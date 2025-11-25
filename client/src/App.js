@@ -1,11 +1,23 @@
+import { Route, Switch } from 'react-router-dom';
 import './App.css';
+import Navbar from './components/Navbar'
+import Home from './pages/HomePage'
+import Pantry from './pages/PantryPage'
+import Recipes from './pages/RecipesPage'
+import WhatCanIMake from './pages/WhatCanIMakePage'
 
-function App() {
+function App() 
+{
   return (
-    <div className="App">
-      <h1>GroceryGenie</h1>
-      <p>Pantry, recipes, and "What can I make?" coming soon.</p>
-    </div>
+    <>
+      <Navbar/>
+        <Switch>
+          <Route path='/' component={Home} exact/>
+          <Route path='/pantry' component={Pantry} />
+          <Route path='/recipes' component={Recipes} />
+          <Route path='/whatcanimake' component={WhatCanIMake} />
+        </Switch>
+    </>
   );
 }
 
