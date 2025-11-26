@@ -12,6 +12,7 @@ server.use(express.urlencoded({extended: false}));
 
 // Routing
 server.use('/api/tempItems', require('./routes/api/items'));
+server.use('/api/tempRecipes', require('./routes/api/recipes'));
 
 // LISTEN
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));

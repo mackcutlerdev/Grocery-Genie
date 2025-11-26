@@ -20,10 +20,12 @@ const Pantry = () =>
     {
         fetch('/api/tempItems')
             .then((res) => res.json())
-            .then((data) => {
+            .then((data) => 
+            {
                 setItems(data);
             })
-            .catch((err) => {
+            .catch((err) => 
+            {
                 console.log("Failed to load pantry items", err);
             })
     }, []); 
