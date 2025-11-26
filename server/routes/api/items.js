@@ -30,6 +30,7 @@ router.post('/', (req, res) =>
         id: uuid.v4(),
         name: req.body.name,
         quantity: req.body.quantity,
+        unit: req.body.unit || "Unit"
     };
 
     if(!newItem.name)
@@ -54,6 +55,7 @@ router.put('/:id', (req, res) =>
             {
                 item.name = updateItem.name ? updateItem.name : item.name;
                 item.quantity = updateItem.quantity ? updateItem.quantity : item.quantity;
+                item.unit = updateItem.unit ? updateItem.unit : item.unit;
 
                 res.json({ msg: 'Item updated', item});
             }

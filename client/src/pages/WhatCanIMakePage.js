@@ -1,15 +1,13 @@
 import React, { Fragment } from 'react';
+import WhatCanIMake from '../components/WhatCanIMake';
 
-const WhatCanIMake = () =>
+const WhatCanIMakePage = () =>
 {
     return (
         <Fragment>
-            <div className='container'>
-                <h1>What can I make?</h1>
-                <p>Temp testing</p>
-            </div>
+            <WhatCanIMake />
         </Fragment>
     );
 };
 
-export default WhatCanIMake;
+export default WhatCanIMakePage;
