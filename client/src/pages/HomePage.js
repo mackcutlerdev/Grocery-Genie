@@ -8,17 +8,17 @@ function HomePage()
     // All the data this page cares about (pulled from server)
     const [appState, setAppState] = useState(
     {
-        loading: false, // spinner / "Loading..." text
+        loading: false, // spinner (if i get to it) / "Loading..." text
         pantryItems: [],
         recipes: [],
     });
 
     const history = useHistory(); // used to push the user to /recipes with a selected id
 
-    // Hit the server and load pantry + recipes
+    // Get the server and load pantry + recipes
     const loadData = () =>
     {
-        // flip loading on and clear old data
+        // turn loading on and clear old data
         setAppState(
         {
             loading: true,
@@ -26,7 +26,7 @@ function HomePage()
             recipes: [],
         });
 
-        // Fetch pantry first, then recipes (keeping it simple)
+        // Fetch pantry first, then recipes (keeping it simple, i like fetch)
         fetch('/api/tempItems')
             .then((res) => res.json())
             .then((itemsData) =>

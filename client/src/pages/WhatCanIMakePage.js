@@ -7,7 +7,7 @@ function WhatCanIMakePage()
     // Data this page needs: pantry + recipes from the server
     const [appState, setAppState] = useState(
     {
-        loading: false, // spinner / "Loading pantry and recipes..."
+        loading: false, // spinner (if i ever get to it) / "Loading pantry and recipes..."
         pantryItems: [],
         recipes: [],
     });
@@ -15,7 +15,7 @@ function WhatCanIMakePage()
     // Pull pantry + recipes from the API
     const loadData = () =>
     {
-        // flip loading on and clear everything while we fetch
+        // turn loading on and clear everything while we fetch
         setAppState(
         {
             loading: true,
@@ -23,7 +23,7 @@ function WhatCanIMakePage()
             recipes: [],
         });
 
-        // First fetch pantry, then recipes (simple nested fetch, no Promise.all)
+        // First fetch pantry, then recipes  (nesting is bad except when its good)
         fetch('/api/tempItems')
             .then((res) => res.json())
             .then((itemsData) =>
@@ -43,14 +43,6 @@ function WhatCanIMakePage()
             .catch((err) =>
             {
                 console.log('Failed to load data for WhatCanIMake', err);
-
-                // if something breaks, at least stop loading and show empty data
-                setAppState(
-                {
-                    loading: false,
-                    pantryItems: [],
-                    recipes: [],
-                });
             });
     };
 
@@ -60,8 +52,7 @@ function WhatCanIMakePage()
         loadData();
     }, []);
 
-    // Page = does the fetching + state
-    // WhatCanIMake component = does all the matching logic + UI
+    // WCIM state stating
     return (
         <WhatCanIMake
             isLoading={appState.loading}

@@ -52,10 +52,10 @@ const WhatCanIMake = (props) =>
         }
 
         // If they share at least one WHOLE word, we consider it a match
-        const setB = new Set(tokensB);
+        const tokensBSet = new Set(tokensB);
         for(let i = 0; i < tokensA.length; i++)
         {
-            if(setB.has(tokensA[i]))
+            if(tokensBSet.has(tokensA[i]))
             {
                 return true;
             }
@@ -73,72 +73,70 @@ const WhatCanIMake = (props) =>
         }
 
         // Every ingredient has to be "satisfed"
-        return recipe.ingredients.every((ing) =>
+        return recipe.ingredients.every((recipeIngredient) =>
         {
-            const pantryItem = pantryItems.find((item) =>
-                namesLooselyMatch(item.name, ing.name)
+            const matchingPantryItem = pantryItems.find((item) =>
+                namesLooselyMatch(item.name, recipeIngredient.name)
             );
 
-            if (!pantryItem)
+            if (!matchingPantryItem)
             {
                 return false;
             }
 
             // If quantity is null/undefined, treat as "to taste", as long as we have it to some capacity, it's fine
-            if (ing.quantity === null || ing.quantity === undefined)
+            if (recipeIngredient.quantity === null || recipeIngredient.quantity === undefined)
             {
                 return true;
             }
 
             // We’re not checking units here, just comparing numeric quantities, doing units is more complex than I have time for because it would require conversion
-            return pantryItem.quantity >= ing.quantity;
+            return matchingPantryItem.quantity >= recipeIngredient.quantity;
         });
     };
 
     // For x recipe, find out what ingredients are not matching or not enough of said ing
     const getMissingIngredients = (recipe) =>
     {
-        if(!recipe || !Array.isArray(recipe.ingredients))
-        {
-            return [];
-        }
 
-        const missing = [];
+        const missingIngredients = [];
 
-        // If the recipe needs a specific amount, check if we're short that amoutn
-        recipe.ingredients.forEach((ing) =>
+        // If the recipe needs a specific amount, check if we're short that amount
+        recipe.ingredients.forEach((recipeIngredient) =>
         {
-            const pantryItem = pantryItems.find((item) =>
-                namesLooselyMatch(item.name, ing.name)
+            const matchingPantryItem = pantryItems.find((item) =>
+                namesLooselyMatch(item.name, recipeIngredient.name)
             );
 
-            if(!pantryItem)
+            // We don't have this ingredient at all
+            if(!matchingPantryItem)
             {
-                missing.push(
+                missingIngredients.push(
                 {
-                    name: ing.name,
-                    needed: ing.quantity || ing.quantity === 0 ? ing.quantity : null,
-                    unit: ing.unit || ''
+                    name: recipeIngredient.name,
+                    needed: recipeIngredient.quantity || recipeIngredient.quantity === 0 ? recipeIngredient.quantity : null,
+                    unit: recipeIngredient.unit || ''
                 });
                 return;
             }
 
-            if(ing.quantity !== null && ing.quantity !== undefined)
+            // We *do* have it, but maybe not enough
+            if(recipeIngredient.quantity !== null && recipeIngredient.quantity !== undefined)
             {
-                if (pantryItem.quantity < ing.quantity)
+                if (matchingPantryItem.quantity < recipeIngredient.quantity)
                 {
-                    missing.push(
+                    missingIngredients.push(
                     {
-                        name: ing.name,
-                        // How much more we need to hit the amoutn needed for recipe
-                        needed: ing.quantity - pantryItem.quantity,
-                        unit: ing.unit || ''
+                        name: recipeIngredient.name,
+                        // How much more we need to hit the amount needed for recipe
+                        needed: recipeIngredient.quantity - matchingPantryItem.quantity,
+                        unit: recipeIngredient.unit || ''
                     });
                 }
             }
         });
 
-        return missing;
+        return missingIngredients;
     };
 
     // Calculate the lists for the numbers
@@ -150,7 +148,7 @@ const WhatCanIMake = (props) =>
             <div className="container">
                 <h1>What Can I Make?</h1>
                 <p>
-                    Based on your current pantry and saved recipes, here&apos;s what you can cook right now.
+                    Based on your current pantry and saved recipes, here's what you can cook right now.
                 </p>
 
                 {isLoading && <p>Loading pantry and recipes...</p>}
@@ -175,7 +173,7 @@ const WhatCanIMake = (props) =>
 
                 {/* Makeable recipes */}
                 <div className="wcim-section-makeable">
-                    <h2>You can make these now</h2>
+                    <h2>Can fully make</h2>
 
                     {makeableRecipes.length === 0 && !isLoading && (
                         <p>No recipes are fully makeable with your current pantry.</p>
@@ -202,33 +200,27 @@ const WhatCanIMake = (props) =>
 
                         {otherRecipes.map((recipe) =>
                         {
-                            const missing = getMissingIngredients(recipe);
+                            const missingIngredients = getMissingIngredients(recipe);
 
                             return (
                                 <div key={recipe.id} className="wcim-missing-recipe">
                                     <strong>{recipe.name}</strong>
 
-                                    {missing.length === 0 && (
-                                        <p className="wcim-missing-note">
-                                            This seems makeable, but something is broken.
-                                        </p>
-                                    )}
-
-                                    {missing.length > 0 && (
+                                    {missingIngredients.length > 0 && (
                                         <ul className="wcim-missing-list">
-                                            {missing.map((m, index) =>
+                                            {missingIngredients.map((missingIngredient, index) =>
                                             {
-                                                const qtyText =
-                                                    m.needed === null || m.needed === undefined
+                                                const neededAmountText =
+                                                    missingIngredient.needed === null || missingIngredient.needed === undefined
                                                         ? ''
-                                                        : m.needed;
+                                                        : missingIngredient.needed;
 
-                                                const unitText = m.unit ? ` ${m.unit}` : '';
+                                                const unitLabel = missingIngredient.unit ? ` ${missingIngredient.unit}` : '';
 
                                                 return (
                                                     <li key={index}>
-                                                        {qtyText !== '' ? `${qtyText}${unitText} ` : ''}
-                                                        {m.name}
+                                                        {neededAmountText !== '' ? `${neededAmountText}${unitLabel} ` : ''}
+                                                        {missingIngredient.name}
                                                     </li>
                                                 );
                                             })}
