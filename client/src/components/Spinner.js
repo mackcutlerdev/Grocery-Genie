@@ -1,3 +1,5 @@
+// IGNORE, STOLE FROM ASSIGNMENT AND I DON'T GET THE CSS RN, MAYBE ILL STEAL THE CSS LATER, BUT IGNORE FOR NOW
+
 import React from "react";
 
 function Spinner()

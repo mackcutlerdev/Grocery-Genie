@@ -1,49 +1,17 @@
-import React, { Fragment, useState, useEffect } from 'react';
+// Dependencies
+import React, { Fragment, useState } from 'react';
 
-const WhatCanIMake = () =>
+// WCIM component, takes the current pantry and recipes and matches
+const WhatCanIMake = (props) =>
 {
-    const [pantryItems, setPantryItems] = useState([]);
-    const [recipes, setRecipes] = useState([]);
+    // Destructured
+    // {list of pantry items, list of recipes, loading flag, on server reload}
+    const { pantryItems, recipes, isLoading, onReload } = props;
 
+    // If true, we only show the "you can make this stuff" and not all the recipes
     const [showOnlyMakeable, setShowOnlyMakeable] = useState(false);
 
-    // Load pantry + recipes on mount
-    // ---- NEW: shared loader function ----
-    const loadData = () =>
-    {
-        // Fetch pantry items
-        fetch('/api/tempItems')
-            .then((res) => res.json())
-            .then((data) =>
-            {
-                setPantryItems(data);
-            })
-            .catch((err) =>
-            {
-                console.log('Failed to load pantry items', err);
-            });
-
-        // Fetch recipes
-        fetch('/api/tempRecipes')
-            .then((res) => res.json())
-            .then((data) =>
-            {
-                setRecipes(data);
-            })
-            .catch((err) =>
-            {
-                console.log('Failed to load recipes', err);
-            });
-    };
-
-    // Run once on mount
-    useEffect(() =>
-    {
-        loadData();
-    }, []);
-
-
-    // === Helper: normalize names for matching ===
+    // Clean up a name so it's easy to compare
     const normalizeName = (name) =>
     {
         if (!name)
@@ -54,27 +22,49 @@ const WhatCanIMake = () =>
         return name.trim().toLowerCase();
     };
 
-    // === Helper: Names that ALMOST match, we count ===
-    const nameAlmostMatch = (a, b) =>
+    // Allow loose matches like "Milk" vs "2% Milk", "Potato" vs "Yukon Gold Potato"
+    const tokenize = (name) =>
     {
-        const an = normalizeName(a);
-        const bn = normalizeName(b);
+        // This tokenize was suggested on Reddit, because I was getting issues with words in words being ticked off as that ingredient, like salt in "unsalted butter"
+        // lowercase, then split on anything that is not a-z or 0-9
+        // So salt != Unsalt now
+        return normalizeName(name)
+            .split(/[^a-z0-9]+/)
+            .filter(Boolean); // remove empty strings
+    };
 
-        if(!an || !bn)
+    // Returns true if 2 ingredient names are close enough but still using tokens. So like Potato = Yukon Potato, but Salt != Unsalt
+    const namesLooselyMatch = (a, b) =>
+    {
+        // Params are tokenized which also normalized thems
+        const tokensA = tokenize(a);
+        const tokensB = tokenize(b);
+
+        if(tokensA.length === 0 || tokensB.length === 0)
         {
             return false;
         }
 
-        if(an === bn)
+        // Exact same tokens (e.g., "milk" vs "milk", "yukon gold potato" vs same)
+        if (tokensA.join(' ') === tokensB.join(' '))
         {
             return true;
         }
 
-        return an.includes(bn) || bn.includes(an);
+        // If they share at least one WHOLE word, we consider it a match
+        const setB = new Set(tokensB);
+        for(let i = 0; i < tokensA.length; i++)
+        {
+            if(setB.has(tokensA[i]))
+            {
+                return true;
+            }
+        }
 
-    }
+        return false;
+    };
 
-    // === Check if a single recipe can be fully made from pantry ===
+    // Check if the user can make a given recipe with the current inventory
     const canMakeRecipe = (recipe) =>
     {
         if (!recipe || !Array.isArray(recipe.ingredients))
@@ -82,47 +72,47 @@ const WhatCanIMake = () =>
             return false;
         }
 
+        // Every ingredient has to be "satisfed"
         return recipe.ingredients.every((ing) =>
         {
             const pantryItem = pantryItems.find((item) =>
-                nameAlmostMatch(item.name, ing.name) 
+                namesLooselyMatch(item.name, ing.name)
             );
 
-            // If we don't even have this ingredient by name
             if (!pantryItem)
             {
                 return false;
             }
 
-            // If quantity is null, treat it as "to taste" → as long as we have it, it's fine
+            // If quantity is null/undefined, treat as "to taste", as long as we have it to some capacity, it's fine
             if (ing.quantity === null || ing.quantity === undefined)
             {
                 return true;
             }
 
-            // Otherwise, check pantry quantity
+            // We’re not checking units here, just comparing numeric quantities, doing units is more complex than I have time for because it would require conversion
             return pantryItem.quantity >= ing.quantity;
         });
     };
 
-    // === Compute what is missing for a recipe ===
+    // For x recipe, find out what ingredients are not matching or not enough of said ing
     const getMissingIngredients = (recipe) =>
     {
-        if (!recipe || !Array.isArray(recipe.ingredients))
+        if(!recipe || !Array.isArray(recipe.ingredients))
         {
             return [];
         }
 
         const missing = [];
 
+        // If the recipe needs a specific amount, check if we're short that amoutn
         recipe.ingredients.forEach((ing) =>
         {
             const pantryItem = pantryItems.find((item) =>
-                nameAlmostMatch(item.name, ing.name) 
+                namesLooselyMatch(item.name, ing.name)
             );
 
-            // No matching pantry item at all
-            if (!pantryItem)
+            if(!pantryItem)
             {
                 missing.push(
                 {
@@ -133,14 +123,14 @@ const WhatCanIMake = () =>
                 return;
             }
 
-            // We have the item; check quantity if required
-            if (ing.quantity !== null && ing.quantity !== undefined)
+            if(ing.quantity !== null && ing.quantity !== undefined)
             {
                 if (pantryItem.quantity < ing.quantity)
                 {
                     missing.push(
                     {
                         name: ing.name,
+                        // How much more we need to hit the amoutn needed for recipe
                         needed: ing.quantity - pantryItem.quantity,
                         unit: ing.unit || ''
                     });
@@ -151,10 +141,9 @@ const WhatCanIMake = () =>
         return missing;
     };
 
+    // Calculate the lists for the numbers
     const makeableRecipes = recipes.filter((recipe) => canMakeRecipe(recipe));
     const otherRecipes = recipes.filter((recipe) => !canMakeRecipe(recipe));
-
-    // === Render ===
 
     return (
         <Fragment>
@@ -163,6 +152,14 @@ const WhatCanIMake = () =>
                 <p>
                     Based on your current pantry and saved recipes, here&apos;s what you can cook right now.
                 </p>
+
+                {isLoading && <p>Loading pantry and recipes...</p>}
+
+                <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                    <button onClick={onReload}>
+                        Reload ingredients
+                    </button>
+                </div>
 
                 <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
                     <label>
@@ -178,9 +175,9 @@ const WhatCanIMake = () =>
 
                 {/* Makeable recipes */}
                 <div style={{ marginTop: '1.5rem' }}>
-                    <h2>✅ You can make these now</h2>
+                    <h2>You can make these now</h2>
 
-                    {makeableRecipes.length === 0 && (
+                    {makeableRecipes.length === 0 && !isLoading && (
                         <p>No recipes are fully makeable with your current pantry.</p>
                     )}
 
@@ -197,9 +194,9 @@ const WhatCanIMake = () =>
                 {/* Recipes that are missing ingredients */}
                 {!showOnlyMakeable && (
                     <div style={{ marginTop: '2rem' }}>
-                        <h2>❌ Missing Ingredients</h2>
+                        <h2>Missing Ingredients</h2>
 
-                        {otherRecipes.length === 0 && (
+                        {otherRecipes.length === 0 && !isLoading && (
                             <p>All recipes are fully makeable (or you have no recipes yet).</p>
                         )}
 
@@ -213,7 +210,7 @@ const WhatCanIMake = () =>
 
                                     {missing.length === 0 && (
                                         <p style={{ marginLeft: '1rem' }}>
-                                            This *should* be makeable, but something is off with the data.
+                                            This seems makeable, but something is broken.
                                         </p>
                                     )}
 

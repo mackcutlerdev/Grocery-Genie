@@ -8,7 +8,7 @@ const recipes = [
             { name: "Yukon Gold Potato", quantity: 4, unit: "Unit"},
             { name: "2% Milk", quantity: 1, unit: "Cup"},
             { name: "Unsalted Butter", quantity: 1, unit: "Cup"},
-            { name: "Salt", quantity: 1, unit: "To taste"}
+            { name: "Salt", quantity: 1, unit: "g"}
         ],
         instructions: [
             "Fill a large pot with cold water.",

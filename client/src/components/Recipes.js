@@ -1,45 +1,51 @@
+// Dependencies
 import React, { Fragment, useState, useEffect } from 'react';
 
-const Recipes = () =>
+// Recipes component = the UI and form states for creating/editing recipes
+const Recipes = (props) =>
 {
-    // Basic data states
-    const [recipes, setRecipes] = useState([]);          // list of recipes
-    const [selectedRecipeId, setSelectedRecipeId] = useState(null); // which recipe is focused
+    // Destructured props
+    // {recipes from server, if page is loading, POST, PUT, DELETE, id from ?recipeId=...}
+    const 
+    {
+        recipes,
+        isLoading,
+        onAddRecipe,
+        onUpdateRecipe,
+        onDeleteRecipe,
+        initialSelectedRecipeId
+    } = props;
 
-    // Add form states
+    // Which recipe is focused / selected (shows on the right side)
+    const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+
+    // States for the add recipe form
     const [showAddForm, setShowAddForm] = useState(false);
     const [newRecipeName, setNewRecipeName] = useState("");
     const [newRecipeIngredients, setNewRecipeIngredients] = useState([
-        { name: "", quantity: "", unit: "Unit" }
+        { name: "", quantity: "", unit: "Unit" }   // start with 1 blank ingredient row
     ]);
     const [newRecipeInstructions, setNewRecipeInstructions] = useState("");
 
-    // Edit form states
-    const [editingId, setEditingId] = useState(null);
+    // States for editing an existing recipe
+    const [editingId, setEditingId] = useState(null); // null = not editing
     const [editRecipeName, setEditRecipeName] = useState("");
     const [editRecipeIngredients, setEditRecipeIngredients] = useState([]);
     const [editRecipeInstructions, setEditRecipeInstructions] = useState("");
 
-    // Load recipes on first render
-    useEffect(() =>
+    // If the page passed in a recipeId from the URL, auto-select that one
+    useEffect(() => 
     {
-        fetch('/api/tempRecipes')
-            .then((res) => res.json())
-            .then((data) =>
-            {
-                setRecipes(data);
-            })
-            .catch((err) =>
-            {
-                console.log("Failed to load recipes", err);
-            });
-    }, []);
+        if(initialSelectedRecipeId)
+        {
+            setSelectedRecipeId(initialSelectedRecipeId);
+        }
+    }, [initialSelectedRecipeId]);
 
-    // Derived selected recipe
+    // Find the currently selected recipe (or null if nothing selected)
     const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId) || null;
 
-    // === Helper: parse instructions textarea -> array ===
-
+    // Takes a big text box of instructions and makes it into an array of clean strings
     const parseInstructionsText = (text) =>
     {
         return text
@@ -48,8 +54,7 @@ const Recipes = () =>
             .filter((line) => line !== '');
     };
 
-    // === Add form ingredient handlers ===
-
+    // Handle typing into any new ingredient field (name/quantity/unit)
     const handleNewIngredientChange = (index, field, value) =>
     {
         setNewRecipeIngredients((prev) =>
@@ -64,6 +69,7 @@ const Recipes = () =>
         });
     };
 
+    // Add another blank ingredient row for a new recipe
     const addIngredientRow = () =>
     {
         setNewRecipeIngredients((prev) =>
@@ -73,6 +79,7 @@ const Recipes = () =>
         ]);
     };
 
+    // Remove an ingredient row from the new recipe form
     const removeIngredientRow = (index) =>
     {
         setNewRecipeIngredients((prev) =>
@@ -80,8 +87,7 @@ const Recipes = () =>
         );
     };
 
-    // === Edit form ingredient handlers ===
-
+    // Same as above but for the edit form
     const handleEditIngredientChange = (index, field, value) =>
     {
         setEditRecipeIngredients((prev) =>
@@ -96,6 +102,7 @@ const Recipes = () =>
         });
     };
 
+    // Add a blank ingredient row when editing a recipe
     const addEditIngredientRow = () =>
     {
         setEditRecipeIngredients((prev) =>
@@ -105,6 +112,7 @@ const Recipes = () =>
         ]);
     };
 
+    // Remove an ingredient row from the edit form
     const removeEditIngredientRow = (index) =>
     {
         setEditRecipeIngredients((prev) =>
@@ -112,45 +120,48 @@ const Recipes = () =>
         );
     };
 
-    // === Main handlers ===
-
+    // When a recipe button is clicked on the left, make that the selected one
     const handleSelectRecipe = (id) =>
     {
         setSelectedRecipeId(id);
 
+        // If I'm editing something else and you click another recipe, leave edit mode
         if (editingId && editingId !== id)
         {
             cancelEditing();
         }
     };
 
+    // Toggle the add form on/off and reset all the add fields
     const handleToggleAddForm = () =>
     {
         setShowAddForm(!showAddForm);
         setNewRecipeName("");
-        setNewRecipeInstructions("");
         setNewRecipeIngredients([
             { name: "", quantity: "", unit: "Unit" }
         ]);
+        setNewRecipeInstructions("");
     };
 
-    const handleAddRecipe = (e) =>
+    // When the add recipe form actually submits
+    const handleAddRecipeSubmit = (e) =>
     {
         e.preventDefault();
 
+        // No nameless recipes
         if (!newRecipeName.trim())
         {
             return;
         }
 
-        // Clean up ingredients: drop empty names, convert quantity to number/null
+        // Clean up the ingredient rows into the format the server expects
         const ingredientsArray = newRecipeIngredients
-            .filter((ing) => ing.name.trim() !== "")
+            .filter((ing) => ing.name.trim() !== "") // ignore totally blank rows
             .map((ing) =>
             {
                 const trimmedName = ing.name.trim();
                 const qtyText = String(ing.quantity).trim();
-                const qtyValue = qtyText === "" ? null : Number(qtyText);
+                const qtyValue = qtyText === "" ? null : Number(qtyText); // blank = null (to taste like for salt)
 
                 return {
                     name: trimmedName,
@@ -159,41 +170,36 @@ const Recipes = () =>
                 };
             });
 
+        // Turn multiline instructions into an array of steps, but only works line-by-line
         const instructionsArray = parseInstructionsText(newRecipeInstructions);
 
-        fetch('/api/tempRecipes',
+        // The final new recipe object
+        const newRecipe =
         {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(
-            {
-                name: newRecipeName,
-                ingredients: ingredientsArray,
-                instructions: instructionsArray
-            }),
-        })
-            .then((res) => res.json())
-            .then((data) =>
-            {
-                setRecipes(data);
-                setNewRecipeName("");
-                setNewRecipeInstructions("");
-                setNewRecipeIngredients([
-                    { name: "", quantity: "", unit: "Unit" }
-                ]);
-                setShowAddForm(false);
-            })
-            .catch((err) =>
-            {
-                console.log("Failed to add recipe", err);
-            });
+            name: newRecipeName,
+            ingredients: ingredientsArray,
+            instructions: instructionsArray
+        };
+
+        // Let RecipesPage do the POST + state stuff
+        onAddRecipe(newRecipe);
+
+        // Reset the add form back to clean defaults
+        setNewRecipeName("");
+        setNewRecipeIngredients([
+            { name: "", quantity: "", unit: "Unit" }
+        ]);
+        setNewRecipeInstructions("");
+        setShowAddForm(false);
     };
 
+    // When the user clicks "Edit" for a recipe
     const startEditing = (recipe) =>
     {
         setEditingId(recipe.id);
         setEditRecipeName(recipe.name || "");
 
+        // If the recipe has ingredients, map them into editable fields
         if (Array.isArray(recipe.ingredients) && recipe.ingredients.length > 0)
         {
             setEditRecipeIngredients(
@@ -208,6 +214,7 @@ const Recipes = () =>
                 }))
             );
         }
+        // If it somehow has none, just give a single blank row
         else
         {
             setEditRecipeIngredients([
@@ -215,6 +222,7 @@ const Recipes = () =>
             ]);
         }
 
+        // Instructions: if it's an array, join with newlines, else just use the string
         if (Array.isArray(recipe.instructions))
         {
             setEditRecipeInstructions(recipe.instructions.join('\n'));
@@ -225,6 +233,7 @@ const Recipes = () =>
         }
     };
 
+    // Cancel editing and wipe out the edit sttae
     const cancelEditing = () =>
     {
         setEditingId(null);
@@ -233,10 +242,12 @@ const Recipes = () =>
         setEditRecipeInstructions("");
     };
 
-    const handleEditRecipe = (e, id) =>
+    // When the edit form submits for a specific recipe
+    const handleEditRecipeSubmit = (e, id) =>
     {
         e.preventDefault();
 
+        // Clean the edit ingredient rows the same way as the add form
         const ingredientsArray = editRecipeIngredients
             .filter((ing) => ing.name.trim() !== "")
             .map((ing) =>
@@ -254,43 +265,24 @@ const Recipes = () =>
 
         const instructionsArray = parseInstructionsText(editRecipeInstructions);
 
-        fetch(`/api/tempRecipes/${id}`,
+        const updatedRecipe =
         {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(
-            {
-                name: editRecipeName,
-                ingredients: ingredientsArray,
-                instructions: instructionsArray
-            }),
-        })
-            .then((res) => res.json())
-            .then((data) =>
-            {
-                const updatedRecipe = data.recipe;
+            name: editRecipeName,
+            ingredients: ingredientsArray,
+            instructions: instructionsArray
+        };
 
-                setRecipes((prev) =>
-                    prev.map((recipe) =>
-                    {
-                        if (recipe.id === updatedRecipe.id)
-                        {
-                            return updatedRecipe;
-                        }
-                        return recipe;
-                    })
-                );
+        // Page does PUT stuff
+        onUpdateRecipe(id, updatedRecipe);
 
-                cancelEditing();
-            })
-            .catch((err) =>
-            {
-                console.log("Failed to update recipe", err);
-            });
+        // Exit edit mode so it doesn't get stuck forever
+        cancelEditing();
     };
 
+    // When the user deletes a recipe
     const handleDeleteRecipe = (id) =>
     {
+        // Same confirm trick as Pantry
         const ok = window.confirm('Delete this recipe?');
 
         if (!ok)
@@ -298,33 +290,22 @@ const Recipes = () =>
             return;
         }
 
-        fetch(`/api/tempRecipes/${id}`,
+        onDeleteRecipe(id);
+
+        // If you were looking at that recipe, unselect it
+        if (selectedRecipeId === id)
         {
-            method: 'DELETE',
-        })
-            .then((res) => res.json())
-            .then((data) =>
-            {
-                setRecipes(data.recipes);
+            setSelectedRecipeId(null);
+        }
 
-                if (selectedRecipeId === id)
-                {
-                    setSelectedRecipeId(null);
-                }
-
-                if (editingId === id)
-                {
-                    cancelEditing();
-                }
-            })
-            .catch((err) =>
-            {
-                console.log("Failed to delete recipe", err);
-            });
+        // If you were editing that recipe, also reset the edit state
+        if (editingId === id)
+        {
+            cancelEditing();
+        }
     };
 
-    // === Render helpers ===
-
+    // Render the ingredient list for the details panel
     const renderIngredients = (ingredients) =>
     {
         if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0)
@@ -352,6 +333,7 @@ const Recipes = () =>
         );
     };
 
+    // Render the instructions as an ordered (numbered) list
     const renderInstructions = (instructions) =>
     {
         if (!instructions || !Array.isArray(instructions) || instructions.length === 0)
@@ -369,21 +351,23 @@ const Recipes = () =>
         );
     };
 
-    // === Render ===
-
     return (
         <Fragment>
             <div className="container">
                 <h1>Recipes</h1>
 
-                {/* Add recipe controls */}
+                {/* If the page is still loading recipes from the server */}
+                {isLoading && <p>Loading recipes...</p>}
+
+                {/* Add button + add form (if open) */}
                 <div className="recipes-controls">
                     <button onClick={handleToggleAddForm}>
                         {showAddForm ? 'Cancel' : 'Add New Recipe'}
                     </button>
 
+                    {/* Add new recipe form, only visible when showAddForm is true */}
                     {showAddForm && (
-                        <form onSubmit={handleAddRecipe} style={{ marginTop: '1rem' }}>
+                        <form onSubmit={handleAddRecipeSubmit} style={{ marginTop: '1rem' }}>
                             <div>
                                 <label>
                                     Name:{' '}
@@ -398,6 +382,7 @@ const Recipes = () =>
                             <div style={{ marginTop: '1rem' }}>
                                 <h3>Ingredients</h3>
 
+                                {/* All the ingredient rows for the new recipe */}
                                 {newRecipeIngredients.map((ing, index) =>
                                 (
                                     <div key={index} style={{ marginBottom: '0.5rem' }}>
@@ -471,13 +456,15 @@ const Recipes = () =>
                     )}
                 </div>
 
-                {/* Layout: list on left, details / edit on right */}
+                {/* Recipe list on the left, details/edit on the right */}
                 <div className="recipes-layout" style={{ display: 'flex', marginTop: '2rem' }}>
-                    {/* Left: list of recipes */}
+                    {/* Left: list of all recipes with buttons */}
                     <div className="recipes-list" style={{ flex: 1, marginRight: '1rem' }}>
-                        {recipes.length === 0 && <p>No recipes yet.</p>}
+                        {(!recipes || recipes.length === 0) && !isLoading && (
+                            <p>No recipes yet.</p>
+                        )}
 
-                        {recipes.map((recipe) =>
+                        {recipes && recipes.map((recipe) =>
                         (
                             <div key={recipe.id} style={{ marginBottom: '0.5rem' }}>
                                 <button onClick={() => handleSelectRecipe(recipe.id)}>
@@ -499,15 +486,16 @@ const Recipes = () =>
                         ))}
                     </div>
 
-                    {/* Right: selected recipe details / edit form */}
+                    {/* Right: either edit form or read-only recipe details */}
                     <div className="recipes-details" style={{ flex: 2 }}>
+                        {/* Nothing selected and not editing = prompt the user */}
                         {!selectedRecipe && editingId === null && (
                             <p>Select a recipe to view details.</p>
                         )}
 
-                        {/* Edit mode */}
+                        {/* Edit mode for the selected recipe */}
                         {editingId && selectedRecipe && editingId === selectedRecipe.id && (
-                            <form onSubmit={(e) => handleEditRecipe(e, selectedRecipe.id)}>
+                            <form onSubmit={(e) => handleEditRecipeSubmit(e, selectedRecipe.id)}>
                                 <h2>Edit Recipe</h2>
 
                                 <div>
@@ -603,7 +591,7 @@ const Recipes = () =>
                             </form>
                         )}
 
-                        {/* Read-only details mode */}
+                        {/* Read-only details for the selected recipe (if we’re not in edit mode) */}
                         {selectedRecipe && (!editingId || editingId !== selectedRecipe.id) && (
                             <div>
                                 <h2>{selectedRecipe.name}</h2>
