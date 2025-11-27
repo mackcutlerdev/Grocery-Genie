@@ -18,7 +18,7 @@ const HomeDashboard = (props) =>
                 {isLoading && <p>Loading data...</p>}
 
                 {/* Raload button */}
-                <div style={{ marginTop: '0.5rem', marginBottom: '1rem' }}>
+                <div className="home-reload">
                     <button onClick={onReload}>
                         Refresh from server
                     </button>
@@ -27,54 +27,27 @@ const HomeDashboard = (props) =>
                 {/* Stats cards, the main point of the dashboard to quickly see your numbers, cause big num = epic */}
                 <div
                     className="home-stats"
-                    style={{
-                        display: 'flex',
-                        gap: '1rem',
-                        marginBottom: '2rem',
-                        flexWrap: 'wrap'
-                    }}
                 >
                     {/* First card, how many items are in the pantry rn */}
-                    <div
-                        style={{
-                            flex: '1 1 150px',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            padding: '1rem'
-                        }}
-                    >
+                    <div className="home-stat-card">
                         <h3>Items in Pantry</h3>
-                        <p style={{ fontSize: '1.5rem', margin: 0 }}>
+                        <p className="home-stat-number">
                             {stats.pantryCount}
                         </p>
                     </div>
 
                     {/* Second card, how many total recipes the user has saved */}
-                    <div
-                        style={{
-                            flex: '1 1 150px',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            padding: '1rem'
-                        }}
-                    >
+                    <div className="home-stat-card">
                         <h3>Total Recipes</h3>
-                        <p style={{ fontSize: '1.5rem', margin: 0 }}>
+                        <p className="home-stat-number">
                             {stats.recipeCount}
                         </p>
                     </div>
 
                     {/* Third card, how many recipes can be currently made (WCIM stats)*/}
-                    <div
-                        style={{
-                            flex: '1 1 150px',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            padding: '1rem'
-                        }}
-                    >
+                    <div className="home-stat-card">
                         <h3>Recipes You Can Make Now</h3>
-                        <p style={{ fontSize: '1.5rem', margin: 0 }}>
+                        <p className="home-stat-number">
                             {stats.makeableCount}
                         </p>
                     </div>
@@ -90,27 +63,14 @@ const HomeDashboard = (props) =>
                     )}
 
                     <div
-                        style={{
-                            maxHeight: '250px',
-                            overflowY: 'auto',
-                            border: '1px solid #ccc',
-                            borderRadius: '4px',
-                            padding: '0.5rem',
-                            marginTop: '0.5rem'
-                        }}
+                        className="home-scroll-box"
                     >
                         {/* Scroll box container for the makeable -btw it doesn't scroll yet, cause idk how to do that */}
                         {makeableRecipes && makeableRecipes.map((recipe) =>
                         (
                             <div
                                 key={recipe.id}
-                                style={{
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center',
-                                    padding: '0.5rem 0',
-                                    borderBottom: '1px solid #eee'
-                                }}
+                                className="home-scroll-row"
                             >
                                 <span>{recipe.name}</span>
                                 <button onClick={() => onOpenRecipe(recipe.id)}>

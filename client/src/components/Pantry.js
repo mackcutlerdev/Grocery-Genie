@@ -127,7 +127,7 @@ const Pantry = (props) =>
 
                 {/* The form to add new items and it only shows when showAddForm is true */}
                 {showAddForm && (
-                    <form onSubmit={handleAddSubmit} style={{ marginTop: '1rem' }}>
+                    <form onSubmit={handleAddSubmit} className="pantry-add-form">
                         <div>
                             <label>
                                 Name:{' '}
@@ -166,13 +166,13 @@ const Pantry = (props) =>
                                 </select>
                             </label>
                         </div>
-                        <button type="submit" style={{ marginTop: '0.5rem' }}>
+                        <button type="submit" className="btn-save">
                             Save
                         </button>
                     </form>
                 )}
 
-                <table style={{ width: '100%', marginTop: '2rem' }}>
+                <table className="pantry-table">
                     <thead>
                         <tr>
                             <th align="left">Name</th>
@@ -239,7 +239,7 @@ const Pantry = (props) =>
                                             </button>
                                             <button
                                                 onClick={cancelEditing}
-                                                style={{ marginLeft: '0.5rem' }}
+                                                className="btn-inline"
                                             >
                                                 Cancel
                                             </button>
@@ -249,7 +249,7 @@ const Pantry = (props) =>
                                             <button onClick={() => startEditing(item)}>Edit</button>
                                             <button
                                                 onClick={() => handleDelete(item.id)}
-                                                style={{ marginLeft: '0.5rem' }}
+                                                className="btn-inline"
                                             >
                                                 Delete
                                             </button>

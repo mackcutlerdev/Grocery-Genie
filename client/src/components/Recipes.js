@@ -367,7 +367,7 @@ const Recipes = (props) =>
 
                     {/* Add new recipe form, only visible when showAddForm is true */}
                     {showAddForm && (
-                        <form onSubmit={handleAddRecipeSubmit} style={{ marginTop: '1rem' }}>
+                        <form onSubmit={handleAddRecipeSubmit} className="recipes-add-form">
                             <div>
                                 <label>
                                     Name:{' '}
@@ -379,13 +379,13 @@ const Recipes = (props) =>
                                 </label>
                             </div>
 
-                            <div style={{ marginTop: '1rem' }}>
+                            <div className="recipes-ingredients-section">
                                 <h3>Ingredients</h3>
 
                                 {/* All the ingredient rows for the new recipe */}
                                 {newRecipeIngredients.map((ing, index) =>
                                 (
-                                    <div key={index} style={{ marginBottom: '0.5rem' }}>
+                                    <div key={index} className="recipes-ingredient-row">
                                         <input
                                             type="text"
                                             placeholder="Name"
@@ -403,7 +403,7 @@ const Recipes = (props) =>
                                             onChange={(e) =>
                                                 handleNewIngredientChange(index, 'quantity', e.target.value)
                                             }
-                                            style={{ marginLeft: '0.5rem', width: '80px' }}
+                                            className="recipes-qty-input"
                                         />
 
                                         <select
@@ -411,7 +411,7 @@ const Recipes = (props) =>
                                             onChange={(e) =>
                                                 handleNewIngredientChange(index, 'unit', e.target.value)
                                             }
-                                            style={{ marginLeft: '0.5rem' }}
+                                            className="recipes-unit-select"
                                         >
                                             <option value="Unit">Unit</option>
                                             <option value="g">g</option>
@@ -426,7 +426,7 @@ const Recipes = (props) =>
                                         <button
                                             type="button"
                                             onClick={() => removeIngredientRow(index)}
-                                            style={{ marginLeft: '0.5rem' }}
+                                            className="btn-inline"
                                         >
                                             X
                                         </button>
@@ -438,7 +438,7 @@ const Recipes = (props) =>
                                 </button>
                             </div>
 
-                            <div style={{ marginTop: '1rem' }}>
+                            <div className="recipes-instructions-section">
                                 <label>
                                     Instructions (one step per line):{' '}
                                     <textarea
@@ -449,7 +449,7 @@ const Recipes = (props) =>
                                 </label>
                             </div>
 
-                            <button type="submit" style={{ marginTop: '0.5rem' }}>
+                            <button type="submit" className="recipes-save-btn">
                                 Save Recipe
                             </button>
                         </form>
@@ -457,28 +457,28 @@ const Recipes = (props) =>
                 </div>
 
                 {/* Recipe list on the left, details/edit on the right */}
-                <div className="recipes-layout" style={{ display: 'flex', marginTop: '2rem' }}>
+                <div className="recipes-layout">
                     {/* Left: list of all recipes with buttons */}
-                    <div className="recipes-list" style={{ flex: 1, marginRight: '1rem' }}>
+                    <div className="recipes-list">
                         {(!recipes || recipes.length === 0) && !isLoading && (
                             <p>No recipes yet.</p>
                         )}
 
                         {recipes && recipes.map((recipe) =>
                         (
-                            <div key={recipe.id} style={{ marginBottom: '0.5rem' }}>
+                            <div key={recipe.id} className="recipes-list-row">
                                 <button onClick={() => handleSelectRecipe(recipe.id)}>
                                     {recipe.name}
                                 </button>
                                 <button
                                     onClick={() => startEditing(recipe)}
-                                    style={{ marginLeft: '0.5rem' }}
+                                    className="btn-inline"
                                 >
                                     Edit
                                 </button>
                                 <button
                                     onClick={() => handleDeleteRecipe(recipe.id)}
-                                    style={{ marginLeft: '0.5rem' }}
+                                    className="btn-inline"
                                 >
                                     Delete
                                 </button>
@@ -487,7 +487,7 @@ const Recipes = (props) =>
                     </div>
 
                     {/* Right: either edit form or read-only recipe details */}
-                    <div className="recipes-details" style={{ flex: 2 }}>
+                    <div className="recipes-details">
                         {/* Nothing selected and not editing = prompt the user */}
                         {!selectedRecipe && editingId === null && (
                             <p>Select a recipe to view details.</p>
@@ -509,12 +509,12 @@ const Recipes = (props) =>
                                     </label>
                                 </div>
 
-                                <div style={{ marginTop: '1rem' }}>
+                                <div className="recipes-ingredients-section">
                                     <h3>Ingredients</h3>
 
                                     {editRecipeIngredients.map((ing, index) =>
                                     (
-                                        <div key={index} style={{ marginBottom: '0.5rem' }}>
+                                        <div key={index} className="recipes-ingredient-row">
                                             <input
                                                 type="text"
                                                 placeholder="Name"
@@ -532,7 +532,7 @@ const Recipes = (props) =>
                                                 onChange={(e) =>
                                                     handleEditIngredientChange(index, 'quantity', e.target.value)
                                                 }
-                                                style={{ marginLeft: '0.5rem', width: '80px' }}
+                                                className="recipes-qty-input"
                                             />
 
                                             <select
@@ -540,7 +540,7 @@ const Recipes = (props) =>
                                                 onChange={(e) =>
                                                     handleEditIngredientChange(index, 'unit', e.target.value)
                                                 }
-                                                style={{ marginLeft: '0.5rem' }}
+                                                className="recipes-unit-select"
                                             >
                                                 <option value="Unit">Unit</option>
                                                 <option value="g">g</option>
@@ -555,7 +555,7 @@ const Recipes = (props) =>
                                             <button
                                                 type="button"
                                                 onClick={() => removeEditIngredientRow(index)}
-                                                style={{ marginLeft: '0.5rem' }}
+                                                className="btn-inline"
                                             >
                                                 X
                                             </button>
@@ -567,7 +567,7 @@ const Recipes = (props) =>
                                     </button>
                                 </div>
 
-                                <div style={{ marginTop: '1rem' }}>
+                                <div className="recipes-instructions-section">
                                     <label>
                                         Instructions (one step per line):{' '}
                                         <textarea
@@ -578,13 +578,13 @@ const Recipes = (props) =>
                                     </label>
                                 </div>
 
-                                <button type="submit" style={{ marginTop: '0.5rem' }}>
+                                <button type="submit" className="recipes-save-btn">
                                     Save Changes
                                 </button>
                                 <button
                                     type="button"
                                     onClick={cancelEditing}
-                                    style={{ marginLeft: '0.5rem' }}
+                                    className="btn-inline"
                                 >
                                     Cancel
                                 </button>

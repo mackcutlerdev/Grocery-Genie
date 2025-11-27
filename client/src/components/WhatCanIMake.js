@@ -155,26 +155,26 @@ const WhatCanIMake = (props) =>
 
                 {isLoading && <p>Loading pantry and recipes...</p>}
 
-                <div style={{ marginTop: '0.5rem', marginBottom: '0.5rem' }}>
+                <div className="wcim-reload-row">
                     <button onClick={onReload}>
                         Reload ingredients
                     </button>
                 </div>
 
-                <div style={{ marginTop: '1rem', marginBottom: '1rem' }}>
+                <div className="wcim-toggle-row">
                     <label>
                         <input
                             type="checkbox"
                             checked={showOnlyMakeable}
                             onChange={(e) => setShowOnlyMakeable(e.target.checked)}
-                            style={{ marginRight: '0.5rem' }}
+                            className="wcim-toggle-checkbox"
                         />
                         Show only recipes I can fully make
                     </label>
                 </div>
 
                 {/* Makeable recipes */}
-                <div style={{ marginTop: '1.5rem' }}>
+                <div className="wcim-section-makeable">
                     <h2>You can make these now</h2>
 
                     {makeableRecipes.length === 0 && !isLoading && (
@@ -184,7 +184,7 @@ const WhatCanIMake = (props) =>
                     <ul>
                         {makeableRecipes.map((recipe) =>
                         (
-                            <li key={recipe.id} style={{ marginBottom: '0.75rem' }}>
+                            <li key={recipe.id} className="wcim-makeable-item">
                                 <strong>{recipe.name}</strong>
                             </li>
                         ))}
@@ -193,7 +193,7 @@ const WhatCanIMake = (props) =>
 
                 {/* Recipes that are missing ingredients */}
                 {!showOnlyMakeable && (
-                    <div style={{ marginTop: '2rem' }}>
+                    <div className="wcim-section-missing">
                         <h2>Missing Ingredients</h2>
 
                         {otherRecipes.length === 0 && !isLoading && (
@@ -205,17 +205,17 @@ const WhatCanIMake = (props) =>
                             const missing = getMissingIngredients(recipe);
 
                             return (
-                                <div key={recipe.id} style={{ marginBottom: '1.5rem' }}>
+                                <div key={recipe.id} className="wcim-missing-recipe">
                                     <strong>{recipe.name}</strong>
 
                                     {missing.length === 0 && (
-                                        <p style={{ marginLeft: '1rem' }}>
+                                        <p className="wcim-missing-note">
                                             This seems makeable, but something is broken.
                                         </p>
                                     )}
 
                                     {missing.length > 0 && (
-                                        <ul style={{ marginLeft: '1.5rem' }}>
+                                        <ul className="wcim-missing-list">
                                             {missing.map((m, index) =>
                                             {
                                                 const qtyText =
