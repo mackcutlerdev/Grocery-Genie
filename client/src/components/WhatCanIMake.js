@@ -146,89 +146,108 @@ const WhatCanIMake = (props) =>
     return (
         <Fragment>
             <div className="container">
-                <h1>What Can I Make?</h1>
-                <p>
+                <h1 className="mb-3">What Can I Make?</h1>
+                <p className="text-muted">
                     Based on your current pantry and saved recipes, here's what you can cook right now.
                 </p>
 
                 {isLoading && <p>Loading pantry and recipes...</p>}
 
-                <div className="wcim-reload-row">
-                    <button onClick={onReload}>
+                <div className="d-flex flex-wrap align-items-center justify-content-between wcim-reload-row">
+                    <button 
+                        onClick={onReload}
+                        className="btn btn-outline-secondary mb-2"
+                    >
                         Reload ingredients
                     </button>
                 </div>
 
-                <div className="wcim-toggle-row">
-                    <label>
+                <div className="wcim-toggle-row mb-2">
+                    <div className="form-check">
                         <input
+                            id="wcim-toggle"
                             type="checkbox"
+                            className="form-check-input wcim-toggle-checkbox"
                             checked={showOnlyMakeable}
                             onChange={(e) => setShowOnlyMakeable(e.target.checked)}
-                            className="wcim-toggle-checkbox"
                         />
-                        Show only recipes I can fully make
-                    </label>
+                        <label
+                            className="form-check-label"
+                            htmlFor="wcim-toggle"
+
+                        >
+                            Show only recipes I can fully make
+                        </label>
+                    </div>
                 </div>
 
                 {/* Makeable recipes */}
-                <div className="wcim-section-makeable">
-                    <h2>Can fully make</h2>
+                <div className="wcim-section-makeable card mt-3 mb-4">
+                    <div className="card-body">
+                        <h2 className="h4 card-title">Can fully make</h2>
 
-                    {makeableRecipes.length === 0 && !isLoading && (
-                        <p>No recipes are fully makeable with your current pantry.</p>
-                    )}
+                        {makeableRecipes.length === 0 && !isLoading && (
+                            <p className="card-text">
+                                No recipes are fully makeable with your current pantry.
+                            </p>
+                        )}
 
-                    <ul>
-                        {makeableRecipes.map((recipe) =>
-                        (
-                            <li key={recipe.id} className="wcim-makeable-item">
-                                <strong>{recipe.name}</strong>
-                            </li>
-                        ))}
-                    </ul>
+                        <ul className="list-group list-group-flush mt-2">
+                            {makeableRecipes.map((recipe) =>
+                            (
+                                <li 
+                                    key={recipe.id} 
+                                    className="list-group-item wcim-makeable-item"
+                                >
+                                    <strong>{recipe.name}</strong>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
                 </div>
 
                 {/* Recipes that are missing ingredients */}
                 {!showOnlyMakeable && (
-                    <div className="wcim-section-missing">
-                        <h2>Missing Ingredients</h2>
+                    <div className="wcim-section-missing card mb-4">
+                        <div className="card-body">
+                            <h2 className="h4 card-title">Missing Ingredients</h2>
 
-                        {otherRecipes.length === 0 && !isLoading && (
-                            <p>All recipes are fully makeable (or you have no recipes yet).</p>
-                        )}
+                            {otherRecipes.length === 0 && !isLoading && (
+                                <p className="card-text">All recipes are fully makeable (or you have no recipes yet).</p>
+                            )}
 
-                        {otherRecipes.map((recipe) =>
-                        {
-                            const missingIngredients = getMissingIngredients(recipe);
+                            {otherRecipes.map((recipe) =>
+                            {
+                                const missingIngredients = getMissingIngredients(recipe);
 
-                            return (
-                                <div key={recipe.id} className="wcim-missing-recipe">
-                                    <strong>{recipe.name}</strong>
+                                return (
+                                    <div key={recipe.id} className="wcim-missing-recipe mt-3">
+                                        <strong>{recipe.name}</strong>
 
-                                    {missingIngredients.length > 0 && (
-                                        <ul className="wcim-missing-list">
-                                            {missingIngredients.map((missingIngredient, index) =>
-                                            {
-                                                const neededAmountText =
-                                                    missingIngredient.needed === null || missingIngredient.needed === undefined
-                                                        ? ''
-                                                        : missingIngredient.needed;
+                                        {missingIngredients.length > 0 && (
+                                            <ul className="wcim-missing-list mt-2">
+                                                {missingIngredients.map((missingIngredient, index) =>
+                                                {
+                                                    const neededAmountText =
+                                                        missingIngredient.needed === null || missingIngredient.needed === undefined
+                                                            ? ''
+                                                            : missingIngredient.needed;
 
-                                                const unitLabel = missingIngredient.unit ? ` ${missingIngredient.unit}` : '';
+                                                    const unitLabel = missingIngredient.unit ? ` ${missingIngredient.unit}` : '';
 
-                                                return (
-                                                    <li key={index}>
-                                                        {neededAmountText !== '' ? `${neededAmountText}${unitLabel} ` : ''}
-                                                        {missingIngredient.name}
-                                                    </li>
-                                                );
-                                            })}
-                                        </ul>
-                                    )}
-                                </div>
-                            );
-                        })}
+                                                    return (
+                                                        <li key={index}>
+                                                            {neededAmountText !== '' ? `${neededAmountText}${unitLabel} ` : ''}
+                                                            {missingIngredient.name}
+                                                        </li>
+                                                    );
+                                                })}
+                                            </ul>
+                                        )}
+                                    </div>
+                                );
+                            })}
+                        </div>
                     </div>
                 )}
             </div>

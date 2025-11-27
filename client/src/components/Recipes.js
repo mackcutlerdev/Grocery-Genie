@@ -354,41 +354,51 @@ const Recipes = (props) =>
     return (
         <Fragment>
             <div className="container">
-                <h1>Recipes</h1>
+                <h1 className="mb-4">Recipes</h1>
 
                 {/* If the page is still loading recipes from the server */}
                 {isLoading && <p>Loading recipes...</p>}
 
                 {/* Add button + add form (if open) */}
-                <div className="recipes-controls">
-                    <button onClick={handleToggleAddForm}>
+                <div className="recipes-controls mb-3">
+                    <button 
+                        onClick={handleToggleAddForm}
+                        className="btn btn-primary"
+                    >
                         {showAddForm ? 'Cancel' : 'Add New Recipe'}
                     </button>
 
                     {/* Add new recipe form, only visible when showAddForm is true */}
                     {showAddForm && (
-                        <form onSubmit={handleAddRecipeSubmit} className="recipes-add-form">
-                            <div>
-                                <label>
-                                    Name:{' '}
-                                    <input
-                                        type="text"
-                                        value={newRecipeName}
-                                        onChange={(e) => setNewRecipeName(e.target.value)}
-                                    />
+                        <form
+                            onSubmit={handleAddRecipeSubmit}
+                            className="recipes-add-form mt-3 mb-4"
+                        >
+                            <div className="mb-3">
+                                <label className="form-label">
+                                    Name
                                 </label>
+                                <input
+                                    type="text"
+                                    className="form-control"
+                                    value={newRecipeName}
+                                    onChange={(e) => setNewRecipeName(e.target.value)}
+                                />
                             </div>
 
-                            <div className="recipes-ingredients-section">
+                            <div className="recipes-ingredients-section mb-3">
                                 <h3>Ingredients</h3>
 
                                 {/* All the ingredient rows for the new recipe */}
-                                {newRecipeIngredients.map((ing, index) =>
-                                (
-                                    <div key={index} className="recipes-ingredient-row">
+                                {newRecipeIngredients.map((ing, index) => (
+                                    <div
+                                        key={index}
+                                        className="recipes-ingredient-row d-flex align-items-center mb-2"
+                                    >
                                         <input
                                             type="text"
                                             placeholder="Name"
+                                            className="form-control"
                                             value={ing.name}
                                             onChange={(e) =>
                                                 handleNewIngredientChange(index, 'name', e.target.value)
@@ -399,19 +409,19 @@ const Recipes = (props) =>
                                             type="number"
                                             placeholder="Qty"
                                             step="0.25"
+                                            className="form-control recipes-qty-input ms-2"
                                             value={ing.quantity}
                                             onChange={(e) =>
                                                 handleNewIngredientChange(index, 'quantity', e.target.value)
                                             }
-                                            className="recipes-qty-input"
                                         />
 
                                         <select
+                                            className="form-select recipes-unit-select ms-2"
                                             value={ing.unit}
                                             onChange={(e) =>
                                                 handleNewIngredientChange(index, 'unit', e.target.value)
                                             }
-                                            className="recipes-unit-select"
                                         >
                                             <option value="Unit">Unit</option>
                                             <option value="g">g</option>
@@ -426,30 +436,38 @@ const Recipes = (props) =>
                                         <button
                                             type="button"
                                             onClick={() => removeIngredientRow(index)}
-                                            className="btn-inline"
+                                            className="btn btn-sm btn-outline-danger ms-2"
                                         >
                                             X
                                         </button>
                                     </div>
                                 ))}
 
-                                <button type="button" onClick={addIngredientRow}>
+                                <button
+                                    type="button"
+                                    onClick={addIngredientRow}
+                                    className="btn btn-sm btn-outline-primary mt-2"
+                                >
                                     + Add Ingredient
                                 </button>
                             </div>
 
-                            <div className="recipes-instructions-section">
-                                <label>
-                                    Instructions (one step per line):{' '}
-                                    <textarea
-                                        rows="6"
-                                        value={newRecipeInstructions}
-                                        onChange={(e) => setNewRecipeInstructions(e.target.value)}
-                                    />
+                            <div className="recipes-instructions-section mb-3">
+                                <label className="form-label">
+                                    Instructions (one step per line)
                                 </label>
+                                <textarea
+                                    rows="6"
+                                    className="form-control"
+                                    value={newRecipeInstructions}
+                                    onChange={(e) => setNewRecipeInstructions(e.target.value)}
+                                />
                             </div>
 
-                            <button type="submit" className="recipes-save-btn">
+                            <button
+                                type="submit"
+                                className="recipes-save-btn btn btn-success"
+                            >
                                 Save Recipe
                             </button>
                         </form>
@@ -457,28 +475,34 @@ const Recipes = (props) =>
                 </div>
 
                 {/* Recipe list on the left, details/edit on the right */}
-                <div className="recipes-layout">
+                <div className="recipes-layout row mt-4">
                     {/* Left: list of all recipes with buttons */}
-                    <div className="recipes-list">
+                    <div className="recipes-list col-4 mb-3">
                         {(!recipes || recipes.length === 0) && !isLoading && (
                             <p>No recipes yet.</p>
                         )}
 
                         {recipes && recipes.map((recipe) =>
                         (
-                            <div key={recipe.id} className="recipes-list-row">
-                                <button onClick={() => handleSelectRecipe(recipe.id)}>
+                            <div 
+                                key={recipe.id} 
+                                className="recipes-list-row d-flex align-items-center mb-2"
+                            >
+                                <button
+                                    onClick={() => handleSelectRecipe(recipe.id)}
+                                    className="btn btn-sm btn-outline-secondary me-2 recipes-list-name-btn text-start"
+                                >
                                     {recipe.name}
                                 </button>
                                 <button
                                     onClick={() => startEditing(recipe)}
-                                    className="btn-inline"
+                                    className="btn btn-sm btn-outline-primary me-2"
                                 >
                                     Edit
                                 </button>
                                 <button
                                     onClick={() => handleDeleteRecipe(recipe.id)}
-                                    className="btn-inline"
+                                    className="btn btn-sm btn-outline-danger"
                                 >
                                     Delete
                                 </button>
@@ -487,37 +511,47 @@ const Recipes = (props) =>
                     </div>
 
                     {/* Right: either edit form or read-only recipe details */}
-                    <div className="recipes-details">
+                    <div className="recipes-details col-8">
                         {/* Nothing selected and not editing = prompt the user */}
                         {!selectedRecipe && editingId === null && (
-                            <p>Select a recipe to view details.</p>
+                            <div className="recipes-placeholder mt-2">
+                                <p>Select a recipe to view details.</p>
+                            </div>
                         )}
 
                         {/* Edit mode for the selected recipe */}
                         {editingId && selectedRecipe && editingId === selectedRecipe.id && (
-                            <form onSubmit={(e) => handleEditRecipeSubmit(e, selectedRecipe.id)}>
-                                <h2>Edit Recipe</h2>
+                            <form 
+                                onSubmit={(e) => handleEditRecipeSubmit(e, selectedRecipe.id)}
+                                className="mt-2"
+                            >
+                                <h2 className="mb-3">Edit Recipe</h2>
 
-                                <div>
-                                    <label>
-                                        Name:{' '}
-                                        <input
-                                            type="text"
-                                            value={editRecipeName}
-                                            onChange={(e) => setEditRecipeName(e.target.value)}
-                                        />
+                                <div className="mb-3">
+                                    <label className="form-label">
+                                        Name
                                     </label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        value={editRecipeName}
+                                        onChange={(e) => setEditRecipeName(e.target.value)}
+                                    />
                                 </div>
 
-                                <div className="recipes-ingredients-section">
+                                <div className="recipes-ingredients-section mb-3">
                                     <h3>Ingredients</h3>
 
                                     {editRecipeIngredients.map((ing, index) =>
                                     (
-                                        <div key={index} className="recipes-ingredient-row">
+                                        <div 
+                                            key={index}
+                                            className="recipes-ingredient-row d-flex align-items-center mb-2"
+                                        >
                                             <input
                                                 type="text"
                                                 placeholder="Name"
+                                                className="form-control"
                                                 value={ing.name}
                                                 onChange={(e) =>
                                                     handleEditIngredientChange(index, 'name', e.target.value)
@@ -528,19 +562,19 @@ const Recipes = (props) =>
                                                 type="number"
                                                 placeholder="Qty"
                                                 step="0.25"
+                                                className="form-control recipes-qty-input ms-2"
                                                 value={ing.quantity}
                                                 onChange={(e) =>
                                                     handleEditIngredientChange(index, 'quantity', e.target.value)
                                                 }
-                                                className="recipes-qty-input"
                                             />
 
                                             <select
+                                                className="form-select recipes-unit-select ms-2"
                                                 value={ing.unit}
                                                 onChange={(e) =>
                                                     handleEditIngredientChange(index, 'unit', e.target.value)
                                                 }
-                                                className="recipes-unit-select"
                                             >
                                                 <option value="Unit">Unit</option>
                                                 <option value="g">g</option>
@@ -555,36 +589,44 @@ const Recipes = (props) =>
                                             <button
                                                 type="button"
                                                 onClick={() => removeEditIngredientRow(index)}
-                                                className="btn-inline"
+                                                className="btn btn-sm btn-outline-danger ms-2"
                                             >
                                                 X
                                             </button>
                                         </div>
                                     ))}
 
-                                    <button type="button" onClick={addEditIngredientRow}>
+                                    <button 
+                                        type="button" 
+                                        onClick={addEditIngredientRow}
+                                        className="btn btn-sm btn-outline-primary mt-2"
+                                    >
                                         + Add Ingredient
                                     </button>
                                 </div>
 
-                                <div className="recipes-instructions-section">
-                                    <label>
-                                        Instructions (one step per line):{' '}
-                                        <textarea
-                                            rows="6"
-                                            value={editRecipeInstructions}
-                                            onChange={(e) => setEditRecipeInstructions(e.target.value)}
-                                        />
+                                <div className="recipes-instructions-section mb-3">
+                                    <label className="form-label">
+                                        Instructions (one step per line)
                                     </label>
+                                    <textarea
+                                        rows="6"
+                                        className="form-control"
+                                        value={editRecipeInstructions}
+                                        onChange={(e) => setEditRecipeInstructions(e.target.value)}
+                                    />
                                 </div>
 
-                                <button type="submit" className="recipes-save-btn">
+                                <button 
+                                    type="submit" 
+                                    className="recipes-save-btn btn btn-success me-2"
+                                >
                                     Save Changes
                                 </button>
                                 <button
                                     type="button"
                                     onClick={cancelEditing}
-                                    className="btn-inline"
+                                    className="btn btn-secondary"
                                 >
                                     Cancel
                                 </button>

@@ -115,64 +115,67 @@ const Pantry = (props) =>
     return (
         <Fragment>
             <div className="container">
-                <h1>Pantry</h1>
+                <h1 className="mb-4">Pantry</h1>
 
                 {/* If the page is loading still */}
                 {isLoading && <p>Loading pantry...</p>}
 
                 {/* God I love ternaary operators */}
-                <button onClick={handleAddToggle}>
+                <button onClick={handleAddToggle} className="btn btn-primary mb-3">
                     {showAddForm ? 'Cancel' : 'Add New Item'}
                 </button>
 
                 {/* The form to add new items and it only shows when showAddForm is true */}
                 {showAddForm && (
-                    <form onSubmit={handleAddSubmit} className="pantry-add-form">
-                        <div>
-                            <label>
+                    <form onSubmit={handleAddSubmit} className="pantry-add-form mb-4">
+                        <div className="mb-3">
+                            <label className="form-label">
                                 Name:{' '}
                                 <input
                                     type="text"
+                                    className="form-control"
                                     value={newName}
                                     onChange={(e) => setNewName(e.target.value)}
                                 />
                             </label>
                         </div>
-                        <div>
-                            <label>
+                        <div className="mb-3">
+                            <label className="form-label">
                                 Quantity:{' '}
                                 <input
                                     type="number"
+                                    className="form-control"
                                     value={newQuantity}
                                     onChange={(e) => setNewQuantity(e.target.value)}
                                 />
                             </label>
                         </div>
-                        <div>
-                            <label>
-                                Unit:{' '}
-                                <select
-                                    value={newUnit}
-                                    onChange={(e) => setNewUnit(e.target.value)}
-                                >
-                                    <option value="Unit">Unit</option>
-                                    <option value="g">g</option>
-                                    <option value="kg">kg</option>
-                                    <option value="ml">ml</option>
-                                    <option value="L">L</option>
-                                    <option value="cup">cup</option>
-                                    <option value="tbsp">tbsp</option>
-                                    <option value="tsp">tsp</option>
-                                </select>
+                        <div className="mb-3">
+                            <label className="form-label">
+                                Unit
                             </label>
+                            <select
+                                className="form-select"
+                                value={newUnit}
+                                onChange={(e) => setNewUnit(e.target.value)}
+                            >
+                                <option value="Unit">Unit</option>
+                                <option value="g">g</option>
+                                <option value="kg">kg</option>
+                                <option value="ml">ml</option>
+                                <option value="L">L</option>
+                                <option value="cup">cup</option>
+                                <option value="tbsp">tbsp</option>
+                                <option value="tsp">tsp</option>
+                            </select>
                         </div>
-                        <button type="submit" className="btn-save">
+                        <button type="submit" className="btn btn-success">
                             Save
                         </button>
                     </form>
                 )}
 
-                <table className="pantry-table">
+                <table className="pantry-table table table-striped table-hover align-middle">
                     <thead>
                         <tr>
                             <th align="left">Name</th>
@@ -234,22 +237,30 @@ const Pantry = (props) =>
                                 <td>
                                     {editingId === item.id ? (
                                         <>
-                                            <button onClick={(e) => handleEditSubmit(e, item.id)}>
+                                            <button 
+                                                onClick={(e) => handleEditSubmit(e, item.id)}
+                                                className="btn btn-sm btn-success"
+                                            >
                                                 Save
                                             </button>
                                             <button
                                                 onClick={cancelEditing}
-                                                className="btn-inline"
+                                                className="btn btn-sm btn-secondary ms-2"
                                             >
                                                 Cancel
                                             </button>
                                         </>
                                     ) : (
                                         <>
-                                            <button onClick={() => startEditing(item)}>Edit</button>
+                                            <button
+                                                onClick={() => startEditing(item)}
+                                                className="btn btn-sm btn-outline-primary"
+                                            >
+                                                Edit
+                                            </button>
                                             <button
                                                 onClick={() => handleDelete(item.id)}
-                                                className="btn-inline"
+                                                className="btn btn-sm btn-outline-danger ms-2"
                                             >
                                                 Delete
                                             </button>

@@ -133,6 +133,23 @@ nav {
   margin-top: 1rem;
 }
 
+.recipes-list-name-btn {
+  flex: 0 0 220px;   /* fixed-ish width for all name buttons */
+  text-align: left;  /* just in case */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;  /* long names get "..." instead of stupidly wide buttons */
+}
+
+.recipes-placeholder {
+  padding: 0.75rem 1rem;
+  border-radius: 4px;
+  border: 1px solid #e0e0e0;
+  background-color: #f9f9f9;
+  color: #666;          /* subtle but readable */
+  font-size: 0.95rem;
+}
+
 /* wcim */
 .wcim-reload-row {
   margin-top: 0.5rem;
