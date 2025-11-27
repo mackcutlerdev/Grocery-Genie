@@ -2,6 +2,15 @@
 
 GroceryGenie’s goal is an app that tracks items in your pantry at home, manage your recipes, and have a “What can I make?” matching system for people who don’t have time or don’t want to spend time trying to figure out what to cook at the end of a long day.
 
+## Requirements
+
+- Must have Node.js installed on your system.
+  > you can install it from this link: https://nodejs.org/en/download <br> You can check if it's installed using `node -v` or `npm -v` in any terminal.
+- Must have a modern web browser.
+  > Chrome, Firefox, Edge, etc.
+- A terminal or command prompt to use the build cmds.
+- Git if you are cloning the project (**RECOMMENDED**) however you can also download the .zip instead.
+
 ## How to build
 
 1. Open a terminal in whatever folder you want the project to live in, eg: `cd "C:\Projects"`.
@@ -16,7 +25,7 @@ GroceryGenie’s goal is an app that tracks items in your pantry at home, manage
 1. Open a terminal in the project root, then navigate into the server folder using `cd server`.
 2. Start the dev setup (this runs the server and the React client together): `npm run dev`.
 3. Your bwoser should open to the React app (usually http://localhost:3000). The API server runs on http://localhost:5000.
-(if it fails to start, check that both ports are open on your device).
+   (if it fails to start, check that both ports are open on your device).
 
 ### Extra notes
 
