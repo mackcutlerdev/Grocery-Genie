@@ -4,7 +4,7 @@ GroceryGenie’s goal is an app that tracks items in your pantry at home, manage
 
 ## How to build
 
-1. Open a terminal in whatever folder you want the project to live in, eg: `cd "C:\Projects`.
+1. Open a terminal in whatever folder you want the project to live in, eg: `cd "C:\Projects"`.
 2. Clone this repository using: `git clone https://github.com/mackcutlerdev/Grocery-Genie`
 3. Then navigate to the project root, and which should just be `cd Grocery-Genie` if you are still in the same terminal.
 4. From the project root, go into the client folder to install dependencies using: `cd client` -> `npm install`.
