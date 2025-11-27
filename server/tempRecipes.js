@@ -56,7 +56,7 @@ const recipes = [
         name: "Oreo Truffles",
         ingredients: [
             {name: "Oreos", quantity: 36, unit: "Unit"},
-            {name: "Cream Cheese", quantity: 250, unit: "Grams"},
+            {name: "Cream Cheese", quantity: 250, unit: "g"},
             {name: "Bakers Semi-Sweet Chocolate", quantity: 2, unit: "Unit"}
         ],
         instructions: [
@@ -71,6 +71,25 @@ const recipes = [
             "Dip the cold truffle balls into the melted chocolate, and put them on the new tray",
             "After all the truffles are dipped, put the tray into the fridge overnight.",
             "Make sure they're cold, and ready to serve!"
+        ]
+    },
+    {
+        id: uuid.v4(),
+        name: "Kraft Dinner Mac n' Cheese",
+        ingredients: [
+            {name: "Kraft Dinner", quantity: 1, unit: "Box"},
+            {name: "Milk", quantity: 0.5, unit: "Cup"},
+            {name: "Margarine", quantity: 1.5, unit: "tbsp"}
+        ],
+        instructions: [
+            "Boil a pot of 6 cups of water until rolling.",
+            "Add the dry macaroni from the box of Kraft Dinner.",
+            "Boil the macaroni for 7 minutes.",
+            "After 7 minutes, drain the cooked pasta from the water, and put it back in the pot.",
+            "Add the milk to the pot, and mix with the pasta.",
+            "Add the margarine to the pot, and mix with the pasta.",
+            "Open the cheese mix from the KD box, and add to the pasta and mix.",
+            "Plate and serve!"
         ]
     }
 ]

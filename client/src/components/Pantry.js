@@ -229,6 +229,7 @@ const Pantry = (props) =>
                                             <option value="cup">cup</option>
                                             <option value="tbsp">tbsp</option>
                                             <option value="tsp">tsp</option>
+                                            <option value="Box">Box</option>
                                         </select>
                                     ) : (
                                         item.unit || 'Unit'

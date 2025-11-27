@@ -1,9 +1,13 @@
 // Dependencies
 import React, { useEffect, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import WhatCanIMake from '../components/WhatCanIMake';
 
 function WhatCanIMakePage()
 {
+    // For the [Open Recipe] button
+    const history = useHistory();
+
     // Data this page needs: pantry + recipes from the server
     const [appState, setAppState] = useState(
     {
@@ -46,6 +50,13 @@ function WhatCanIMakePage()
             });
     };
 
+    // For the Open Recipe button
+    const handleOpenRecipe = (id) =>
+    {
+        // go to Recipes page and auto-select this recipe
+        history.push(`/recipes?recipeId=${id}`);
+    };
+
     // load everything once on mount
     useEffect(() =>
     {
@@ -59,6 +70,7 @@ function WhatCanIMakePage()
             pantryItems={appState.pantryItems}
             recipes={appState.recipes}
             onReload={loadData}
+            onOpenRecipe={handleOpenRecipe}
         />
     );
 }

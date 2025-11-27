@@ -5,8 +5,8 @@ import React, { Fragment, useState } from 'react';
 const WhatCanIMake = (props) =>
 {
     // Destructured
-    // {list of pantry items, list of recipes, loading flag, on server reload}
-    const { pantryItems, recipes, isLoading, onReload } = props;
+    // {list of pantry items, list of recipes, loading flag, on server reload, on recipe call}
+    const { pantryItems, recipes, isLoading, onReload, onOpenRecipe } = props;
 
     // If true, we only show the "you can make this stuff" and not all the recipes
     const [showOnlyMakeable, setShowOnlyMakeable] = useState(false);
@@ -197,9 +197,18 @@ const WhatCanIMake = (props) =>
                             (
                                 <li 
                                     key={recipe.id} 
-                                    className="list-group-item wcim-makeable-item"
+                                    className="list-group-item wcim-makeable-item d-flex align-items-center justify-content-between"
                                 >
                                     <strong>{recipe.name}</strong>
+
+                                    {onOpenRecipe && (
+                                        <button
+                                            className="btn btn-sm btn-primary ms-2"
+                                            onClick={() => onOpenRecipe(recipe.id)}
+                                        >
+                                            Open Recipe
+                                        </button>
+                                    )}
                                 </li>
                             ))}
                         </ul>
