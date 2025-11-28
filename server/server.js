@@ -17,16 +17,16 @@ server.use('/api/tempItems', require('./routes/api/items'));
 server.use('/api/tempRecipes', require('./routes/api/recipes'));
 
 // Added for the Render web services
-// Serve React client in production
-// NOW serve React build (must be LAST)
-if (process.env.NODE_ENV === 'production') {
+// https://stackoverflow.com/questions/53308128/problem-serving-static-files-with-express
+if(process.env.NODE_ENV === 'production') 
+{
     const clientBuildPath = path.join(__dirname, '../client/build');
     console.log('Serving static from:', clientBuildPath);
 
     server.use(express.static(clientBuildPath));
 
-    // Express 5: wildcard route must use regex
-    server.get(/.*/, (req, res) => {
+    server.get(/.*/, (req, res) => 
+    {
         res.sendFile(path.join(clientBuildPath, 'index.html'));
     });
 }

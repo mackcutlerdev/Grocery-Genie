@@ -1,4 +1,4 @@
-// pages/SourcesPage.js
+// Dependencies
 import React, { Fragment } from 'react';
 
 function SourcesPage()
@@ -15,17 +15,20 @@ function SourcesPage()
                         <ul className="list-group list-group-flush mt-3">
                             <li className="list-group-item">
                                 <strong>React</strong><br />
-                                JavaScript library for building user interfaces<br />
-                                <a href="https://react.dev/" target="_blank" rel="noopener noreferrer">
-                                    https://react.dev/
+                                Used a lot of them, before I realized I needed specific pages<br />
+                                <a href="https://react.dev/reference/react/hooks" target="_blank" rel="noopener noreferrer">
+                                    https://react.dev/reference/react/hooks
                                 </a>
                             </li>
 
                             <li className="list-group-item">
                                 <strong>React Router</strong><br />
-                                Client-side routing for React applications<br />
-                                <a href="https://reactrouter.com/" target="_blank" rel="noopener noreferrer">
-                                    https://reactrouter.com/
+                               React Router V5, cause we used that in class so I needed old docs for it, also didn't realize I needed to cite so here's the whole page<br />
+                                <a href="https://v5.reactrouter.com/web/api/Hooks" target="_blank" rel="noopener noreferrer">
+                                    https://v5.reactrouter.com/web/api/Hooks
+                                </a>
+                                <a href="https://www.youtube.com/watch?v=TNhaISOUy6Q" target="_blank" rel="noopener noreferrer">
+                                    YouTube Fireship!
                                 </a>
                             </li>
 
@@ -39,9 +42,15 @@ function SourcesPage()
 
                             <li className="list-group-item">
                                 <strong>Bootstrap 5</strong><br />
-                                CSS framework for styling and responsive design<br />
-                                <a href="https://getbootstrap.com/" target="_blank" rel="noopener noreferrer">
-                                    https://getbootstrap.com/
+                                Mainly used for buttons, cards, and forms<br />
+                                <a href="https://getbootstrap.com/docs/5.3/forms/overview/" target="_blank" rel="noopener noreferrer">
+                                    Forms
+                                </a>
+                                <a href="https://getbootstrap.com/docs/5.0/components/card/" target="_blank" rel="noopener noreferrer">
+                                    Cards
+                                </a>
+                                <a href="https://getbootstrap.com/docs/5.3/components/buttons/" target="_blank" rel="noopener noreferrer">
+                                    Buttons
                                 </a>
                             </li>
                         </ul>
@@ -78,16 +87,63 @@ function SourcesPage()
                             </li>
 
                             <li className="list-group-item">
-                                <strong>Tokenization approach for ingredient matching</strong><br />
+                                <strong>RegEx: Tokenization approach for ingredient matching</strong><br />
                                 My friend from Unix class (and I took it last semester) helped me with the regex tokenization to solve the "salt" vs "unsalted butter" matching problem<br />
-                                Uses <code>/[^a-z]+/</code> regex to split ingredient names into tokens, even tho I hate regex
+                                Uses <code>/[^a-z]+/</code> regex to split ingredient names into tokens, even tho I hate regex <br/>
+                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp" target="_blank" rel="noopener noreferrer">
+                                    MDN: RegEx
+                                </a>
                             </li>
 
                             <li className="list-group-item">
                                 <strong>Express REST API patterns</strong><br />
                                 Course materials and documentation for building CRUD endpoints<br />
-                                <a href="https://expressjs.com/en/starter/basic-routing.html" target="_blank" rel="noopener noreferrer">
+                                <a href="https://expressjs.com/en/guide/using-middleware.html" target="_blank" rel="noopener noreferrer">
                                     Express.js Routing Documentation
+                                </a>
+                            </li>
+
+                            <li className="list-group-item">
+                                <strong>Render serving static files in build</strong><br />
+                                When trying to serve my app on Render<br />
+                                <a href="https://stackoverflow.com/questions/53308128/problem-serving-static-files-with-express" target="_blank" rel="noopener noreferrer">
+                                    Stack Overflow: Serving Static Files
+                                </a>
+                            </li>
+
+                            <li className="list-group-item">
+                                <strong>URLSearchParams</strong><br />
+                                So I could open a specific part of the page <br/>
+                                <a href="https://www.youtube.com/watch?v=KUN0Vkn207k">
+                                    YouTube Azul Coding
+                                </a>
+                            </li>
+
+                            <li className="list-group-item">
+                                <strong>Prop Drilling</strong><br />
+                                This one seems obvious as it's for the general react archietecture <br/>
+                                However it's also used for the controlled inputs and forms, which is in the same link <br/>
+                                <a href="https://react.dev/learn/sharing-state-between-components" target="_blank" rel="noopener noreferrer">
+                                    React: State Sharing
+                                </a><br/>
+                                <a href="https://www.youtube.com/watch?v=O6P86uwfdR0" target="_blank" rel="noopener noreferrer">
+                                    YouTube useState
+                                </a>
+                            </li>
+
+                            <li className="list-group-item">
+                                <strong>Controlled Inputs & Forms</strong><br />
+                                So I could open a specific part of the page <br/>
+                                <a href="https://www.youtube.com/watch?v=KUN0Vkn207k">
+                                    YouTube Azul Coding
+                                </a>
+                            </li>
+
+                            <li className="list-group-item">
+                                <strong>Mapping</strong><br />
+                                I needed to figure out how to map for my many lists and rendering them dynamically<br/>
+                                <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map">
+                                    MDN: .map()
                                 </a>
                             </li>
                         </ul>
