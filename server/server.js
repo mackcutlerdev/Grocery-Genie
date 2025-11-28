@@ -4,6 +4,9 @@ const logger = require('./middleware/logger');
 const server = express();
 const path = require('path');
 
+// PORT
+const PORT = process.env.PORT || 5000;
+
 // Middleware
 server.use(logger);
 server.use(express.json());
@@ -15,15 +18,18 @@ server.use('/api/tempRecipes', require('./routes/api/recipes'));
 
 // Added for the Render web services
 // Serve React client in production
+// NOW serve React build (must be LAST)
 if (process.env.NODE_ENV === 'production') {
-    server.use(express.static(path.join(__dirname, '../client/build')));
+    const clientBuildPath = path.join(__dirname, '../client/build');
+    console.log('Serving static from:', clientBuildPath);
 
-    // Catch-all route for React Router
-    server.get('/*', (req, res) => {
-        res.sendFile(path.join(__dirname, '../client/build', 'index.html'));
+    server.use(express.static(clientBuildPath));
+
+    // Express 5: wildcard route must use regex
+    server.get(/.*/, (req, res) => {
+        res.sendFile(path.join(clientBuildPath, 'index.html'));
     });
 }
 
 // LISTEN
-const PORT = process.env.PORT || 5000;
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));

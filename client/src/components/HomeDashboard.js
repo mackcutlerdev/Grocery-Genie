@@ -1,7 +1,7 @@
 // Dependencies
 import React, { Fragment } from 'react';
 
-// Main home page component, doesn't do a lot but gives info immediately to the user
+// Main homepage component, doesn't do a lot but gives info immediately to the user
 const HomeDashboard = (props) =>
 {
     // All the props from HopePage, destructured for clarity and reuse
@@ -62,7 +62,8 @@ const HomeDashboard = (props) =>
                     <h2>What Can I Make Today?</h2>
 
                     {/* If there aren't any makeable pages and the loading is already over, tell the user they are dumb cause they don't have anything to make */}
-                    {(!makeableRecipes || makeableRecipes.length === 0) && !isLoading && (
+                    {(!makeableRecipes || makeableRecipes.length === 0) && !isLoading && 
+                    (
                         <p>No recipes are fully makeable yet. Add ingredients to your pantry!</p>
                     )}
 
@@ -72,7 +73,10 @@ const HomeDashboard = (props) =>
                         (
                             <div key={recipe.id} className="home-scroll-row">
                                 <span>{recipe.name}</span>
-                                <button onClick={() => onOpenRecipe(recipe.id)} className="btn btn-sm btn-primary">
+                                <button 
+                                    onClick={() => onOpenRecipe(recipe.id)} 
+                                    className="btn btn-sm btn-primary"
+                                >
                                     Open Recipe
                                 </button>
                             </div>

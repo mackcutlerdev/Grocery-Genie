@@ -78,7 +78,7 @@ function HomePage()
     const tokenize = (name) =>
     {
         return normalizeName(name)
-            .split(/[^a-z0-9]+/)
+            .split(/[^a-z]+/)
             .filter(Boolean);
     };
 
@@ -98,6 +98,7 @@ function HomePage()
             return true;
         }
 
+        // See comment in WhatCanIMake.js
         const setB = new Set(tokensB);
 
         for (let i = 0; i < tokensA.length; i++)

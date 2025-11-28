@@ -24,6 +24,15 @@ nav {
   gap: 1rem;
 }
 
+/* footer */
+.footer-fixed {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;  /* stay above */
+}
+
 /* buttons */
 .btn-save {
   margin-top: 0.5rem;
@@ -187,4 +196,9 @@ nav {
 
 .wcim-missing-list {
   margin-left: 1.5rem;
+}
+
+/* roadmap */
+.rm-list-highlight {
+  color: rgb(196, 0, 0);
 }

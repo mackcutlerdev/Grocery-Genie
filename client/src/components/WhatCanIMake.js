@@ -25,11 +25,11 @@ const WhatCanIMake = (props) =>
     // Allow loose matches like "Milk" vs "2% Milk", "Potato" vs "Yukon Gold Potato"
     const tokenize = (name) =>
     {
-        // This tokenize was suggested on Reddit, because I was getting issues with words in words being ticked off as that ingredient, like salt in "unsalted butter"
+        // This tokenize was suggested by a friend who was with me in Unix class, because I was getting issues with words in words being ticked off as that ingredient, like salt in "unsalted butter"
         // lowercase, then split on anything that is not a-z or 0-9
         // So salt != Unsalt now
         return normalizeName(name)
-            .split(/[^a-z0-9]+/)
+            .split(/[^a-z]+/)
             .filter(Boolean); // remove empty strings
     };
 
@@ -52,6 +52,7 @@ const WhatCanIMake = (props) =>
         }
 
         // If they share at least one WHOLE word, we consider it a match
+        // https://stackoverflow.com/questions/55057200/is-the-set-has-method-o1-and-array-indexof-on -> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set
         const tokensBSet = new Set(tokensB);
         for(let i = 0; i < tokensA.length; i++)
         {
@@ -186,7 +187,8 @@ const WhatCanIMake = (props) =>
                     <div className="card-body">
                         <h2 className="h4 card-title">Can fully make</h2>
 
-                        {makeableRecipes.length === 0 && !isLoading && (
+                        {makeableRecipes.length === 0 && !isLoading && 
+                        (
                             <p className="card-text">
                                 No recipes are fully makeable with your current pantry.
                             </p>
@@ -201,7 +203,8 @@ const WhatCanIMake = (props) =>
                                 >
                                     <strong>{recipe.name}</strong>
 
-                                    {onOpenRecipe && (
+                                    {onOpenRecipe && 
+                                    (
                                         <button
                                             className="btn btn-sm btn-primary ms-2"
                                             onClick={() => onOpenRecipe(recipe.id)}
@@ -216,12 +219,14 @@ const WhatCanIMake = (props) =>
                 </div>
 
                 {/* Recipes that are missing ingredients */}
-                {!showOnlyMakeable && (
+                {!showOnlyMakeable && 
+                (
                     <div className="wcim-section-missing card mb-4">
                         <div className="card-body">
                             <h2 className="h4 card-title">Missing Ingredients</h2>
 
-                            {otherRecipes.length === 0 && !isLoading && (
+                            {otherRecipes.length === 0 && !isLoading && 
+                            (
                                 <p className="card-text">All recipes are fully makeable (or you have no recipes yet).</p>
                             )}
 
@@ -233,7 +238,8 @@ const WhatCanIMake = (props) =>
                                     <div key={recipe.id} className="wcim-missing-recipe mt-3">
                                         <strong>{recipe.name}</strong>
 
-                                        {missingIngredients.length > 0 && (
+                                        {missingIngredients.length > 0 && 
+                                        (
                                             <ul className="wcim-missing-list mt-2">
                                                 {missingIngredients.map((missingIngredient, index) =>
                                                 {

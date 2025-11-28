@@ -13,7 +13,8 @@ const Recipes = (props) =>
         onAddRecipe,
         onUpdateRecipe,
         onDeleteRecipe,
-        initialSelectedRecipeId
+        initialSelectedRecipeId,
+        onMakeRecipe
     } = props;
 
     // Which recipe is focused / selected (shows on the right side)
@@ -161,7 +162,7 @@ const Recipes = (props) =>
             {
                 const trimmedName = ing.name.trim();
                 const qtyText = String(ing.quantity).trim();
-                const qtyValue = qtyText === "" ? null : Number(qtyText); // blank = null (to taste like for salt)
+                const qtyValue = qtyText === "" ? null : Number(qtyText); // blank = null (to taste like for salt) otherwise conver to num
 
                 return {
                     name: trimmedName,
@@ -214,7 +215,7 @@ const Recipes = (props) =>
                 }))
             );
         }
-        // If it somehow has none, just give a single blank row
+        // If it somehow has none, just give a single blank row cause it cant be empty
         else
         {
             setEditRecipeIngredients([
@@ -390,7 +391,8 @@ const Recipes = (props) =>
                                 <h3>Ingredients</h3>
 
                                 {/* All the ingredient rows for the new recipe */}
-                                {newRecipeIngredients.map((ing, index) => (
+                                {newRecipeIngredients.map((ing, index) => 
+                                (
                                     <div
                                         key={index}
                                         className="recipes-ingredient-row d-flex align-items-center mb-2"
@@ -479,7 +481,8 @@ const Recipes = (props) =>
                 <div className="recipes-layout row mt-4">
                     {/* Left: list of all recipes with buttons */}
                     <div className="recipes-list col-4 mb-3">
-                        {(!recipes || recipes.length === 0) && !isLoading && (
+                        {(!recipes || recipes.length === 0) && !isLoading && 
+                        (
                             <p>No recipes yet.</p>
                         )}
 
@@ -514,14 +517,16 @@ const Recipes = (props) =>
                     {/* Right: either edit form or read-only recipe details */}
                     <div className="recipes-details col-8">
                         {/* Nothing selected and not editing = prompt the user */}
-                        {!selectedRecipe && editingId === null && (
+                        {!selectedRecipe && editingId === null && 
+                        (
                             <div className="recipes-placeholder mt-2">
                                 <p>Select a recipe to view details.</p>
                             </div>
                         )}
 
                         {/* Edit mode for the selected recipe */}
-                        {editingId && selectedRecipe && editingId === selectedRecipe.id && (
+                        {editingId && selectedRecipe && editingId === selectedRecipe.id && 
+                        (
                             <form 
                                 onSubmit={(e) => handleEditRecipeSubmit(e, selectedRecipe.id)}
                                 className="mt-2"
@@ -636,9 +641,32 @@ const Recipes = (props) =>
                         )}
 
                         {/* Read-only details for the selected recipe (if we’re not in edit mode) */}
-                        {selectedRecipe && (!editingId || editingId !== selectedRecipe.id) && (
-                            <div>
-                                <h2>{selectedRecipe.name}</h2>
+                        {selectedRecipe && (!editingId || editingId !== selectedRecipe.id) && 
+                        (
+                            <div className="mt-2">
+                                <div className="d-flex align-items-center justify-content-between mb-3">
+                                    <h2 className="mb-0">{selectedRecipe.name}</h2>
+
+                                    {onMakeRecipe && 
+                                    (
+                                        <button
+                                            className="btn btn-success"
+                                                onClick={() =>
+                                                {
+                                                    const ok = window.confirm(`Use pantry items to make "${selectedRecipe.name}"?`);
+                                                    if(!ok)
+                                                    {
+                                                        return;
+                                                    }
+
+                                                    onMakeRecipe(selectedRecipe);
+                                                    window.alert(`Successlly removed used ingredients from pantry!`);
+                                                }}
+                                        >
+                                            Make Recipe
+                                        </button>
+                                    )}
+                                </div>
 
                                 <h3>Ingredients</h3>
                                 {renderIngredients(selectedRecipe.ingredients)}

@@ -46,7 +46,7 @@ function WhatCanIMakePage()
             })
             .catch((err) =>
             {
-                console.log('Failed to load data for WhatCanIMake', err);
+                console.log("Failed to load data for WhatCanIMake", err);
             });
     };
 

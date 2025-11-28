@@ -28,11 +28,17 @@ const Navbar = () =>
                         <li className="nav-item">
                             <Link to='/whatcanimake' className="nav-link">What Can I Make?</Link>
                         </li>
+                        <li className="nav-item">
+                            <Link to='/roadmap' className="nav-link">Roadmap/ Docs</Link>
+                        </li>
+                        <li className="nav-item">
+                            <Link to='/sources' className="nav-link">Sources</Link>
+                        </li>
                     </ul>
                 </div>
             </div>
         </nav>
-    )
-}
+    );
+};
 
-export default Navbar
+export default Navbar;

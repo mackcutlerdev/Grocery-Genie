@@ -126,7 +126,8 @@ const Pantry = (props) =>
                 </button>
 
                 {/* The form to add new items and it only shows when showAddForm is true */}
-                {showAddForm && (
+                {showAddForm && 
+                (
                     <form onSubmit={handleAddSubmit} className="pantry-add-form mb-4">
                         <div className="mb-3">
                             <label className="form-label">
@@ -185,13 +186,15 @@ const Pantry = (props) =>
                         </tr>
                     </thead>
                     <tbody>
-                        {(!items || items.length === 0) && !isLoading && (
+                        {(!items || items.length === 0) && !isLoading && 
+                        (
                             <tr>
                                 <td colSpan="4">No items in pantry yet.</td>
                             </tr>
                         )}
 
-                        {items && items.map((item) => (
+                        {items && items.map((item) => 
+                        (
                             <tr key={item.id}>
                                 <td>
                                     {editingId === item.id ? (
