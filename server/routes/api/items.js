@@ -43,7 +43,7 @@ router.post('/', (req, res) =>
     // No nameless items allowed
     if (!newItem.name)
     {
-        return res.status(404).json({ msg: 'Please include an item name' });
+        return res.status(404).json({ msg: "Please include an item name" });
     }
 
     // Push into the in-memory array and send back the full list
@@ -72,7 +72,7 @@ router.put('/:id', (req, res) =>
                 item.unit = updateItem.unit ? updateItem.unit : item.unit;
 
                 // Send back the updated item
-                res.json({ msg: 'Item updated', item });
+                res.json({ msg: "Item updated", item });
             }
         });
     }

@@ -42,7 +42,7 @@ router.post('/', (req, res) =>
     // No nameless recipes, that's illegal here
     if (!newrecipe.name)
     {
-        return res.status(404).json({ msg: 'Please include a recipe name' });
+        return res.status(404).json({ msg: "Please include a recipe name" });
     }
 
     // Push into in-memory array and return the full updated list
@@ -71,7 +71,7 @@ router.put('/:id', (req, res) =>
                 recipe.instructions = updaterecipe.instructions ? updaterecipe.instructions : recipe.instructions;
 
                 // Send back the updated recipe
-                res.json({ msg: 'recipe updated', recipe });
+                res.json({ msg: "recipe updated", recipe });
             }
         });
     }
