@@ -1,44 +1,53 @@
-// Dependencies
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { NavLink } from 'react-router-dom';
 
-const Navbar = () => 
+const Navbar = () =>
 {
     return (
-        // Using Bootstrap styles for Navbar
-        <nav>
-            <div className="navbar navbar-expand-lg navbar-dark bg-dark mb-4">
-                {/* container keeps stuff centered and not super wide or anything */}
-                <div className="container nav-wrapper">
-                    {/* app title on the left */}
-                    <Link to="/" className="navbar-brand">
-                        GroceryGenie
-                    </Link>
+        <aside id="gg-sidebar">
 
-                    {/* nav links on the right */}
-                    <ul id="nav-mobile" className="navbar-nav ms-auto">
-                        <li className="nav-item">
-                            <Link to='/' className="nav-link">Home</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to='/pantry' className="nav-link">Pantry</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to='/recipes' className="nav-link">Recipe Book</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to='/whatcanimake' className="nav-link">What Can I Make?</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to='/roadmap' className="nav-link">Roadmap/ Docs</Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link to='/sources' className="nav-link">Sources</Link>
-                        </li>
-                    </ul>
+            {/* Logo */}
+            <NavLink exact to="/" className="gg-sidebar-logo" style={{ textDecoration: 'none' }}>
+                <div className="gg-logo-orb"></div>
+                <div className="gg-logo-wordmark">
+                    <div className="gg-logo-grocery">Grocery</div>
+                    <div className="gg-logo-genie">Genie</div>
                 </div>
+            </NavLink>
+
+            {/* Nav links */}
+            <nav className="gg-sidebar-nav">
+                <NavLink exact to="/"           className="gg-nav-item" activeClassName="active">
+                    <span className="gg-nav-icon"><i className="bi bi-grid-1x2"></i></span>
+                    <span className="gg-nav-label">Dashboard</span>
+                </NavLink>
+                <NavLink to="/pantry"           className="gg-nav-item" activeClassName="active">
+                    <span className="gg-nav-icon"><i className="bi bi-basket"></i></span>
+                    <span className="gg-nav-label">Pantry</span>
+                </NavLink>
+                <NavLink to="/recipes"          className="gg-nav-item" activeClassName="active">
+                    <span className="gg-nav-icon"><i className="bi bi-journal-richtext"></i></span>
+                    <span className="gg-nav-label">Recipe Book</span>
+                </NavLink>
+                <NavLink to="/whatcanimake"     className="gg-nav-item" activeClassName="active">
+                    <span className="gg-nav-icon"><i className="bi bi-stars"></i></span>
+                    <span className="gg-nav-label">What Can I Make?</span>
+                </NavLink>
+                <NavLink to="/roadmap"          className="gg-nav-item" activeClassName="active">
+                    <span className="gg-nav-icon"><i className="bi bi-map"></i></span>
+                    <span className="gg-nav-label">Roadmap</span>
+                </NavLink>
+                <NavLink to="/sources"          className="gg-nav-item" activeClassName="active">
+                    <span className="gg-nav-icon"><i className="bi bi-bookmark-star"></i></span>
+                    <span className="gg-nav-label">Sources</span>
+                </NavLink>
+            </nav>
+
+            {/* Footer */}
+            <div className="gg-sidebar-footer">
+                <div className="gg-version-tag">v<em>0.9.1</em> · prototype</div>
             </div>
-        </nav>
+        </aside>
     );
 };
 

@@ -1,270 +1,225 @@
-// Dependencies
 import React, { Fragment, useState } from 'react';
 
-// WCIM component, takes the current pantry and recipes and matches
 const WhatCanIMake = (props) =>
 {
-    // Destructured
-    // {list of pantry items, list of recipes, loading flag, on server reload, on recipe call}
     const { pantryItems, recipes, isLoading, onReload, onOpenRecipe } = props;
 
-    // If true, we only show the "you can make this stuff" and not all the recipes
-    const [showOnlyMakeable, setShowOnlyMakeable] = useState(false);
+    // 'all' | 'ready' | 'missing'
+    const [filterMode, setFilterMode] = useState('all');
 
-    // Clean up a name so it's easy to compare
-    const normalizeName = (name) =>
-    {
-        if (!name)
-        {
-            return '';
-        }
+    /* ── Matching logic (unchanged from original) ── */
+    const normalizeName = (name) => (!name ? '' : name.trim().toLowerCase());
 
-        return name.trim().toLowerCase();
-    };
-
-    // Allow loose matches like "Milk" vs "2% Milk", "Potato" vs "Yukon Gold Potato"
     const tokenize = (name) =>
-    {
-        // This tokenize was suggested by a friend who was with me in Unix class, because I was getting issues with words in words being ticked off as that ingredient, like salt in "unsalted butter"
-        // lowercase, then split on anything that is not a-z or 0-9
-        // So salt != Unsalt now
-        return normalizeName(name)
-            .split(/[^a-z]+/)
-            .filter(Boolean); // remove empty strings
-    };
+        normalizeName(name).split(/[^a-z]+/).filter(Boolean);
 
-    // Returns true if 2 ingredient names are close enough but still using tokens. So like Potato = Yukon Potato, but Salt != Unsalt
     const namesLooselyMatch = (a, b) =>
     {
-        // Params are tokenized which also normalized thems
         const tokensA = tokenize(a);
         const tokensB = tokenize(b);
-
-        if(tokensA.length === 0 || tokensB.length === 0)
-        {
-            return false;
-        }
-
-        // Exact same tokens (e.g., "milk" vs "milk", "yukon gold potato" vs same)
-        if (tokensA.join(' ') === tokensB.join(' '))
-        {
-            return true;
-        }
-
-        // If they share at least one WHOLE word, we consider it a match
-        // https://stackoverflow.com/questions/55057200/is-the-set-has-method-o1-and-array-indexof-on -> https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set
-        const tokensBSet = new Set(tokensB);
-        for(let i = 0; i < tokensA.length; i++)
-        {
-            if(tokensBSet.has(tokensA[i]))
-            {
-                return true;
-            }
-        }
-
+        if (tokensA.length === 0 || tokensB.length === 0) return false;
+        if (tokensA.join(' ') === tokensB.join(' ')) return true;
+        const setB = new Set(tokensB);
+        for (let i = 0; i < tokensA.length; i++)
+            if (setB.has(tokensA[i])) return true;
         return false;
     };
 
-    // Check if the user can make a given recipe with the current inventory
     const canMakeRecipe = (recipe) =>
     {
-        if (!recipe || !Array.isArray(recipe.ingredients))
+        if (!recipe || !Array.isArray(recipe.ingredients)) return false;
+        return recipe.ingredients.every((recipeIng) =>
         {
-            return false;
-        }
-
-        // Every ingredient has to be "satisfed"
-        return recipe.ingredients.every((recipeIngredient) =>
-        {
-            const matchingPantryItem = pantryItems.find((item) =>
-                namesLooselyMatch(item.name, recipeIngredient.name)
-            );
-
-            if (!matchingPantryItem)
-            {
-                return false;
-            }
-
-            // If quantity is null/undefined, treat as "to taste", as long as we have it to some capacity, it's fine
-            if (recipeIngredient.quantity === null || recipeIngredient.quantity === undefined)
-            {
-                return true;
-            }
-
-            // We’re not checking units here, just comparing numeric quantities, doing units is more complex than I have time for because it would require conversion
-            return matchingPantryItem.quantity >= recipeIngredient.quantity;
+            const match = pantryItems.find((item) => namesLooselyMatch(item.name, recipeIng.name));
+            if (!match) return false;
+            if (recipeIng.quantity === null || recipeIng.quantity === undefined) return true;
+            return match.quantity >= recipeIng.quantity;
         });
     };
 
-    // For x recipe, find out what ingredients are not matching or not enough of said ing
     const getMissingIngredients = (recipe) =>
     {
-
-        const missingIngredients = [];
-
-        // If the recipe needs a specific amount, check if we're short that amount
-        recipe.ingredients.forEach((recipeIngredient) =>
+        const missing = [];
+        recipe.ingredients.forEach((recipeIng) =>
         {
-            const matchingPantryItem = pantryItems.find((item) =>
-                namesLooselyMatch(item.name, recipeIngredient.name)
-            );
-
-            // We don't have this ingredient at all
-            if(!matchingPantryItem)
+            const match = pantryItems.find((item) => namesLooselyMatch(item.name, recipeIng.name));
+            if (!match)
             {
-                missingIngredients.push(
-                {
-                    name: recipeIngredient.name,
-                    needed: recipeIngredient.quantity || recipeIngredient.quantity === 0 ? recipeIngredient.quantity : null,
-                    unit: recipeIngredient.unit || ''
-                });
+                missing.push({ name: recipeIng.name, needed: recipeIng.quantity ?? null, unit: recipeIng.unit || '' });
                 return;
             }
-
-            // We *do* have it, but maybe not enough
-            if(recipeIngredient.quantity !== null && recipeIngredient.quantity !== undefined)
-            {
-                if (matchingPantryItem.quantity < recipeIngredient.quantity)
-                {
-                    missingIngredients.push(
-                    {
-                        name: recipeIngredient.name,
-                        // How much more we need to hit the amount needed for recipe
-                        needed: recipeIngredient.quantity - matchingPantryItem.quantity,
-                        unit: recipeIngredient.unit || ''
-                    });
-                }
-            }
+            if (recipeIng.quantity !== null && recipeIng.quantity !== undefined)
+                if (match.quantity < recipeIng.quantity)
+                    missing.push({ name: recipeIng.name, needed: recipeIng.quantity - match.quantity, unit: recipeIng.unit || '' });
         });
-
-        return missingIngredients;
+        return missing;
     };
 
-    // Calculate the lists for the numbers
-    const makeableRecipes = recipes.filter((recipe) => canMakeRecipe(recipe));
-    const otherRecipes = recipes.filter((recipe) => !canMakeRecipe(recipe));
+    const matchInfo = (recipe) =>
+    {
+        const total   = recipe.ingredients ? recipe.ingredients.length : 0;
+        const missing = getMissingIngredients(recipe);
+        const matched = total - missing.length;
+        return { total, matched, missingList: missing };
+    };
+
+    const makeableRecipes = recipes.filter((r) => canMakeRecipe(r));
+    const missingRecipes  = recipes.filter((r) => !canMakeRecipe(r));
+
+    // Sort missing by % matched descending
+    missingRecipes.sort((a, b) =>
+    {
+        const mA = matchInfo(a); const mB = matchInfo(b);
+        return (mB.matched / (mB.total || 1)) - (mA.matched / (mA.total || 1));
+    });
+
+    const showReady   = filterMode !== 'missing';
+    const showMissing = filterMode !== 'ready';
 
     return (
         <Fragment>
-            <div className="container">
-                <h1 className="mb-3">What Can I Make?</h1>
-                <p className="text-muted">
-                    Based on your current pantry and saved recipes, here's what you can cook right now.
-                </p>
+            <div className="gg-panel active" id="panel-cook">
 
-                {isLoading && <p>Loading pantry and recipes...</p>}
+                {/* Intro blurb */}
+                <div style={{ marginBottom: '24px' }}>
+                    <div className="gg-kicker" style={{ marginBottom: '8px' }}>Pantry Intelligence</div>
+                    <p style={{ fontFamily: 'var(--f-body)', fontStyle: 'italic', color: 'var(--text-dim)', fontSize: '16px', maxWidth: '680px', lineHeight: '1.6', margin: 0 }}>
+                        Based on your current pantry and saved recipes, here's what you can cook right now.
+                        The matching engine understands ingredient variants —{' '}
+                        <em style={{ color: 'var(--accent)' }}>"2% Milk"</em> counts as{' '}
+                        <em style={{ color: 'var(--accent)' }}>"Milk"</em>.
+                    </p>
+                </div>
 
-                <div className="d-flex flex-wrap align-items-center justify-content-between wcim-reload-row">
-                    <button 
-                        onClick={onReload}
-                        className="btn btn-outline-secondary mb-2"
+                {/* Filter bar */}
+                <div className="gg-wcim-filter-bar">
+                    <button
+                        className={`gg-wcim-filter-btn${filterMode === 'all' ? ' active teal' : ''}`}
+                        onClick={() => setFilterMode('all')}
                     >
-                        Reload ingredients
+                        All Recipes
+                    </button>
+                    <button
+                        className={`gg-wcim-filter-btn${filterMode === 'ready' ? ' active teal' : ''}`}
+                        onClick={() => setFilterMode('ready')}
+                    >
+                        ✦ Can Fully Make
+                    </button>
+                    <button
+                        className={`gg-wcim-filter-btn${filterMode === 'missing' ? ' active' : ''}`}
+                        onClick={() => setFilterMode('missing')}
+                    >
+                        Missing Ingredients
+                    </button>
+                    <button className="gg-btn-ghost" onClick={onReload} style={{ marginLeft: 'auto' }}>
+                        <i className="bi bi-arrow-clockwise"></i> Reload
                     </button>
                 </div>
 
-                <div className="wcim-toggle-row mb-2">
-                    <div className="form-check">
-                        <input
-                            id="wcim-toggle"
-                            type="checkbox"
-                            className="form-check-input wcim-toggle-checkbox"
-                            checked={showOnlyMakeable}
-                            onChange={(e) => setShowOnlyMakeable(e.target.checked)}
-                        />
-                        <label
-                            className="form-check-label"
-                            htmlFor="wcim-toggle"
-
-                        >
-                            Show only recipes I can fully make
-                        </label>
+                {isLoading && (
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: '10px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--text-faint)', marginBottom: '24px' }}>
+                        Loading pantry and recipes…
                     </div>
-                </div>
+                )}
 
-                {/* Makeable recipes */}
-                <div className="wcim-section-makeable card mt-3 mb-4">
-                    <div className="card-body">
-                        <h2 className="h4 card-title">Can fully make</h2>
+                {/* Empty state */}
+                {!isLoading && recipes.length === 0 && (
+                    <div className="gg-empty-state">
+                        <div className="big-glyph">✦</div>
+                        <p>Add pantry items and recipes to see what you can cook</p>
+                    </div>
+                )}
 
-                        {makeableRecipes.length === 0 && !isLoading && 
-                        (
-                            <p className="card-text">
-                                No recipes are fully makeable with your current pantry.
-                            </p>
-                        )}
+                {/* ── Can Fully Make ── */}
+                {showReady && recipes.length > 0 && (
+                    <div id="wcim-ready-section">
+                        <div className="gg-wcim-section-title">
+                            Can fully make
+                            <span className="gg-badge-count">{makeableRecipes.length}</span>
+                        </div>
 
-                        <ul className="list-group list-group-flush mt-2">
-                            {makeableRecipes.map((recipe) =>
-                            (
-                                <li 
-                                    key={recipe.id} 
-                                    className="list-group-item wcim-makeable-item d-flex align-items-center justify-content-between"
+                        {makeableRecipes.length === 0 ? (
+                            <div className="gg-dash-empty">
+                                No recipes are fully covered by your pantry yet.
+                            </div>
+                        ) : (
+                            makeableRecipes.map((recipe) => (
+                                <div
+                                    key={recipe.id}
+                                    className="gg-wcim-recipe-card"
+                                    onClick={() => onOpenRecipe(recipe.id)}
                                 >
-                                    <strong>{recipe.name}</strong>
-
-                                    {onOpenRecipe && 
-                                    (
+                                    <div className="gg-wcim-card-stripe"></div>
+                                    <div className="gg-wcim-card-body">
+                                        <div style={{ flex: 1 }}>
+                                            <div className="gg-wcim-recipe-name">{recipe.name}</div>
+                                            <div className="gg-wcim-recipe-meta">
+                                                {recipe.prep || '–'} · {recipe.servings || '–'} servings ·{' '}
+                                                {recipe.ingredients ? recipe.ingredients.length : 0} ingredients
+                                            </div>
+                                        </div>
                                         <button
-                                            className="btn btn-sm btn-primary ms-2"
-                                            onClick={() => onOpenRecipe(recipe.id)}
+                                            className="gg-wcim-open-btn"
+                                            onClick={(e) => { e.stopPropagation(); onOpenRecipe(recipe.id); }}
                                         >
                                             Open Recipe
                                         </button>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-
-                {/* Recipes that are missing ingredients */}
-                {!showOnlyMakeable && 
-                (
-                    <div className="wcim-section-missing card mb-4">
-                        <div className="card-body">
-                            <h2 className="h4 card-title">Missing Ingredients</h2>
-
-                            {otherRecipes.length === 0 && !isLoading && 
-                            (
-                                <p className="card-text">All recipes are fully makeable (or you have no recipes yet).</p>
-                            )}
-
-                            {otherRecipes.map((recipe) =>
-                            {
-                                const missingIngredients = getMissingIngredients(recipe);
-
-                                return (
-                                    <div key={recipe.id} className="wcim-missing-recipe mt-3">
-                                        <strong>{recipe.name}</strong>
-
-                                        {missingIngredients.length > 0 && 
-                                        (
-                                            <ul className="wcim-missing-list mt-2">
-                                                {missingIngredients.map((missingIngredient, index) =>
-                                                {
-                                                    const neededAmountText =
-                                                        missingIngredient.needed === null || missingIngredient.needed === undefined
-                                                            ? ''
-                                                            : missingIngredient.needed;
-
-                                                    const unitLabel = missingIngredient.unit ? ` ${missingIngredient.unit}` : '';
-
-                                                    return (
-                                                        <li key={index}>
-                                                            {neededAmountText !== '' ? `${neededAmountText}${unitLabel} ` : ''}
-                                                            {missingIngredient.name}
-                                                        </li>
-                                                    );
-                                                })}
-                                            </ul>
-                                        )}
                                     </div>
-                                );
-                            })}
-                        </div>
+                                </div>
+                            ))
+                        )}
                     </div>
                 )}
+
+                {/* ── Missing Ingredients ── */}
+                {showMissing && recipes.length > 0 && (
+                    <div id="wcim-missing-section" style={{ marginTop: showReady ? '32px' : '0' }}>
+                        <div className="gg-wcim-section-title">
+                            Missing Ingredients
+                            <span className="gg-badge-count orange">{missingRecipes.length}</span>
+                        </div>
+
+                        {missingRecipes.length === 0 ? (
+                            <div className="gg-dash-empty" style={{ borderColor: 'rgba(232,132,90,0.15)' }}>
+                                ✦ You have all ingredients for every saved recipe!
+                            </div>
+                        ) : (
+                            missingRecipes.map((recipe) =>
+                            {
+                                const m = matchInfo(recipe);
+                                return (
+                                    <div key={recipe.id} className="gg-wcim-missing-card">
+                                        <div
+                                            className="gg-wcim-missing-header"
+                                            onClick={() => onOpenRecipe(recipe.id)}
+                                        >
+                                            <div>
+                                                <div className="gg-wcim-missing-name">{recipe.name}</div>
+                                                <div style={{ fontFamily: 'var(--f-mono)', fontSize: '9px', letterSpacing: '0.12em', color: 'var(--text-faint)', marginTop: '3px' }}>
+                                                    {recipe.prep || '–'} · {recipe.servings || '–'} servings
+                                                </div>
+                                            </div>
+                                            <span className="gg-wcim-match-info">{m.matched} / {m.total} have</span>
+                                        </div>
+
+                                        <div className="gg-wcim-missing-body">
+                                            {m.missingList.map((ing, index) => (
+                                                <div key={index} className="gg-missing-ing-item">
+                                                    <div className="gg-missing-dot"></div>
+                                                    <span>{ing.name}</span>
+                                                    <span className="gg-missing-ing-qty">
+                                                        {ing.needed !== null && ing.needed !== undefined ? ing.needed : ''}{ing.unit ? ` ${ing.unit}` : ''}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
+                    </div>
+                )}
+
             </div>
         </Fragment>
     );

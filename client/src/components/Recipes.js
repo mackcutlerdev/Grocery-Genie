@@ -1,13 +1,8 @@
-// Dependencies
 import React, { Fragment, useState, useEffect } from 'react';
 
-// Recipes component = the UI and form states for creating/editing recipes
 const Recipes = (props) =>
 {
-    // Destructured props
-    // {recipes from server, if page is loading, POST, PUT, DELETE, id from ?recipeId=...}
-    const 
-    {
+    const {
         recipes,
         isLoading,
         onAddRecipe,
@@ -17,663 +12,448 @@ const Recipes = (props) =>
         onMakeRecipe
     } = props;
 
-    // Which recipe is focused / selected (shows on the right side)
-    const [selectedRecipeId, setSelectedRecipeId] = useState(null);
+    const [selectedRecipeId,       setSelectedRecipeId]       = useState(null);
+    const [showAddForm,            setShowAddForm]            = useState(false);
+    const [newRecipeName,          setNewRecipeName]          = useState('');
+    const [newRecipeIngredients,   setNewRecipeIngredients]   = useState([{ name: '', quantity: '', unit: 'Unit' }]);
+    const [newRecipeInstructions,  setNewRecipeInstructions]  = useState('');
 
-    // States for the add recipe form
-    const [showAddForm, setShowAddForm] = useState(false);
-    const [newRecipeName, setNewRecipeName] = useState("");
-    const [newRecipeIngredients, setNewRecipeIngredients] = useState([
-        { name: "", quantity: "", unit: "Unit" }   // start with 1 blank ingredient row
-    ]);
-    const [newRecipeInstructions, setNewRecipeInstructions] = useState("");
+    const [editingId,              setEditingId]              = useState(null);
+    const [editRecipeName,         setEditRecipeName]         = useState('');
+    const [editRecipeIngredients,  setEditRecipeIngredients]  = useState([]);
+    const [editRecipeInstructions, setEditRecipeInstructions] = useState('');
 
-    // States for editing an existing recipe
-    const [editingId, setEditingId] = useState(null); // null = not editing
-    const [editRecipeName, setEditRecipeName] = useState("");
-    const [editRecipeIngredients, setEditRecipeIngredients] = useState([]);
-    const [editRecipeInstructions, setEditRecipeInstructions] = useState("");
-
-    // If the page passed in a recipeId from the URL, auto-select that one
-    useEffect(() => 
+    useEffect(() =>
     {
-        if(initialSelectedRecipeId)
-        {
-            setSelectedRecipeId(initialSelectedRecipeId);
-        }
+        if (initialSelectedRecipeId) setSelectedRecipeId(initialSelectedRecipeId);
     }, [initialSelectedRecipeId]);
 
-    // Find the currently selected recipe (or null if nothing selected)
-    const selectedRecipe = recipes.find((recipe) => recipe.id === selectedRecipeId) || null;
+    const selectedRecipe = recipes.find((r) => r.id === selectedRecipeId) || null;
 
-    // Takes a big text box of instructions and makes it into an array of clean strings
+    const UNITS = ['Unit','g','kg','ml','L','cup','tbsp','tsp','Box','oz','Package'];
+
     const parseInstructionsText = (text) =>
-    {
-        return text
-            .split('\n')
-            .map((line) => line.trim())
-            .filter((line) => line !== '');
-    };
+        text.split('\n').map((l) => l.trim()).filter((l) => l !== '');
 
-    // Handle typing into any new ingredient field (name/quantity/unit)
-    const handleNewIngredientChange = (index, field, value) =>
-    {
-        setNewRecipeIngredients((prev) =>
-        {
-            const updated = [...prev];
-            updated[index] =
-            {
-                ...updated[index],
-                [field]: value
-            };
-            return updated;
-        });
-    };
+    /* ── New ingredient helpers ── */
+    const handleNewIngChange = (index, field, value) =>
+        setNewRecipeIngredients((prev) => { const u=[...prev]; u[index]={...u[index],[field]:value}; return u; });
 
-    // Add another blank ingredient row for a new recipe
-    const addIngredientRow = () =>
-    {
-        setNewRecipeIngredients((prev) =>
-        [
-            ...prev,
-            { name: "", quantity: "", unit: "Unit" }
-        ]);
-    };
+    const addIngRow    = () => setNewRecipeIngredients((p) => [...p, { name:'', quantity:'', unit:'Unit' }]);
+    const removeIngRow = (i) => setNewRecipeIngredients((p) => p.filter((_,idx) => idx !== i));
 
-    // Remove an ingredient row from the new recipe form
-    const removeIngredientRow = (index) =>
-    {
-        setNewRecipeIngredients((prev) =>
-            prev.filter((_, i) => i !== index)
-        );
-    };
+    /* ── Edit ingredient helpers ── */
+    const handleEditIngChange = (index, field, value) =>
+        setEditRecipeIngredients((prev) => { const u=[...prev]; u[index]={...u[index],[field]:value}; return u; });
 
-    // Same as above but for the edit form
-    const handleEditIngredientChange = (index, field, value) =>
-    {
-        setEditRecipeIngredients((prev) =>
-        {
-            const updated = [...prev];
-            updated[index] =
-            {
-                ...updated[index],
-                [field]: value
-            };
-            return updated;
-        });
-    };
+    const addEditIngRow    = () => setEditRecipeIngredients((p) => [...p, { name:'', quantity:'', unit:'Unit' }]);
+    const removeEditIngRow = (i) => setEditRecipeIngredients((p) => p.filter((_,idx) => idx !== i));
 
-    // Add a blank ingredient row when editing a recipe
-    const addEditIngredientRow = () =>
-    {
-        setEditRecipeIngredients((prev) =>
-        [
-            ...prev,
-            { name: "", quantity: "", unit: "Unit" }
-        ]);
-    };
-
-    // Remove an ingredient row from the edit form
-    const removeEditIngredientRow = (index) =>
-    {
-        setEditRecipeIngredients((prev) =>
-            prev.filter((_, i) => i !== index)
-        );
-    };
-
-    // When a recipe button is clicked on the left, make that the selected one
+    /* ── Selection ── */
     const handleSelectRecipe = (id) =>
     {
         setSelectedRecipeId(id);
-
-        // If I'm editing something else and you click another recipe, leave edit mode
-        if (editingId && editingId !== id)
-        {
-            cancelEditing();
-        }
+        if (editingId && editingId !== id) cancelEditing();
     };
 
-    // Toggle the add form on/off and reset all the add fields
+    /* ── Add form ── */
     const handleToggleAddForm = () =>
     {
         setShowAddForm(!showAddForm);
-        setNewRecipeName("");
-        setNewRecipeIngredients([
-            { name: "", quantity: "", unit: "Unit" }
-        ]);
-        setNewRecipeInstructions("");
+        setNewRecipeName('');
+        setNewRecipeIngredients([{ name:'', quantity:'', unit:'Unit' }]);
+        setNewRecipeInstructions('');
     };
 
-    // When the add recipe form actually submits
     const handleAddRecipeSubmit = (e) =>
     {
         e.preventDefault();
+        if (!newRecipeName.trim()) return;
 
-        // No nameless recipes
-        if (!newRecipeName.trim())
-        {
-            return;
-        }
+        const ingredients = newRecipeIngredients
+            .filter((ing) => ing.name.trim() !== '')
+            .map((ing) => ({
+                name:     ing.name.trim(),
+                quantity: String(ing.quantity).trim() === '' ? null : Number(ing.quantity),
+                unit:     ing.unit || '',
+            }));
 
-        // Clean up the ingredient rows into the format the server expects
-        const ingredientsArray = newRecipeIngredients
-            .filter((ing) => ing.name.trim() !== "") // ignore totally blank rows
-            .map((ing) =>
-            {
-                const trimmedName = ing.name.trim();
-                const qtyText = String(ing.quantity).trim();
-                const qtyValue = qtyText === "" ? null : Number(qtyText); // blank = null (to taste like for salt) otherwise conver to num
+        onAddRecipe({
+            name:         newRecipeName,
+            ingredients,
+            instructions: parseInstructionsText(newRecipeInstructions),
+        });
 
-                return {
-                    name: trimmedName,
-                    quantity: qtyValue,
-                    unit: ing.unit || ""
-                };
-            });
-
-        // Turn multiline instructions into an array of steps, but only works line-by-line
-        const instructionsArray = parseInstructionsText(newRecipeInstructions);
-
-        // The final new recipe object
-        const newRecipe =
-        {
-            name: newRecipeName,
-            ingredients: ingredientsArray,
-            instructions: instructionsArray
-        };
-
-        // Let RecipesPage do the POST + state stuff
-        onAddRecipe(newRecipe);
-
-        // Reset the add form back to clean defaults
-        setNewRecipeName("");
-        setNewRecipeIngredients([
-            { name: "", quantity: "", unit: "Unit" }
-        ]);
-        setNewRecipeInstructions("");
+        setNewRecipeName('');
+        setNewRecipeIngredients([{ name:'', quantity:'', unit:'Unit' }]);
+        setNewRecipeInstructions('');
         setShowAddForm(false);
     };
 
-    // When the user clicks "Edit" for a recipe
+    /* ── Edit form ── */
     const startEditing = (recipe) =>
     {
         setEditingId(recipe.id);
-        setEditRecipeName(recipe.name || "");
-
-        // If the recipe has ingredients, map them into editable fields
-        if (Array.isArray(recipe.ingredients) && recipe.ingredients.length > 0)
-        {
-            setEditRecipeIngredients(
-                recipe.ingredients.map((ing) =>
-                ({
-                    name: ing.name || "",
-                    quantity:
-                        ing.quantity === undefined || ing.quantity === null
-                            ? ""
-                            : ing.quantity,
-                    unit: ing.unit || "Unit"
+        setEditRecipeName(recipe.name || '');
+        setEditRecipeIngredients(
+            Array.isArray(recipe.ingredients) && recipe.ingredients.length > 0
+                ? recipe.ingredients.map((ing) => ({
+                    name:     ing.name || '',
+                    quantity: ing.quantity === undefined || ing.quantity === null ? '' : ing.quantity,
+                    unit:     ing.unit || 'Unit',
                 }))
-            );
-        }
-        // If it somehow has none, just give a single blank row cause it cant be empty
-        else
-        {
-            setEditRecipeIngredients([
-                { name: "", quantity: "", unit: "Unit" }
-            ]);
-        }
-
-        // Instructions: if it's an array, join with newlines, else just use the string
-        if (Array.isArray(recipe.instructions))
-        {
-            setEditRecipeInstructions(recipe.instructions.join('\n'));
-        }
-        else
-        {
-            setEditRecipeInstructions(recipe.instructions || "");
-        }
+                : [{ name:'', quantity:'', unit:'Unit' }]
+        );
+        setEditRecipeInstructions(
+            Array.isArray(recipe.instructions) ? recipe.instructions.join('\n') : recipe.instructions || ''
+        );
     };
 
-    // Cancel editing and wipe out the edit sttae
     const cancelEditing = () =>
     {
         setEditingId(null);
-        setEditRecipeName("");
+        setEditRecipeName('');
         setEditRecipeIngredients([]);
-        setEditRecipeInstructions("");
+        setEditRecipeInstructions('');
     };
 
-    // When the edit form submits for a specific recipe
-    const handleEditRecipeSubmit = (e, id) =>
+    const handleEditSubmit = (e, id) =>
     {
         e.preventDefault();
+        const ingredients = editRecipeIngredients
+            .filter((ing) => ing.name.trim() !== '')
+            .map((ing) => ({
+                name:     ing.name.trim(),
+                quantity: String(ing.quantity).trim() === '' ? null : Number(ing.quantity),
+                unit:     ing.unit || '',
+            }));
 
-        // Clean the edit ingredient rows the same way as the add form
-        const ingredientsArray = editRecipeIngredients
-            .filter((ing) => ing.name.trim() !== "")
-            .map((ing) =>
-            {
-                const trimmedName = ing.name.trim();
-                const qtyText = String(ing.quantity).trim();
-                const qtyValue = qtyText === "" ? null : Number(qtyText);
-
-                return {
-                    name: trimmedName,
-                    quantity: qtyValue,
-                    unit: ing.unit || ""
-                };
-            });
-
-        const instructionsArray = parseInstructionsText(editRecipeInstructions);
-
-        const updatedRecipe =
-        {
-            name: editRecipeName,
-            ingredients: ingredientsArray,
-            instructions: instructionsArray
-        };
-
-        // Page does PUT stuff
-        onUpdateRecipe(id, updatedRecipe);
-
-        // Exit edit mode so it doesn't get stuck forever
+        onUpdateRecipe(id, {
+            name:         editRecipeName,
+            ingredients,
+            instructions: parseInstructionsText(editRecipeInstructions),
+        });
         cancelEditing();
     };
 
-    // When the user deletes a recipe
     const handleDeleteRecipe = (id) =>
     {
-        // Same confirm trick as Pantry
-        const ok = window.confirm('Delete this recipe?');
-
-        if (!ok)
-        {
-            return;
-        }
-
+        if (!window.confirm('Delete this recipe?')) return;
         onDeleteRecipe(id);
-
-        // If you were looking at that recipe, unselect it
-        if (selectedRecipeId === id)
-        {
-            setSelectedRecipeId(null);
-        }
-
-        // If you were editing that recipe, also reset the edit state
-        if (editingId === id)
-        {
-            cancelEditing();
-        }
+        if (selectedRecipeId === id) setSelectedRecipeId(null);
+        if (editingId === id) cancelEditing();
     };
 
-    // Render the ingredient list for the details panel
-    const renderIngredients = (ingredients) =>
+    /* ── Add-form modal overlay (renders above the split pane) ── */
+    const renderAddFormModal = () => !showAddForm ? null : (
+        <div style={{
+            position: 'fixed', inset: 0,
+            background: 'rgba(17,12,20,0.85)',
+            backdropFilter: 'blur(6px)',
+            zIndex: 100,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            padding: '24px',
+        }}>
+            <div style={{
+                background: 'linear-gradient(160deg, var(--bg-3) 0%, var(--bg-1) 100%)',
+                border: '1px solid var(--hairline-mid)',
+                borderRadius: 'var(--r-xl)',
+                width: '100%', maxWidth: '600px', maxHeight: '85vh',
+                display: 'flex', flexDirection: 'column',
+                position: 'relative', overflow: 'hidden',
+            }}>
+                {/* Shimmer top line */}
+                <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(232,132,90,0.4), transparent)' }}></div>
+
+                {/* Header */}
+                <div style={{ padding: '22px 28px 18px', borderBottom: '1px solid var(--hairline)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+                    <div style={{ fontFamily: 'var(--f-display)', fontSize: '24px', fontWeight: 500, fontStyle: 'italic' }}>
+                        New <em style={{ color: 'var(--accent)' }}>Recipe</em>
+                    </div>
+                    <button className="gg-btn-icon" onClick={handleToggleAddForm} style={{ fontSize: '16px' }}>
+                        <i className="bi bi-x-lg"></i>
+                    </button>
+                </div>
+
+                {/* Body */}
+                <form onSubmit={handleAddRecipeSubmit} style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '0' }}>
+
+                    {/* Name / Prep / Servings row */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '12px', marginBottom: '16px' }}>
+                        <div>
+                            <label className="gg-label" htmlFor="m-name">Recipe Name</label>
+                            <input className="gg-input" id="m-name" placeholder="e.g. Mushroom Omelette"
+                                value={newRecipeName} onChange={(e) => setNewRecipeName(e.target.value)} />
+                        </div>
+                    </div>
+
+                    <div className="gg-divider"></div>
+
+                    {/* Ingredients */}
+                    <div className="gg-detail-section-label" style={{ marginBottom: '12px' }}>Ingredients</div>
+
+                    {newRecipeIngredients.map((ing, index) => (
+                        <div key={index} className="gg-modal-ing-item">
+                            <input className="gg-input gg-modal-ing-name" type="text" placeholder="Name"
+                                style={{ flex: 1 }}
+                                value={ing.name} onChange={(e) => handleNewIngChange(index, 'name', e.target.value)} />
+                            <input className="gg-input" type="number" placeholder="Qty" step="0.25"
+                                style={{ width: '70px' }}
+                                value={ing.quantity} onChange={(e) => handleNewIngChange(index, 'quantity', e.target.value)} />
+                            <select className="gg-input" style={{ width: '80px' }}
+                                value={ing.unit} onChange={(e) => handleNewIngChange(index, 'unit', e.target.value)}>
+                                {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
+                            </select>
+                            <button type="button" className="gg-btn-icon" onClick={() => removeIngRow(index)}>
+                                <i className="bi bi-x"></i>
+                            </button>
+                        </div>
+                    ))}
+
+                    <button type="button" className="gg-btn-ghost" onClick={addIngRow} style={{ marginBottom: '4px', alignSelf: 'flex-start' }}>
+                        <i className="bi bi-plus-lg"></i> Add Ingredient
+                    </button>
+
+                    <div className="gg-divider"></div>
+
+                    {/* Instructions */}
+                    <div className="gg-detail-section-label" style={{ marginBottom: '12px' }}>Instructions</div>
+                    <textarea
+                        className="gg-input"
+                        rows={6}
+                        placeholder="One step per line…"
+                        value={newRecipeInstructions}
+                        onChange={(e) => setNewRecipeInstructions(e.target.value)}
+                        style={{ resize: 'vertical' }}
+                    />
+
+                    {/* Footer */}
+                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '20px' }}>
+                        <button type="button" className="gg-btn-ghost" onClick={handleToggleAddForm}>Cancel</button>
+                        <button type="submit" className="gg-btn-primary">
+                            <i className="bi bi-floppy"></i><span>Save Recipe</span>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    );
+
+    /* ── Ingredient check dot (for read-only detail view — no pantry data here, just display) ── */
+    const renderDetailIngredients = (ingredients) =>
     {
-        if (!ingredients || !Array.isArray(ingredients) || ingredients.length === 0)
+        if (!ingredients || ingredients.length === 0)
+            return <div style={{ color: 'var(--text-faint)', fontStyle: 'italic', fontSize: '14px' }}>No ingredients listed.</div>;
+
+        return ingredients.map((ing, index) =>
         {
-            return <p>No ingredients listed.</p>;
-        }
-
-        return (
-            <ul>
-                {ingredients.map((ing, index) =>
-                {
-                    const qty = ing.quantity !== undefined && ing.quantity !== null
-                        ? ing.quantity
-                        : '';
-                    const unit = ing.unit ? ` ${ing.unit}` : '';
-                    const name = ing.name || '';
-
-                    return (
-                        <li key={index}>
-                            {`${qty}${unit} ${name}`.trim()}
-                        </li>
-                    );
-                })}
-            </ul>
-        );
+            const qty  = ing.quantity !== undefined && ing.quantity !== null ? ing.quantity : '';
+            const unit = ing.unit ? ` ${ing.unit}` : '';
+            return (
+                <div key={index} className="gg-detail-ing-row">
+                    <div className="gg-detail-ing-check have"><i className="bi bi-check"></i></div>
+                    <div className="gg-detail-ing-name">{ing.name}</div>
+                    <div className="gg-detail-ing-qty">{`${qty}${unit}`.trim()}</div>
+                </div>
+            );
+        });
     };
 
-    // Render the instructions as an ordered (numbered) list
-    const renderInstructions = (instructions) =>
+    const renderDetailSteps = (instructions) =>
     {
-        if (!instructions || !Array.isArray(instructions) || instructions.length === 0)
-        {
-            return <p>No instructions provided.</p>;
-        }
+        if (!instructions || instructions.length === 0)
+            return <div style={{ color: 'var(--text-faint)', fontStyle: 'italic', fontSize: '14px' }}>No instructions provided.</div>;
 
-        return (
-            <ol>
-                {instructions.map((step, index) =>
-                (
-                    <li key={index}>{step}</li>
-                ))}
-            </ol>
-        );
+        return instructions.map((step, index) => (
+            <div key={index} className="gg-detail-step">
+                <div className="gg-detail-step-num">{index + 1}</div>
+                <div className="gg-detail-step-text">{step}</div>
+            </div>
+        ));
     };
 
     return (
         <Fragment>
-            <div className="container">
-                <h1 className="mb-4">Recipes</h1>
+            {/* Add-recipe modal */}
+            {renderAddFormModal()}
 
-                {/* If the page is still loading recipes from the server */}
-                {isLoading && <p>Loading recipes...</p>}
+            <div className="gg-panel active" id="panel-recipes">
+                <div className="gg-recipe-layout">
 
-                {/* Add button + add form (if open) */}
-                <div className="recipes-controls mb-3">
-                    <button 
-                        onClick={handleToggleAddForm}
-                        className="btn btn-primary"
-                    >
-                        {showAddForm ? 'Cancel' : 'Add New Recipe'}
-                    </button>
-
-                    {/* Add new recipe form, only visible when showAddForm is true */}
-                    {showAddForm && (
-                        <form
-                            onSubmit={handleAddRecipeSubmit}
-                            className="recipes-add-form mt-3 mb-4"
-                        >
-                            <div className="mb-3">
-                                <label className="form-label">
-                                    Name
-                                </label>
-                                <input
-                                    type="text"
-                                    className="form-control"
-                                    value={newRecipeName}
-                                    onChange={(e) => setNewRecipeName(e.target.value)}
-                                />
-                            </div>
-
-                            <div className="recipes-ingredients-section mb-3">
-                                <h3>Ingredients</h3>
-
-                                {/* All the ingredient rows for the new recipe */}
-                                {newRecipeIngredients.map((ing, index) => 
-                                (
-                                    <div
-                                        key={index}
-                                        className="recipes-ingredient-row d-flex align-items-center mb-2"
-                                    >
-                                        <input
-                                            type="text"
-                                            placeholder="Name"
-                                            className="form-control"
-                                            value={ing.name}
-                                            onChange={(e) =>
-                                                handleNewIngredientChange(index, 'name', e.target.value)
-                                            }
-                                        />
-
-                                        <input
-                                            type="number"
-                                            placeholder="Qty"
-                                            step="0.25"
-                                            className="form-control recipes-qty-input ms-2"
-                                            value={ing.quantity}
-                                            onChange={(e) =>
-                                                handleNewIngredientChange(index, 'quantity', e.target.value)
-                                            }
-                                        />
-
-                                        <select
-                                            className="form-select recipes-unit-select ms-2"
-                                            value={ing.unit}
-                                            onChange={(e) =>
-                                                handleNewIngredientChange(index, 'unit', e.target.value)
-                                            }
-                                        >
-                                            <option value="Unit">Unit</option>
-                                            <option value="g">g</option>
-                                            <option value="kg">kg</option>
-                                            <option value="ml">ml</option>
-                                            <option value="L">L</option>
-                                            <option value="cup">cup</option>
-                                            <option value="tbsp">tbsp</option>
-                                            <option value="tsp">tsp</option>
-                                            <option value="Box">Box</option>
-                                        </select>
-
-                                        <button
-                                            type="button"
-                                            onClick={() => removeIngredientRow(index)}
-                                            className="btn btn-sm btn-outline-danger ms-2"
-                                        >
-                                            X
-                                        </button>
-                                    </div>
-                                ))}
-
-                                <button
-                                    type="button"
-                                    onClick={addIngredientRow}
-                                    className="btn btn-sm btn-outline-primary mt-2"
-                                >
-                                    + Add Ingredient
-                                </button>
-                            </div>
-
-                            <div className="recipes-instructions-section mb-3">
-                                <label className="form-label">
-                                    Instructions (one step per line)
-                                </label>
-                                <textarea
-                                    rows="6"
-                                    className="form-control"
-                                    value={newRecipeInstructions}
-                                    onChange={(e) => setNewRecipeInstructions(e.target.value)}
-                                />
-                            </div>
-
+                    {/* ── Left: recipe list ─────────────── */}
+                    <div className="gg-recipe-list-col">
+                        <div className="gg-recipe-list-header">
+                            <div className="gg-recipe-list-title">All Recipes</div>
                             <button
-                                type="submit"
-                                className="recipes-save-btn btn btn-success"
+                                className="gg-btn-icon"
+                                title="New Recipe"
+                                onClick={handleToggleAddForm}
+                                style={{ borderColor: 'var(--hairline-mid)', color: 'var(--accent)' }}
                             >
-                                Save Recipe
+                                <i className="bi bi-plus-lg"></i>
                             </button>
-                        </form>
-                    )}
-                </div>
+                        </div>
 
-                {/* Recipe list on the left, details/edit on the right */}
-                <div className="recipes-layout row mt-4">
-                    {/* Left: list of all recipes with buttons */}
-                    <div className="recipes-list col-4 mb-3">
-                        {(!recipes || recipes.length === 0) && !isLoading && 
-                        (
-                            <p>No recipes yet.</p>
-                        )}
-
-                        {recipes && recipes.map((recipe) =>
-                        (
-                            <div 
-                                key={recipe.id} 
-                                className="recipes-list-row d-flex align-items-center mb-2"
-                            >
-                                <button
+                        <div className="gg-recipe-items-scroll">
+                            {isLoading && (
+                                <div style={{ padding: '20px 14px', fontFamily: 'var(--f-mono)', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
+                                    Loading recipes…
+                                </div>
+                            )}
+                            {!isLoading && (!recipes || recipes.length === 0) && (
+                                <div style={{ padding: '20px 14px', fontFamily: 'var(--f-body)', fontStyle: 'italic', fontSize: '14px', color: 'var(--text-faint)' }}>
+                                    No recipes yet.
+                                </div>
+                            )}
+                            {recipes && recipes.map((recipe) => (
+                                <div
+                                    key={recipe.id}
+                                    className={`gg-recipe-list-item${selectedRecipeId === recipe.id ? ' selected' : ''}`}
                                     onClick={() => handleSelectRecipe(recipe.id)}
-                                    className="btn btn-sm btn-outline-secondary me-2 recipes-list-name-btn text-start"
                                 >
-                                    {recipe.name}
-                                </button>
-                                <button
-                                    onClick={() => startEditing(recipe)}
-                                    className="btn btn-sm btn-outline-primary me-2"
-                                >
-                                    Edit
-                                </button>
-                                <button
-                                    onClick={() => handleDeleteRecipe(recipe.id)}
-                                    className="btn btn-sm btn-outline-danger"
-                                >
-                                    Delete
-                                </button>
-                            </div>
-                        ))}
+                                    <div className="gg-recipe-not-dot"></div>
+                                    <div>
+                                        <div className="gg-recipe-item-name">{recipe.name}</div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
                     </div>
 
-                    {/* Right: either edit form or read-only recipe details */}
-                    <div className="recipes-details col-8">
-                        {/* Nothing selected and not editing = prompt the user */}
-                        {!selectedRecipe && editingId === null && 
-                        (
-                            <div className="recipes-placeholder mt-2">
-                                <p>Select a recipe to view details.</p>
+                    {/* ── Right: detail / edit ──────────── */}
+                    <div className="gg-recipe-detail-col">
+
+                        {/* Nothing selected */}
+                        {!selectedRecipe && editingId === null && (
+                            <div className="gg-recipe-detail-empty">
+                                <div className="gg-recipe-detail-empty-inner">
+                                    <div className="gg-recipe-detail-empty-icon">❦</div>
+                                    <div>Select a recipe to view details</div>
+                                </div>
                             </div>
                         )}
 
-                        {/* Edit mode for the selected recipe */}
-                        {editingId && selectedRecipe && editingId === selectedRecipe.id && 
-                        (
-                            <form 
-                                onSubmit={(e) => handleEditRecipeSubmit(e, selectedRecipe.id)}
-                                className="mt-2"
+                        {/* Edit mode */}
+                        {editingId && selectedRecipe && editingId === selectedRecipe.id && (
+                            <form
+                                onSubmit={(e) => handleEditSubmit(e, selectedRecipe.id)}
+                                className="gg-recipe-edit-form"
                             >
-                                <h2 className="mb-3">Edit Recipe</h2>
+                                <div className="gg-recipe-edit-title">Edit <em style={{ color: 'var(--accent)' }}>Recipe</em></div>
 
-                                <div className="mb-3">
-                                    <label className="form-label">
-                                        Name
-                                    </label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        value={editRecipeName}
-                                        onChange={(e) => setEditRecipeName(e.target.value)}
-                                    />
+                                <div>
+                                    <label className="gg-label">Recipe Name</label>
+                                    <input className="gg-input" type="text" value={editRecipeName}
+                                        onChange={(e) => setEditRecipeName(e.target.value)} />
                                 </div>
 
-                                <div className="recipes-ingredients-section mb-3">
-                                    <h3>Ingredients</h3>
-
-                                    {editRecipeIngredients.map((ing, index) =>
-                                    (
-                                        <div 
-                                            key={index}
-                                            className="recipes-ingredient-row d-flex align-items-center mb-2"
-                                        >
-                                            <input
-                                                type="text"
-                                                placeholder="Name"
-                                                className="form-control"
-                                                value={ing.name}
-                                                onChange={(e) =>
-                                                    handleEditIngredientChange(index, 'name', e.target.value)
-                                                }
-                                            />
-
-                                            <input
-                                                type="number"
-                                                placeholder="Qty"
-                                                step="0.25"
-                                                className="form-control recipes-qty-input ms-2"
-                                                value={ing.quantity}
-                                                onChange={(e) =>
-                                                    handleEditIngredientChange(index, 'quantity', e.target.value)
-                                                }
-                                            />
-
-                                            <select
-                                                className="form-select recipes-unit-select ms-2"
-                                                value={ing.unit}
-                                                onChange={(e) =>
-                                                    handleEditIngredientChange(index, 'unit', e.target.value)
-                                                }
-                                            >
-                                                <option value="Unit">Unit</option>
-                                                <option value="g">g</option>
-                                                <option value="kg">kg</option>
-                                                <option value="ml">ml</option>
-                                                <option value="L">L</option>
-                                                <option value="cup">cup</option>
-                                                <option value="tbsp">tbsp</option>
-                                                <option value="tsp">tsp</option>
-                                                <option value="Box">Box</option>
+                                <div>
+                                    <div className="gg-detail-section-label" style={{ marginBottom: '10px' }}>Ingredients</div>
+                                    {editRecipeIngredients.map((ing, index) => (
+                                        <div key={index} className="gg-modal-ing-item">
+                                            <input className="gg-input gg-modal-ing-name" type="text" placeholder="Name"
+                                                style={{ flex: 1 }}
+                                                value={ing.name} onChange={(e) => handleEditIngChange(index, 'name', e.target.value)} />
+                                            <input className="gg-input" type="number" placeholder="Qty" step="0.25"
+                                                style={{ width: '70px' }}
+                                                value={ing.quantity} onChange={(e) => handleEditIngChange(index, 'quantity', e.target.value)} />
+                                            <select className="gg-input" style={{ width: '80px' }}
+                                                value={ing.unit} onChange={(e) => handleEditIngChange(index, 'unit', e.target.value)}>
+                                                {UNITS.map(u => <option key={u} value={u}>{u}</option>)}
                                             </select>
-
-                                            <button
-                                                type="button"
-                                                onClick={() => removeEditIngredientRow(index)}
-                                                className="btn btn-sm btn-outline-danger ms-2"
-                                            >
-                                                X
+                                            <button type="button" className="gg-btn-icon" onClick={() => removeEditIngRow(index)}>
+                                                <i className="bi bi-x"></i>
                                             </button>
                                         </div>
                                     ))}
-
-                                    <button 
-                                        type="button" 
-                                        onClick={addEditIngredientRow}
-                                        className="btn btn-sm btn-outline-primary mt-2"
-                                    >
-                                        + Add Ingredient
+                                    <button type="button" className="gg-btn-ghost" onClick={addEditIngRow} style={{ alignSelf: 'flex-start' }}>
+                                        <i className="bi bi-plus-lg"></i> Add Ingredient
                                     </button>
                                 </div>
 
-                                <div className="recipes-instructions-section mb-3">
-                                    <label className="form-label">
-                                        Instructions (one step per line)
-                                    </label>
-                                    <textarea
-                                        rows="6"
-                                        className="form-control"
+                                <div>
+                                    <label className="gg-label">Instructions (one step per line)</label>
+                                    <textarea className="gg-input" rows={6}
                                         value={editRecipeInstructions}
                                         onChange={(e) => setEditRecipeInstructions(e.target.value)}
-                                    />
+                                        style={{ resize: 'vertical' }} />
                                 </div>
 
-                                <button 
-                                    type="submit" 
-                                    className="recipes-save-btn btn btn-success me-2"
-                                >
-                                    Save Changes
-                                </button>
-                                <button
-                                    type="button"
-                                    onClick={cancelEditing}
-                                    className="btn btn-secondary"
-                                >
-                                    Cancel
-                                </button>
+                                <div style={{ display: 'flex', gap: '10px' }}>
+                                    <button type="submit" className="gg-btn-primary">
+                                        <i className="bi bi-floppy"></i><span>Save Changes</span>
+                                    </button>
+                                    <button type="button" className="gg-btn-ghost" onClick={cancelEditing}>Cancel</button>
+                                </div>
                             </form>
                         )}
 
-                        {/* Read-only details for the selected recipe (if we’re not in edit mode) */}
-                        {selectedRecipe && (!editingId || editingId !== selectedRecipe.id) && 
-                        (
-                            <div className="mt-2">
-                                <div className="d-flex align-items-center justify-content-between mb-3">
-                                    <h2 className="mb-0">{selectedRecipe.name}</h2>
-
-                                    {onMakeRecipe && 
-                                    (
-                                        <button
-                                            className="btn btn-success"
-                                                onClick={() =>
-                                                {
-                                                    const ok = window.confirm(`Use pantry items to make "${selectedRecipe.name}"?`);
-                                                    if(!ok)
-                                                    {
-                                                        return;
-                                                    }
-
-                                                    onMakeRecipe(selectedRecipe);
-                                                    window.alert(`Successlly removed used ingredients from pantry!`);
-                                                }}
-                                        >
-                                            Make Recipe
-                                        </button>
-                                    )}
+                        {/* Read-only detail */}
+                        {selectedRecipe && (!editingId || editingId !== selectedRecipe.id) && (
+                            <>
+                                {/* Header */}
+                                <div className="gg-recipe-detail-header">
+                                    <div className="gg-recipe-detail-title">{selectedRecipe.name}</div>
+                                    <div className="gg-recipe-detail-meta">
+                                        {selectedRecipe.prep && (
+                                            <span className="gg-recipe-meta-pill">
+                                                <i className="bi bi-clock"></i> {selectedRecipe.prep}
+                                            </span>
+                                        )}
+                                        {selectedRecipe.servings && (
+                                            <span className="gg-recipe-meta-pill">
+                                                <i className="bi bi-people"></i> {selectedRecipe.servings} servings
+                                            </span>
+                                        )}
+                                        {selectedRecipe.ingredients && (
+                                            <span className="gg-recipe-meta-pill">
+                                                <i className="bi bi-list-ul"></i> {selectedRecipe.ingredients.length} ingredients
+                                            </span>
+                                        )}
+                                    </div>
                                 </div>
 
-                                <h3>Ingredients</h3>
-                                {renderIngredients(selectedRecipe.ingredients)}
+                                {/* Body */}
+                                <div className="gg-recipe-detail-body">
+                                    <div className="gg-detail-section-label" style={{ marginBottom: '10px' }}>Ingredients</div>
+                                    {renderDetailIngredients(selectedRecipe.ingredients)}
 
-                                <h3>Instructions</h3>
-                                {renderInstructions(selectedRecipe.instructions)}
-                            </div>
+                                    <div style={{ height: '20px' }}></div>
+
+                                    <div className="gg-detail-section-label" style={{ marginBottom: '12px' }}>Instructions</div>
+                                    {renderDetailSteps(selectedRecipe.instructions)}
+                                </div>
+
+                                {/* Footer */}
+                                <div className="gg-recipe-detail-footer">
+                                    {onMakeRecipe && (
+                                        <button
+                                            className="gg-btn-teal"
+                                            onClick={() =>
+                                            {
+                                                if (!window.confirm(`Use pantry items to make "${selectedRecipe.name}"?`)) return;
+                                                onMakeRecipe(selectedRecipe);
+                                                window.alert('Ingredients removed from pantry!');
+                                            }}
+                                        >
+                                            <i className="bi bi-fire"></i><span>Make Recipe</span>
+                                        </button>
+                                    )}
+                                    <button
+                                        className="gg-btn-ghost"
+                                        onClick={() => startEditing(selectedRecipe)}
+                                    >
+                                        <i className="bi bi-pencil"></i> Edit
+                                    </button>
+                                    <button
+                                        className="gg-btn-icon"
+                                        onClick={() => handleDeleteRecipe(selectedRecipe.id)}
+                                        title="Delete recipe"
+                                    >
+                                        <i className="bi bi-trash3"></i>
+                                    </button>
+                                </div>
+                            </>
                         )}
                     </div>
                 </div>

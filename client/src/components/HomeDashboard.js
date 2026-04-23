@@ -1,88 +1,91 @@
-// Dependencies
 import React, { Fragment } from 'react';
 
-// Main homepage component, doesn't do a lot but gives info immediately to the user
 const HomeDashboard = (props) =>
 {
-    // All the props from HopePage, destructured for clarity and reuse
-    // in order {still waiting on server, summary of numbers, the list of recipes, to jump to the open recipe, reload data from server cause sometimes it breaks???}
     const { isLoading, stats, makeableRecipes, onOpenRecipe, onReload } = props;
 
     return (
         <Fragment>
-            {/*Main container for the doashboard*/}
-            <div className="container">
-                <h1 className="mb-4">GroceryGenie Dashboard</h1>
+            <div className="gg-panel active" id="panel-dashboard">
 
-                {/* If the page is loading, show a loading message, could also use the spinner but I can't figure out how to make the spinner but if I do, replace it here */}
-                {isLoading && <p>Loading data...</p>}
+                {/* ── Stat cards ───────────────────────── */}
+                <div className="gg-dash-stats">
 
-                {/* Raload button */}
-                <div className="home-reload">
-                    <button onClick={onReload} className="btn btn-outline-secondary">
-                        Refresh from server
+                    <div className="gg-stat-card accent-red">
+                        <div className="gg-stat-label">Items in Pantry</div>
+                        <div className="gg-stat-num col-accent">{stats.pantryCount}</div>
+                        <div className="gg-stat-sub">ingredients tracked</div>
+                        <div className="gg-stat-glyph">◈</div>
+                    </div>
+
+                    <div className="gg-stat-card">
+                        <div className="gg-stat-label">Total Recipes</div>
+                        <div className="gg-stat-num col-warm">{stats.recipeCount}</div>
+                        <div className="gg-stat-sub">in your book</div>
+                        <div className="gg-stat-glyph">❦</div>
+                    </div>
+
+                    <div className="gg-stat-card accent-teal">
+                        <div className="gg-stat-label">Recipes You Can Make Now</div>
+                        <div className="gg-stat-num col-teal">{stats.makeableCount}</div>
+                        <div className="gg-stat-sub">ready to cook tonight</div>
+                        <div className="gg-stat-glyph">✦</div>
+                    </div>
+                </div>
+
+                {/* ── Section header ───────────────────── */}
+                <div className="gg-kicker" style={{ marginBottom: '12px' }}>Tonight's options</div>
+                <div className="gg-dash-section-title">
+                    What Can I Make <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>Today?</em>
+                </div>
+                <div className="gg-sub-heading" style={{ marginBottom: '18px' }}>
+                    Recipes fully covered by your current pantry
+                </div>
+
+                {/* Reload button — subtle ghost */}
+                <div style={{ marginBottom: '20px' }}>
+                    <button onClick={onReload} className="gg-btn-ghost">
+                        <i className="bi bi-arrow-clockwise"></i> Refresh
                     </button>
                 </div>
 
-                {/* Stats cards, the main point of the dashboard to quickly see your numbers, cause big num = epic */}
-                <div className="home-stats">
-                    {/* First card, how many items are in the pantry rn */}
-                    <div className="home-stat-card card">
-                        <div className="card-body">
-                            <h3 className="card-title">Items in Pantry</h3>
-                            <p className="home-stat-number card-text">
-                                {stats.pantryCount}
-                            </p>
-                        </div>
-                    </div>
+                {isLoading && (
+                    <div className="gg-dash-empty">Loading data…</div>
+                )}
 
-                    {/* Second card, how many total recipes the user has saved */}
-                    <div className="home-stat-card card">
-                        <div className="card-body">
-                            <h3 className="card-title">Total Recipes</h3>
-                            <p className="home-stat-number card-text">
-                                {stats.recipeCount}
-                            </p>
-                        </div>
-                    </div>
+                {/* ── Cookable recipe list ──────────────── */}
+                {!isLoading && (
+                    <div className="gg-dash-cookable-list">
+                        {(!makeableRecipes || makeableRecipes.length === 0) && (
+                            <div className="gg-dash-empty">
+                                No recipes are fully makeable yet — add more ingredients to your pantry!
+                            </div>
+                        )}
 
-                    {/* Third card, how many recipes can be currently made (WCIM stats)*/}
-                    <div className="home-stat-card card">
-                        <div className="card-body">
-                            <h3 className="card-title">Recipes You Can Make Now</h3>
-                            <p className="home-stat-number card-text">
-                                {stats.makeableCount}
-                            </p>
-                        </div>
-                    </div>
-                </div>
-
-                {/* Scrollable "What Can I Make" list, basically a mini version of the WCIM page*/}
-                <div className="mt-4">
-                    <h2>What Can I Make Today?</h2>
-
-                    {/* If there aren't any makeable pages and the loading is already over, tell the user they are dumb cause they don't have anything to make */}
-                    {(!makeableRecipes || makeableRecipes.length === 0) && !isLoading && 
-                    (
-                        <p>No recipes are fully makeable yet. Add ingredients to your pantry!</p>
-                    )}
-
-                    <div className="home-scroll-box">
-                        {/* Scroll box container for the makeable -btw it doesn't scroll yet, cause idk how to do that */}
-                        {makeableRecipes && makeableRecipes.map((recipe) =>
-                        (
-                            <div key={recipe.id} className="home-scroll-row">
-                                <span>{recipe.name}</span>
-                                <button 
-                                    onClick={() => onOpenRecipe(recipe.id)} 
-                                    className="btn btn-sm btn-primary"
+                        {makeableRecipes && makeableRecipes.map((recipe) => (
+                            <div
+                                key={recipe.id}
+                                className="gg-dash-recipe-row"
+                                onClick={() => onOpenRecipe(recipe.id)}
+                            >
+                                <div style={{ flex: 1 }}>
+                                    <div className="gg-dash-recipe-name">{recipe.name}</div>
+                                    <div className="gg-dash-recipe-meta">
+                                        {recipe.prep || '–'} · {recipe.servings || '–'} servings
+                                    </div>
+                                </div>
+                                <span className="gg-cookable-pill">✦ Ready</span>
+                                <button
+                                    className="gg-btn-ghost"
+                                    onClick={(e) => { e.stopPropagation(); onOpenRecipe(recipe.id); }}
+                                    style={{ marginLeft: '4px' }}
                                 >
                                     Open Recipe
                                 </button>
                             </div>
                         ))}
                     </div>
-                </div>
+                )}
             </div>
         </Fragment>
     );

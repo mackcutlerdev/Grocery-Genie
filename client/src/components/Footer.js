@@ -1,14 +1,7 @@
-// Dependencies
-import React from 'react';
+// Footer removed — version info now lives in the sidebar footer.
+// This file is kept as a no-op so existing imports don't break.
+// You can safely delete Footer.js and remove its import from App.js.
 
-const Footer = () => {
-    return (
-        <footer className="footer-fixed bg-light text-center text-muted py-2 px-3 border-top">
-            <small>
-                GroceryGenie • v0.9.1 • Built by <strong>Mack Cutler</strong> for CPSC 2600
-            </small>
-        </footer>
-    );
-};
+const Footer = () => null;
 
 export default Footer;
