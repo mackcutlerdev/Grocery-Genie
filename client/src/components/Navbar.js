@@ -1,8 +1,24 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
 
 const Navbar = () =>
 {
+    // Read initial theme from localStorage so it persists across reloads
+    const [theme, setTheme] = useState(() =>
+        localStorage.getItem('gg-theme') || 'dark'
+    );
+
+    // Write data-theme onto <html> whenever it changes — that one attribute
+    // triggers all the CSS token overrides in index.css automatically
+    useEffect(() =>
+    {
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('gg-theme', theme);
+    }, [theme]);
+
+    const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+
+    const isDark = theme === 'dark';
     return (
         <aside id="gg-sidebar">
 
@@ -43,8 +59,18 @@ const Navbar = () =>
                 </NavLink>
             </nav>
 
-            {/* Footer */}
+            {/* Footer — version + theme toggle */}
             <div className="gg-sidebar-footer">
+                {/* Theme toggle button */}
+                <button
+                    onClick={toggleTheme}
+                    className="gg-btn-ghost"
+                    style={{ width: '100%', justifyContent: 'center', marginBottom: '10px' }}
+                    title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
+                >
+                    <i className={`bi bi-${isDark ? 'sun' : 'moon-stars'}`}></i>
+                    <span style={{ marginLeft: '6px' }}>{isDark ? 'Light' : 'Dark'}</span>
+                </button>
                 <div className="gg-version-tag">v<em>0.9.1</em> · prototype</div>
             </div>
         </aside>

@@ -122,6 +122,22 @@ function SourcesPage()
                         </div>
                     </div>
 
+                    <div className="gg-sources-card">
+                        <div className="gg-sources-card-title">Other Learning Resources</div>
+                        <div className="gg-sources-item">
+                            <a href="https://bootstrap.build/app" target="_blank" rel="noopener noreferrer">Bootstrap Builder</a>
+                        </div>
+                        <div className="gg-sources-item">
+                            <a href="https://icons.getbootstrap.com/?q=pencil" target="_blank" rel="noopener noreferrer">Bootstrap Icons</a>
+                        </div>
+                        <div className="gg-sources-item">
+                            <a href="https://www.realtimecolors.com/?colors=e8845a-110c14-1a1018-3d2030-3a5c89&fonts=Inter-Inter" target="_blank" rel="noopener noreferrer">Color Pallette Viewer</a>
+                        </div>
+                        <div className="gg-sources-item">
+                            <a href="https://bootstrapstudio.io/" target="_blank" rel="noopener noreferrer">Bootstrap Studio</a>
+                        </div>
+                    </div>
+
                 </div>
             </div>
         </Fragment>

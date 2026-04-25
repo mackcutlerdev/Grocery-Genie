@@ -37,6 +37,59 @@
 }
 
 /* ═══════════════════════════════════════════════════
+   LIGHT THEME TOKEN OVERRIDES
+   Applied by setting data-theme="light" on <html>.
+   Only the token values change — every component
+   inherits the new values automatically via var(--x).
+   No component CSS needs to be touched for theming.
+═══════════════════════════════════════════════════ */
+[data-theme="light"] {
+  /* Backgrounds — warm parchment/cream scale, light to slightly deeper */
+  --bg-0:       #F0E8DF;
+  --bg-1:       #EDE0D4;
+  --bg-2:       #E8D8C8;
+  --bg-3:       #E0CDB8;
+  --bg-raised:  #D8C0A8;
+
+  /* Text — flipped: dark warm browns on parchment */
+  --text:       #2A1218;
+  --text-dim:   #7A5A52;
+  --text-faint: #B09080;
+
+  /* Brand colours — same hues, slightly adjusted for light legibility */
+  --primary:      #C2304A;
+  --primary-deep: #8C2238;
+  --secondary:    #EAE0D5;
+  --accent:       #E07848;
+  --accent-deep:  #C45C30;
+  --teal:         #4A9090;
+  --teal-deep:    #2E7070;
+
+  /* Borders — dark warm tint instead of light warm tint */
+  --hairline:     rgba(42, 18, 24, 0.07);
+  --hairline-mid: rgba(42, 18, 24, 0.13);
+  --hairline-hi:  rgba(42, 18, 24, 0.22);
+}
+
+/* Ambient blobs — softer on light background */
+[data-theme="light"] body::before {
+  background:
+    radial-gradient(ellipse 70% 50% at 5% 0%,   rgba(194,48,74,0.09),  transparent 60%),
+    radial-gradient(ellipse 50% 40% at 95% 95%,  rgba(74,144,144,0.07), transparent 55%),
+    radial-gradient(ellipse 60% 50% at 55% 110%, rgba(224,120,72,0.06), transparent 50%);
+}
+
+/* Sidebar — warm parchment gradient */
+[data-theme="light"] #gg-sidebar {
+  background: linear-gradient(180deg, #EDE0D4 0%, #E8D8C8 100%);
+}
+
+/* Topbar — frosted parchment */
+[data-theme="light"] #gg-topbar {
+  background: rgba(240, 232, 223, 0.80);
+}
+
+/* ═══════════════════════════════════════════════════
    RESET & BASE
 ═══════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -183,6 +236,7 @@ body::after {
   letter-spacing: 0.12em;
   text-transform: uppercase;
   text-decoration: none;
+  -webkit-user-select: none;
   user-select: none;
 }
 .gg-nav-item:hover {
@@ -244,6 +298,7 @@ body::after {
   flex-shrink: 0;
   gap: 16px;
   background: rgba(17,12,20,0.6);
+  -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
 

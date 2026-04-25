@@ -9,7 +9,8 @@ const Recipes = (props) =>
         onUpdateRecipe,
         onDeleteRecipe,
         initialSelectedRecipeId,
-        onMakeRecipe
+        onMakeRecipe,
+        pantryItems = [],   // new: for gauge + dot colouring
     } = props;
 
     const [selectedRecipeId,       setSelectedRecipeId]       = useState(null);
@@ -35,6 +36,36 @@ const Recipes = (props) =>
     const parseInstructionsText = (text) =>
         text.split('\n').map((l) => l.trim()).filter((l) => l !== '');
 
+    /* ── Loose matching (same as WCIM/HomePage) ── */
+    const normalizeName = (name) => (!name ? '' : name.trim().toLowerCase());
+    const tokenize = (name) => normalizeName(name).split(/[^a-z]+/).filter(Boolean);
+    const namesLooselyMatch = (a, b) =>
+    {
+        const tokA = tokenize(a), tokB = tokenize(b);
+        if (!tokA.length || !tokB.length) return false;
+        if (tokA.join(' ') === tokB.join(' ')) return true;
+        const setB = new Set(tokB);
+        return tokA.some((t) => setB.has(t));
+    };
+
+    /* ── Pantry coverage for a recipe ── */
+    const getCoverage = (recipe) =>
+    {
+        if (!recipe || !Array.isArray(recipe.ingredients) || recipe.ingredients.length === 0)
+            return { matched: 0, total: 0, pct: 0 };
+
+        const total   = recipe.ingredients.length;
+        const matched = recipe.ingredients.filter((ing) =>
+        {
+            const p = pantryItems.find((pi) => namesLooselyMatch(pi.name, ing.name));
+            if (!p) return false;
+            if (ing.quantity === null || ing.quantity === undefined) return true;
+            return p.quantity >= ing.quantity;
+        }).length;
+
+        return { matched, total, pct: total > 0 ? matched / total : 0 };
+    };
+
     /* ── New ingredient helpers ── */
     const handleNewIngChange = (index, field, value) =>
         setNewRecipeIngredients((prev) => { const u=[...prev]; u[index]={...u[index],[field]:value}; return u; });
@@ -56,7 +87,7 @@ const Recipes = (props) =>
         if (editingId && editingId !== id) cancelEditing();
     };
 
-    /* ── Add form ── */
+    /* ── Add form toggle ── */
     const handleToggleAddForm = () =>
     {
         setShowAddForm(!showAddForm);
@@ -144,7 +175,7 @@ const Recipes = (props) =>
         if (editingId === id) cancelEditing();
     };
 
-    /* ── Add-form modal overlay (renders above the split pane) ── */
+    /* ── Add-form modal ── */
     const renderAddFormModal = () => !showAddForm ? null : (
         <div style={{
             position: 'fixed', inset: 0,
@@ -162,10 +193,8 @@ const Recipes = (props) =>
                 display: 'flex', flexDirection: 'column',
                 position: 'relative', overflow: 'hidden',
             }}>
-                {/* Shimmer top line */}
                 <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '1px', background: 'linear-gradient(90deg, transparent, rgba(232,132,90,0.4), transparent)' }}></div>
 
-                {/* Header */}
                 <div style={{ padding: '22px 28px 18px', borderBottom: '1px solid var(--hairline)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
                     <div style={{ fontFamily: 'var(--f-display)', fontSize: '24px', fontWeight: 500, fontStyle: 'italic' }}>
                         New <em style={{ color: 'var(--accent)' }}>Recipe</em>
@@ -175,21 +204,15 @@ const Recipes = (props) =>
                     </button>
                 </div>
 
-                {/* Body */}
                 <form onSubmit={handleAddRecipeSubmit} style={{ flex: 1, overflowY: 'auto', padding: '24px 28px', display: 'flex', flexDirection: 'column', gap: '0' }}>
 
-                    {/* Name / Prep / Servings row */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: '12px', marginBottom: '16px' }}>
-                        <div>
-                            <label className="gg-label" htmlFor="m-name">Recipe Name</label>
-                            <input className="gg-input" id="m-name" placeholder="e.g. Mushroom Omelette"
-                                value={newRecipeName} onChange={(e) => setNewRecipeName(e.target.value)} />
-                        </div>
+                    <div style={{ marginBottom: '16px' }}>
+                        <label className="gg-label" htmlFor="m-name">Recipe Name</label>
+                        <input className="gg-input" id="m-name" placeholder="e.g. Mushroom Omelette"
+                            value={newRecipeName} onChange={(e) => setNewRecipeName(e.target.value)} />
                     </div>
 
                     <div className="gg-divider"></div>
-
-                    {/* Ingredients */}
                     <div className="gg-detail-section-label" style={{ marginBottom: '12px' }}>Ingredients</div>
 
                     {newRecipeIngredients.map((ing, index) => (
@@ -215,19 +238,12 @@ const Recipes = (props) =>
                     </button>
 
                     <div className="gg-divider"></div>
-
-                    {/* Instructions */}
                     <div className="gg-detail-section-label" style={{ marginBottom: '12px' }}>Instructions</div>
-                    <textarea
-                        className="gg-input"
-                        rows={6}
-                        placeholder="One step per line…"
+                    <textarea className="gg-input" rows={6} placeholder="One step per line…"
                         value={newRecipeInstructions}
                         onChange={(e) => setNewRecipeInstructions(e.target.value)}
-                        style={{ resize: 'vertical' }}
-                    />
+                        style={{ resize: 'vertical' }} />
 
-                    {/* Footer */}
                     <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '10px', paddingTop: '20px' }}>
                         <button type="button" className="gg-btn-ghost" onClick={handleToggleAddForm}>Cancel</button>
                         <button type="submit" className="gg-btn-primary">
@@ -239,7 +255,7 @@ const Recipes = (props) =>
         </div>
     );
 
-    /* ── Ingredient check dot (for read-only detail view — no pantry data here, just display) ── */
+    /* ── Ingredient rows in read-only detail (now pantry-aware for check/x) ── */
     const renderDetailIngredients = (ingredients) =>
     {
         if (!ingredients || ingredients.length === 0)
@@ -247,12 +263,15 @@ const Recipes = (props) =>
 
         return ingredients.map((ing, index) =>
         {
-            const qty  = ing.quantity !== undefined && ing.quantity !== null ? ing.quantity : '';
-            const unit = ing.unit ? ` ${ing.unit}` : '';
+            const qty      = ing.quantity !== undefined && ing.quantity !== null ? ing.quantity : '';
+            const unit     = ing.unit ? ` ${ing.unit}` : '';
+            const inPantry = pantryItems.some((p) => namesLooselyMatch(p.name, ing.name));
             return (
                 <div key={index} className="gg-detail-ing-row">
-                    <div className="gg-detail-ing-check have"><i className="bi bi-check"></i></div>
-                    <div className="gg-detail-ing-name">{ing.name}</div>
+                    <div className={`gg-detail-ing-check ${inPantry ? 'have' : 'missing'}`}>
+                        <i className={`bi bi-${inPantry ? 'check' : 'x'}`}></i>
+                    </div>
+                    <div className={`gg-detail-ing-name${inPantry ? '' : ' missing-name'}`}>{ing.name}</div>
                     <div className="gg-detail-ing-qty">{`${qty}${unit}`.trim()}</div>
                 </div>
             );
@@ -272,15 +291,56 @@ const Recipes = (props) =>
         ));
     };
 
+    /* ── (ii) Pantry coverage gauge ── */
+    const renderCoverageGauge = (recipe) =>
+    {
+        const { matched, total, pct } = getCoverage(recipe);
+        if (total === 0) return null;
+
+        const isFull    = pct >= 1;
+        const isPartial = pct > 0 && pct < 1;
+
+        const fillBg = isFull
+            ? 'linear-gradient(90deg, var(--teal-deep), var(--teal))'
+            : isPartial
+                ? 'linear-gradient(90deg, var(--primary-deep), var(--accent))'
+                : 'linear-gradient(90deg, var(--primary-deep), var(--primary))';
+
+        const countColor = isFull ? 'var(--teal)' : isPartial ? 'var(--accent)' : 'var(--primary)';
+
+        return (
+            <div style={{ marginBottom: '22px' }}>
+                {/* Label row */}
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>
+                    <span style={{ fontFamily: 'var(--f-mono)', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
+                        Pantry Coverage
+                    </span>
+                    <span style={{ fontFamily: 'var(--f-display)', fontSize: '15px', fontStyle: 'italic', color: countColor }}>
+                        {matched} / {total} ingredients
+                    </span>
+                </div>
+                {/* Track */}
+                <div style={{ height: '3px', background: 'rgba(240,222,200,0.07)', borderRadius: '99px', overflow: 'hidden' }}>
+                    <div style={{
+                        height: '100%',
+                        width: `${Math.round(pct * 100)}%`,
+                        borderRadius: '99px',
+                        background: fillBg,
+                        transition: 'width 0.6s cubic-bezier(0.34, 1.56, 0.64, 1)',
+                    }} />
+                </div>
+            </div>
+        );
+    };
+
     return (
         <Fragment>
-            {/* Add-recipe modal */}
             {renderAddFormModal()}
 
             <div className="gg-panel active" id="panel-recipes">
                 <div className="gg-recipe-layout">
 
-                    {/* ── Left: recipe list ─────────────── */}
+                    {/* ── Left: recipe list ─────────────────────────── */}
                     <div className="gg-recipe-list-col">
                         <div className="gg-recipe-list-header">
                             <div className="gg-recipe-list-title">All Recipes</div>
@@ -305,25 +365,47 @@ const Recipes = (props) =>
                                     No recipes yet.
                                 </div>
                             )}
-                            {recipes && recipes.map((recipe) => (
-                                <div
-                                    key={recipe.id}
-                                    className={`gg-recipe-list-item${selectedRecipeId === recipe.id ? ' selected' : ''}`}
-                                    onClick={() => handleSelectRecipe(recipe.id)}
-                                >
-                                    <div className="gg-recipe-not-dot"></div>
-                                    <div>
-                                        <div className="gg-recipe-item-name">{recipe.name}</div>
+
+                            {recipes && recipes.map((recipe) =>
+                            {
+                                // (iii) Cyan dot if fully makeable
+                                const { pct } = getCoverage(recipe);
+                                const isMakeable = pct >= 1;
+
+                                // (i) Meta line: "X ing. · yy min"
+                                const ingCount  = Array.isArray(recipe.ingredients) ? recipe.ingredients.length : 0;
+                                const metaParts = [];
+                                if (ingCount > 0)   metaParts.push(`${ingCount} ing.`);
+                                if (recipe.prep)    metaParts.push(recipe.prep);
+
+                                return (
+                                    <div
+                                        key={recipe.id}
+                                        className={`gg-recipe-list-item${selectedRecipeId === recipe.id ? ' selected' : ''}`}
+                                        onClick={() => handleSelectRecipe(recipe.id)}
+                                    >
+                                        {/* (iii) Cyan if makeable, dim grey otherwise */}
+                                        <div className={isMakeable ? 'gg-recipe-cookable-dot' : 'gg-recipe-not-dot'}
+                                             style={{ flexShrink: 0 }}></div>
+
+                                        <div style={{ minWidth: 0 }}>
+                                            <div className="gg-recipe-item-name">{recipe.name}</div>
+                                            {/* (i) Meta line */}
+                                            {metaParts.length > 0 && (
+                                                <div className="gg-recipe-item-meta">
+                                                    {metaParts.join(' · ')}
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
+                                );
+                            })}
                         </div>
                     </div>
 
-                    {/* ── Right: detail / edit ──────────── */}
+                    {/* ── Right: detail / edit ──────────────────────── */}
                     <div className="gg-recipe-detail-col">
 
-                        {/* Nothing selected */}
                         {!selectedRecipe && editingId === null && (
                             <div className="gg-recipe-detail-empty">
                                 <div className="gg-recipe-detail-empty-inner">
@@ -391,7 +473,6 @@ const Recipes = (props) =>
                         {/* Read-only detail */}
                         {selectedRecipe && (!editingId || editingId !== selectedRecipe.id) && (
                             <>
-                                {/* Header */}
                                 <div className="gg-recipe-detail-header">
                                     <div className="gg-recipe-detail-title">{selectedRecipe.name}</div>
                                     <div className="gg-recipe-detail-meta">
@@ -413,8 +494,10 @@ const Recipes = (props) =>
                                     </div>
                                 </div>
 
-                                {/* Body */}
                                 <div className="gg-recipe-detail-body">
+                                    {/* (ii) Coverage gauge — above ingredient list */}
+                                    {renderCoverageGauge(selectedRecipe)}
+
                                     <div className="gg-detail-section-label" style={{ marginBottom: '10px' }}>Ingredients</div>
                                     {renderDetailIngredients(selectedRecipe.ingredients)}
 
@@ -424,7 +507,6 @@ const Recipes = (props) =>
                                     {renderDetailSteps(selectedRecipe.instructions)}
                                 </div>
 
-                                {/* Footer */}
                                 <div className="gg-recipe-detail-footer">
                                     {onMakeRecipe && (
                                         <button
@@ -439,17 +521,10 @@ const Recipes = (props) =>
                                             <i className="bi bi-fire"></i><span>Make Recipe</span>
                                         </button>
                                     )}
-                                    <button
-                                        className="gg-btn-ghost"
-                                        onClick={() => startEditing(selectedRecipe)}
-                                    >
+                                    <button className="gg-btn-ghost" onClick={() => startEditing(selectedRecipe)}>
                                         <i className="bi bi-pencil"></i> Edit
                                     </button>
-                                    <button
-                                        className="gg-btn-icon"
-                                        onClick={() => handleDeleteRecipe(selectedRecipe.id)}
-                                        title="Delete recipe"
-                                    >
+                                    <button className="gg-btn-icon" onClick={() => handleDeleteRecipe(selectedRecipe.id)} title="Delete recipe">
                                         <i className="bi bi-trash3"></i>
                                     </button>
                                 </div>

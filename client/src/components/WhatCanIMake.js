@@ -7,69 +7,73 @@ const WhatCanIMake = (props) =>
     // 'all' | 'ready' | 'missing'
     const [filterMode, setFilterMode] = useState('all');
 
-    /* ── Matching logic (unchanged from original) ── */
+    /* ── Matching logic (unchanged) ── */
     const normalizeName = (name) => (!name ? '' : name.trim().toLowerCase());
-
-    const tokenize = (name) =>
-        normalizeName(name).split(/[^a-z]+/).filter(Boolean);
-
+    const tokenize = (name) => normalizeName(name).split(/[^a-z]+/).filter(Boolean);
     const namesLooselyMatch = (a, b) =>
     {
-        const tokensA = tokenize(a);
-        const tokensB = tokenize(b);
-        if (tokensA.length === 0 || tokensB.length === 0) return false;
-        if (tokensA.join(' ') === tokensB.join(' ')) return true;
-        const setB = new Set(tokensB);
-        for (let i = 0; i < tokensA.length; i++)
-            if (setB.has(tokensA[i])) return true;
-        return false;
+        const tokA = tokenize(a), tokB = tokenize(b);
+        if (!tokA.length || !tokB.length) return false;
+        if (tokA.join(' ') === tokB.join(' ')) return true;
+        const setB = new Set(tokB);
+        return tokA.some((t) => setB.has(t));
     };
 
     const canMakeRecipe = (recipe) =>
     {
         if (!recipe || !Array.isArray(recipe.ingredients)) return false;
-        return recipe.ingredients.every((recipeIng) =>
+        return recipe.ingredients.every((ing) =>
         {
-            const match = pantryItems.find((item) => namesLooselyMatch(item.name, recipeIng.name));
+            const match = pantryItems.find((p) => namesLooselyMatch(p.name, ing.name));
             if (!match) return false;
-            if (recipeIng.quantity === null || recipeIng.quantity === undefined) return true;
-            return match.quantity >= recipeIng.quantity;
+            if (ing.quantity === null || ing.quantity === undefined) return true;
+            return match.quantity >= ing.quantity;
         });
     };
 
     const getMissingIngredients = (recipe) =>
     {
         const missing = [];
-        recipe.ingredients.forEach((recipeIng) =>
+        recipe.ingredients.forEach((ing) =>
         {
-            const match = pantryItems.find((item) => namesLooselyMatch(item.name, recipeIng.name));
+            const match = pantryItems.find((p) => namesLooselyMatch(p.name, ing.name));
             if (!match)
             {
-                missing.push({ name: recipeIng.name, needed: recipeIng.quantity ?? null, unit: recipeIng.unit || '' });
+                missing.push({ name: ing.name, needed: ing.quantity ?? null, unit: ing.unit || '' });
                 return;
             }
-            if (recipeIng.quantity !== null && recipeIng.quantity !== undefined)
-                if (match.quantity < recipeIng.quantity)
-                    missing.push({ name: recipeIng.name, needed: recipeIng.quantity - match.quantity, unit: recipeIng.unit || '' });
+            if (ing.quantity !== null && ing.quantity !== undefined)
+                if (match.quantity < ing.quantity)
+                    missing.push({ name: ing.name, needed: ing.quantity - match.quantity, unit: ing.unit || '' });
         });
         return missing;
     };
 
     const matchInfo = (recipe) =>
     {
-        const total   = recipe.ingredients ? recipe.ingredients.length : 0;
-        const missing = getMissingIngredients(recipe);
-        const matched = total - missing.length;
-        return { total, matched, missingList: missing };
+        const total      = recipe.ingredients ? recipe.ingredients.length : 0;
+        const missingList = getMissingIngredients(recipe);
+        const matched    = total - missingList.length;
+        return { total, matched, missingList };
+    };
+
+    /* ── Build the accurate meta string for any recipe ── */
+    const buildMeta = (recipe) =>
+    {
+        const parts = [];
+        if (recipe.prep) parts.push(recipe.prep);
+        const ingCount = Array.isArray(recipe.ingredients) ? recipe.ingredients.length : 0;
+        if (ingCount > 0) parts.push(`${ingCount} ing.`);
+        return parts.join(' · ');
     };
 
     const makeableRecipes = recipes.filter((r) => canMakeRecipe(r));
     const missingRecipes  = recipes.filter((r) => !canMakeRecipe(r));
 
-    // Sort missing by % matched descending
+    // Sort missing by % matched descending (closest to ready first)
     missingRecipes.sort((a, b) =>
     {
-        const mA = matchInfo(a); const mB = matchInfo(b);
+        const mA = matchInfo(a), mB = matchInfo(b);
         return (mB.matched / (mB.total || 1)) - (mA.matched / (mA.total || 1));
     });
 
@@ -80,7 +84,7 @@ const WhatCanIMake = (props) =>
         <Fragment>
             <div className="gg-panel active" id="panel-cook">
 
-                {/* Intro blurb */}
+                {/* Intro */}
                 <div style={{ marginBottom: '24px' }}>
                     <div className="gg-kicker" style={{ marginBottom: '8px' }}>Pantry Intelligence</div>
                     <p style={{ fontFamily: 'var(--f-body)', fontStyle: 'italic', color: 'var(--text-dim)', fontSize: '16px', maxWidth: '680px', lineHeight: '1.6', margin: 0 }}>
@@ -122,7 +126,6 @@ const WhatCanIMake = (props) =>
                     </div>
                 )}
 
-                {/* Empty state */}
                 {!isLoading && recipes.length === 0 && (
                     <div className="gg-empty-state">
                         <div className="big-glyph">✦</div>
@@ -143,30 +146,33 @@ const WhatCanIMake = (props) =>
                                 No recipes are fully covered by your pantry yet.
                             </div>
                         ) : (
-                            makeableRecipes.map((recipe) => (
-                                <div
-                                    key={recipe.id}
-                                    className="gg-wcim-recipe-card"
-                                    onClick={() => onOpenRecipe(recipe.id)}
-                                >
-                                    <div className="gg-wcim-card-stripe"></div>
-                                    <div className="gg-wcim-card-body">
-                                        <div style={{ flex: 1 }}>
-                                            <div className="gg-wcim-recipe-name">{recipe.name}</div>
-                                            <div className="gg-wcim-recipe-meta">
-                                                {recipe.prep || '–'} · {recipe.servings || '–'} servings ·{' '}
-                                                {recipe.ingredients ? recipe.ingredients.length : 0} ingredients
+                            makeableRecipes.map((recipe) =>
+                            {
+                                const meta = buildMeta(recipe);
+                                return (
+                                    <div
+                                        key={recipe.id}
+                                        className="gg-wcim-recipe-card"
+                                        onClick={() => onOpenRecipe(recipe.id)}
+                                    >
+                                        <div className="gg-wcim-card-stripe"></div>
+                                        <div className="gg-wcim-card-body">
+                                            <div style={{ flex: 1 }}>
+                                                <div className="gg-wcim-recipe-name">{recipe.name}</div>
+                                                {meta && (
+                                                    <div className="gg-wcim-recipe-meta">{meta}</div>
+                                                )}
                                             </div>
+                                            <button
+                                                className="gg-wcim-open-btn"
+                                                onClick={(e) => { e.stopPropagation(); onOpenRecipe(recipe.id); }}
+                                            >
+                                                Open Recipe
+                                            </button>
                                         </div>
-                                        <button
-                                            className="gg-wcim-open-btn"
-                                            onClick={(e) => { e.stopPropagation(); onOpenRecipe(recipe.id); }}
-                                        >
-                                            Open Recipe
-                                        </button>
                                     </div>
-                                </div>
-                            ))
+                                );
+                            })
                         )}
                     </div>
                 )}
@@ -186,7 +192,8 @@ const WhatCanIMake = (props) =>
                         ) : (
                             missingRecipes.map((recipe) =>
                             {
-                                const m = matchInfo(recipe);
+                                const m    = matchInfo(recipe);
+                                const meta = buildMeta(recipe);
                                 return (
                                     <div key={recipe.id} className="gg-wcim-missing-card">
                                         <div
@@ -195,9 +202,12 @@ const WhatCanIMake = (props) =>
                                         >
                                             <div>
                                                 <div className="gg-wcim-missing-name">{recipe.name}</div>
-                                                <div style={{ fontFamily: 'var(--f-mono)', fontSize: '9px', letterSpacing: '0.12em', color: 'var(--text-faint)', marginTop: '3px' }}>
-                                                    {recipe.prep || '–'} · {recipe.servings || '–'} servings
-                                                </div>
+                                                {/* Accurate meta: "30 min · 6 ing." */}
+                                                {meta && (
+                                                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: '9px', letterSpacing: '0.12em', color: 'var(--text-faint)', marginTop: '3px' }}>
+                                                        {meta}
+                                                    </div>
+                                                )}
                                             </div>
                                             <span className="gg-wcim-match-info">{m.matched} / {m.total} have</span>
                                         </div>
@@ -208,7 +218,8 @@ const WhatCanIMake = (props) =>
                                                     <div className="gg-missing-dot"></div>
                                                     <span>{ing.name}</span>
                                                     <span className="gg-missing-ing-qty">
-                                                        {ing.needed !== null && ing.needed !== undefined ? ing.needed : ''}{ing.unit ? ` ${ing.unit}` : ''}
+                                                        {ing.needed !== null && ing.needed !== undefined ? ing.needed : ''}
+                                                        {ing.unit ? ` ${ing.unit}` : ''}
                                                     </span>
                                                 </div>
                                             ))}
