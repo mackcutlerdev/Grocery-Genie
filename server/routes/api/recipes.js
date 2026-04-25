@@ -1,13 +1,17 @@
 const express = require('express');
 const router  = express.Router();
 const Recipe  = require('../../models/Recipe');
+const auth    = require('../../middleware/auth');
 
-// GET all recipes
+// All recipe routes require a valid JWT.
+router.use(auth);
+
+// GET all recipes belonging to the logged-in user
 router.get('/', async (req, res) =>
 {
     try
     {
-        const recipes = await Recipe.find().sort({ createdAt: -1 });
+        const recipes = await Recipe.find({ userId: req.userId }).sort({ createdAt: -1 });
         res.json(recipes);
     }
     catch (err)
@@ -17,17 +21,15 @@ router.get('/', async (req, res) =>
     }
 });
 
-// GET single recipe by id
+// GET single recipe — must belong to the logged-in user
 router.get('/:id', async (req, res) =>
 {
     try
     {
-        const recipe = await Recipe.findById(req.params.id);
+        const recipe = await Recipe.findOne({ _id: req.params.id, userId: req.userId });
 
         if (!recipe)
-        {
             return res.status(404).json({ msg: `No recipe with id ${req.params.id}` });
-        }
 
         res.json(recipe);
     }
@@ -38,20 +40,18 @@ router.get('/:id', async (req, res) =>
     }
 });
 
-// POST — create a new recipe
+// POST — create a new recipe owned by the logged-in user
 router.post('/', async (req, res) =>
 {
     const { name, ingredients, instructions, prep, servings } = req.body;
 
     if (!name || !name.trim())
-    {
         return res.status(400).json({ msg: 'Please include a recipe name' });
-    }
 
     try
     {
-        const recipe = new Recipe(
-        {
+        const recipe = new Recipe({
+            userId:       req.userId,
             name:         name.trim(),
             ingredients:  ingredients  || [],
             instructions: instructions || [],
@@ -61,8 +61,7 @@ router.post('/', async (req, res) =>
 
         await recipe.save();
 
-        // Return full updated list (same shape client expects)
-        const allRecipes = await Recipe.find().sort({ createdAt: -1 });
+        const allRecipes = await Recipe.find({ userId: req.userId }).sort({ createdAt: -1 });
         res.json(allRecipes);
     }
     catch (err)
@@ -72,15 +71,15 @@ router.post('/', async (req, res) =>
     }
 });
 
-// PUT — update a recipe
+// PUT — update a recipe, only if it belongs to the logged-in user
 router.put('/:id', async (req, res) =>
 {
     const { name, ingredients, instructions, prep, servings } = req.body;
 
     try
     {
-        const updated = await Recipe.findByIdAndUpdate(
-            req.params.id,
+        const updated = await Recipe.findOneAndUpdate(
+            { _id: req.params.id, userId: req.userId },
             {
                 ...(name         !== undefined && { name: name.trim() }),
                 ...(ingredients  !== undefined && { ingredients }),
@@ -92,11 +91,8 @@ router.put('/:id', async (req, res) =>
         );
 
         if (!updated)
-        {
             return res.status(404).json({ msg: `No recipe with id ${req.params.id}` });
-        }
 
-        // Same shape as old route: { msg, recipe }
         res.json({ msg: 'Recipe updated', recipe: updated });
     }
     catch (err)
@@ -106,19 +102,17 @@ router.put('/:id', async (req, res) =>
     }
 });
 
-// DELETE — remove a recipe
+// DELETE — remove a recipe, only if it belongs to the logged-in user
 router.delete('/:id', async (req, res) =>
 {
     try
     {
-        const deleted = await Recipe.findByIdAndDelete(req.params.id);
+        const deleted = await Recipe.findOneAndDelete({ _id: req.params.id, userId: req.userId });
 
         if (!deleted)
-        {
             return res.status(404).json({ msg: `No recipe with id ${req.params.id}` });
-        }
 
-        const remaining = await Recipe.find().sort({ createdAt: -1 });
+        const remaining = await Recipe.find({ userId: req.userId }).sort({ createdAt: -1 });
         res.json({ msg: 'Recipe deleted', recipes: remaining });
     }
     catch (err)

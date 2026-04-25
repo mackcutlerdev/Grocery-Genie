@@ -1,4 +1,3 @@
-// Load .env variables first, before anything else reads process.env
 require('dotenv').config();
 
 const express   = require('express');
@@ -15,7 +14,6 @@ mongoose.connect(process.env.MONGODB_URI)
     .catch((err) =>
     {
         console.error('MongoDB connection error:', err.message);
-        // Exit hard — no point running if there's no database
         process.exit(1);
     });
 
@@ -25,10 +23,10 @@ server.use(express.json());
 server.use(express.urlencoded({ extended: false }));
 
 // ── API Routes ─────────────────────────────────────────────────────────────
-// Keeping /api/tempItems and /api/tempRecipes URLs so the client
-// doesn't need to change a single fetch call for Phase 1.
-// We'll rename them to /api/items and /api/recipes in Phase 3
-// when we update the client anyway for auth headers.
+// Auth is public — no JWT needed to register or login
+server.use('/api/auth',        require('./routes/api/auth'));
+
+// Data routes — protected by JWT inside each router via auth middleware
 server.use('/api/tempItems',   require('./routes/api/items'));
 server.use('/api/tempRecipes', require('./routes/api/recipes'));
 
@@ -40,7 +38,6 @@ if (process.env.NODE_ENV === 'production')
 
     server.use(express.static(clientBuildPath));
 
-    // Catch-all: any route that isn't an API route serves the React app
     server.get(/.*/, (req, res) =>
     {
         res.sendFile(path.join(clientBuildPath, 'index.html'));

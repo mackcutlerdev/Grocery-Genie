@@ -1,69 +1,41 @@
-// Dependencies
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import WhatCanIMake from '../components/WhatCanIMake';
+import { apiGet } from '../api';
 
 function WhatCanIMakePage()
 {
-    // For the [Open Recipe] button
     const history = useHistory();
 
-    // Data this page needs: pantry + recipes from the server
-    const [appState, setAppState] = useState(
-    {
-        loading: false, // spinner (if i ever get to it) / "Loading pantry and recipes..."
+    const [appState, setAppState] = useState({
+        loading: false,
         pantryItems: [],
         recipes: [],
     });
 
-    // Pull pantry + recipes from the API
     const loadData = () =>
     {
-        // turn loading on and clear everything while we fetch
-        setAppState(
-        {
-            loading: true,
-            pantryItems: [],
-            recipes: [],
-        });
+        setAppState({ loading: true, pantryItems: [], recipes: [] });
 
-        // First fetch pantry, then recipes  (nesting is bad except when its good)
-        fetch('/api/tempItems')
-            .then((res) => res.json())
-            .then((itemsData) =>
+        Promise.all([
+            apiGet('/api/tempItems'),
+            apiGet('/api/tempRecipes'),
+        ])
+            .then(([itemsData, recipesData]) =>
             {
-                fetch('/api/tempRecipes')
-                    .then((res) => res.json())
-                    .then((recipesData) =>
-                    {
-                        setAppState(
-                        {
-                            loading: false,
-                            pantryItems: itemsData,
-                            recipes: recipesData,
-                        });
-                    });
+                setAppState({ loading: false, pantryItems: itemsData, recipes: recipesData });
             })
             .catch((err) =>
             {
-                console.log("Failed to load data for WhatCanIMake", err);
+                console.log('Failed to load data for WhatCanIMake', err);
+                setAppState({ loading: false, pantryItems: [], recipes: [] });
             });
     };
 
-    // For the Open Recipe button
-    const handleOpenRecipe = (id) =>
-    {
-        // go to Recipes page and auto-select this recipe
-        history.push(`/recipes?recipeId=${id}`);
-    };
+    useEffect(() => { loadData(); }, []);
 
-    // load everything once on mount
-    useEffect(() =>
-    {
-        loadData();
-    }, []);
+    const handleOpenRecipe = (id) => history.push(`/recipes?recipeId=${id}`);
 
-    // WCIM state stating
     return (
         <WhatCanIMake
             isLoading={appState.loading}

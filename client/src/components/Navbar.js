@@ -1,24 +1,41 @@
 import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useHistory } from 'react-router-dom';
 
 const Navbar = () =>
 {
-    // Read initial theme from localStorage so it persists across reloads
-    const [theme, setTheme] = useState(() =>
-        localStorage.getItem('gg-theme') || 'dark'
-    );
+    const history = useHistory();
 
-    // Write data-theme onto <html> whenever it changes — that one attribute
-    // triggers all the CSS token overrides in index.css automatically
+    const [theme,    setTheme]    = useState(() => localStorage.getItem('gg-theme') || 'dark');
+    const [username, setUsername] = useState('');
+
+    // Apply theme token to <html> on change
     useEffect(() =>
     {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('gg-theme', theme);
     }, [theme]);
 
-    const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    // Read the stored username so we can display it in the sidebar
+    useEffect(() =>
+    {
+        const stored = localStorage.getItem('gg-user');
+        if (stored)
+        {
+            try { setUsername(JSON.parse(stored).username || ''); }
+            catch {}
+        }
+    }, []);
 
-    const isDark = theme === 'dark';
+    const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+    const isDark      = theme === 'dark';
+
+    const handleLogout = () =>
+    {
+        localStorage.removeItem('gg-token');
+        localStorage.removeItem('gg-user');
+        history.push('/login');
+    };
+
     return (
         <aside id="gg-sidebar">
 
@@ -59,19 +76,39 @@ const Navbar = () =>
                 </NavLink>
             </nav>
 
-            {/* Footer — version + theme toggle */}
+            {/* Footer — username, theme toggle, logout */}
             <div className="gg-sidebar-footer">
-                {/* Theme toggle button */}
+
+                {/* Logged-in user */}
+                {username && (
+                    <div style={{ fontFamily: 'var(--f-mono)', fontSize: '9px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-dim)', marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <i className="bi bi-person-circle" style={{ fontSize: '11px' }}></i>
+                        <span className="gg-nav-label">{username}</span>
+                    </div>
+                )}
+
+                {/* Theme toggle */}
                 <button
                     onClick={toggleTheme}
                     className="gg-btn-ghost"
-                    style={{ width: '100%', justifyContent: 'center', marginBottom: '10px' }}
+                    style={{ width: '100%', justifyContent: 'center', marginBottom: '6px' }}
                     title={isDark ? 'Switch to light theme' : 'Switch to dark theme'}
                 >
                     <i className={`bi bi-${isDark ? 'sun' : 'moon-stars'}`}></i>
-                    <span style={{ marginLeft: '6px' }}>{isDark ? 'Light' : 'Dark'}</span>
+                    <span className="gg-nav-label" style={{ marginLeft: '6px' }}>{isDark ? 'Light' : 'Dark'}</span>
                 </button>
-                <div className="gg-version-tag">v<em>0.9.5</em> · demo</div>
+
+                {/* Logout */}
+                <button
+                    onClick={handleLogout}
+                    className="gg-btn-ghost"
+                    style={{ width: '100%', justifyContent: 'center', marginBottom: '10px' }}
+                >
+                    <i className="bi bi-box-arrow-left"></i>
+                    <span className="gg-nav-label" style={{ marginLeft: '6px' }}>Logout</span>
+                </button>
+
+                <div className="gg-version-tag">v<em>0.9.1</em> · prototype</div>
             </div>
         </aside>
     );

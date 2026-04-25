@@ -1,29 +1,27 @@
-// Dependencies
 import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Recipes from '../components/Recipes';
+import { apiGet, apiPost, apiPut, apiDelete } from '../api';
 
 function RecipesPage()
 {
     const location = useLocation();
-    const query = new URLSearchParams(location.search);
+    const query    = new URLSearchParams(location.search);
     const initialSelectedRecipeId = query.get('recipeId');
 
-    const [appState, setAppState] = useState(
-    {
+    const [appState, setAppState] = useState({
         loading: false,
         recipes: [],
-        pantryItems: [],   // ← NEW: needed for ingredient coverage gauge + dot colours
+        pantryItems: [],
     });
 
-    // Pull both recipes AND pantry in one go
     const loadData = () =>
     {
         setAppState({ loading: true, recipes: [], pantryItems: [] });
 
         Promise.all([
-            fetch('/api/tempRecipes').then((r) => r.json()),
-            fetch('/api/tempItems').then((r) => r.json()),
+            apiGet('/api/tempRecipes'),
+            apiGet('/api/tempItems'),
         ])
             .then(([recipesData, itemsData]) =>
             {
@@ -38,50 +36,28 @@ function RecipesPage()
 
     useEffect(() => { loadData(); }, []);
 
-    // ── Loose name matching (same as WCIM / HomePage) ──────────────────────
-    const normalizeName = (name) => (!name ? '' : name.trim().toLowerCase());
-
-    const tokenize = (name) =>
-        normalizeName(name).split(/[^a-z]+/).filter(Boolean);
-
+    // Loose matching — used by handleMakeRecipe
+    const normalizeName    = (name) => (!name ? '' : name.trim().toLowerCase());
+    const tokenize         = (name) => normalizeName(name).split(/[^a-z]+/).filter(Boolean);
     const namesLooselyMatch = (a, b) =>
     {
-        const tokensA = tokenize(a);
-        const tokensB = tokenize(b);
-        if (tokensA.length === 0 || tokensB.length === 0) return false;
-        if (tokensA.join(' ') === tokensB.join(' ')) return true;
-        const setB = new Set(tokensB);
-        for (let i = 0; i < tokensA.length; i++)
-            if (setB.has(tokensA[i])) return true;
-        return false;
+        const tokA = tokenize(a), tokB = tokenize(b);
+        if (!tokA.length || !tokB.length) return false;
+        if (tokA.join(' ') === tokB.join(' ')) return true;
+        const setB = new Set(tokB);
+        return tokA.some((t) => setB.has(t));
     };
 
-    // ── CRUD handlers ──────────────────────────────────────────────────────
     const handleAddRecipe = (newRecipe) =>
     {
-        fetch('/api/tempRecipes',
-        {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(newRecipe),
-        })
-            .then((res) => res.json())
-            .then((data) =>
-            {
-                setAppState((prev) => ({ ...prev, loading: false, recipes: data }));
-            })
+        apiPost('/api/tempRecipes', newRecipe)
+            .then((data) => setAppState((prev) => ({ ...prev, loading: false, recipes: data })))
             .catch((err) => console.log('Failed to add recipe', err));
     };
 
     const handleUpdateRecipe = (id, updatedRecipe) =>
     {
-        fetch(`/api/tempRecipes/${id}`,
-        {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(updatedRecipe),
-        })
-            .then((res) => res.json())
+        apiPut(`/api/tempRecipes/${id}`, updatedRecipe)
             .then((data) =>
             {
                 const updated = data.recipe;
@@ -95,12 +71,8 @@ function RecipesPage()
 
     const handleDeleteRecipe = (id) =>
     {
-        fetch(`/api/tempRecipes/${id}`, { method: 'DELETE' })
-            .then((res) => res.json())
-            .then((data) =>
-            {
-                setAppState((prev) => ({ ...prev, loading: false, recipes: data.recipes }));
-            })
+        apiDelete(`/api/tempRecipes/${id}`)
+            .then((data) => setAppState((prev) => ({ ...prev, loading: false, recipes: data.recipes })))
             .catch((err) => console.log('Failed to delete recipe', err));
     };
 
@@ -108,8 +80,7 @@ function RecipesPage()
     {
         if (!recipe || !Array.isArray(recipe.ingredients)) return;
 
-        fetch('/api/tempItems')
-            .then((res) => res.json())
+        apiGet('/api/tempItems')
             .then((pantryItems) =>
             {
                 const itemsToUpdate = [];
@@ -133,15 +104,12 @@ function RecipesPage()
 
                 itemsToUpdate.forEach((item) =>
                 {
-                    fetch(`/api/tempItems/${item.id}`,
-                    {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ name: item.name, quantity: item.quantity, unit: item.unit }),
+                    apiPut(`/api/tempItems/${item.id}`, {
+                        name: item.name, quantity: item.quantity, unit: item.unit,
                     }).catch((err) => console.log('Error updating pantry after make', err));
                 });
 
-                // Refresh pantry state so dots/gauge update immediately
+                // Update local pantry state so gauge/dots refresh immediately
                 const updatedPantry = appState.pantryItems.map((p) =>
                 {
                     const changed = itemsToUpdate.find((u) => u.id === p.id);
@@ -156,7 +124,7 @@ function RecipesPage()
         <Recipes
             isLoading={appState.loading}
             recipes={appState.recipes}
-            pantryItems={appState.pantryItems}        // ← NEW prop
+            pantryItems={appState.pantryItems}
             onAddRecipe={handleAddRecipe}
             onUpdateRecipe={handleUpdateRecipe}
             onDeleteRecipe={handleDeleteRecipe}

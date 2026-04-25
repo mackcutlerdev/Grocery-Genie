@@ -1,164 +1,74 @@
-// Dependencies
 import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import HomeDashboard from '../components/HomeDashboard';
+import { apiGet } from '../api';
 
 function HomePage()
 {
-    // All the data this page cares about (pulled from server)
-    const [appState, setAppState] = useState(
-    {
-        loading: false, // spinner (if i get to it) / "Loading..." text
+    const [appState, setAppState] = useState({
+        loading: false,
         pantryItems: [],
         recipes: [],
     });
 
-    const history = useHistory(); // used to push the user to /recipes with a selected id
+    const history = useHistory();
 
-    // Get the server and load pantry + recipes
     const loadData = () =>
     {
-        // turn loading on and clear old data
-        setAppState(
-        {
-            loading: true,
-            pantryItems: [],
-            recipes: [],
-        });
+        setAppState({ loading: true, pantryItems: [], recipes: [] });
 
-        // Fetch pantry first, then recipes (keeping it simple, i like fetch)
-        fetch('/api/tempItems')
-            .then((res) => res.json())
-            .then((itemsData) =>
+        Promise.all([
+            apiGet('/api/tempItems'),
+            apiGet('/api/tempRecipes'),
+        ])
+            .then(([itemsData, recipesData]) =>
             {
-                fetch('/api/tempRecipes')
-                    .then((res) => res.json())
-                    .then((recipesData) =>
-                    {
-                        setAppState(
-                        {
-                            loading: false,
-                            pantryItems: itemsData,
-                            recipes: recipesData,
-                        });
-                    });
+                setAppState({ loading: false, pantryItems: itemsData, recipes: recipesData });
             })
             .catch((err) =>
             {
                 console.log('Failed to load data for Home', err);
-
-                // if it blows up, just stop loading and show empty stuff
-                setAppState(
-                {
-                    loading: false,
-                    pantryItems: [],
-                    recipes: [],
-                });
+                setAppState({ loading: false, pantryItems: [], recipes: [] });
             });
     };
 
-    // load once on mount
-    useEffect(() =>
-    {
-        loadData();
-    }, []);
+    useEffect(() => { loadData(); }, []);
 
-    // Normalizes names for the loose matching
-    const normalizeName = (name) =>
-    {
-        if (!name)
-        {
-            return '';
-        }
-
-        return name.trim().toLowerCase();
-    };
-
-    // Splits a name into simple words/tokens
-    const tokenize = (name) =>
-    {
-        return normalizeName(name)
-            .split(/[^a-z]+/)
-            .filter(Boolean);
-    };
-
-    // Returns true if two ingredient names are "close enough"
+    const normalizeName     = (name) => (!name ? '' : name.trim().toLowerCase());
+    const tokenize          = (name) => normalizeName(name).split(/[^a-z]+/).filter(Boolean);
     const namesLooselyMatch = (a, b) =>
     {
-        const tokensA = tokenize(a);
-        const tokensB = tokenize(b);
-
-        if (tokensA.length === 0 || tokensB.length === 0)
-        {
-            return false;
-        }
-
-        if (tokensA.join(' ') === tokensB.join(' '))
-        {
-            return true;
-        }
-
-        // See comment in WhatCanIMake.js
-        const setB = new Set(tokensB);
-
-        for (let i = 0; i < tokensA.length; i++)
-        {
-            if (setB.has(tokensA[i]))
-            {
-                return true;
-            }
-        }
-
-        return false;
+        const tokA = tokenize(a), tokB = tokenize(b);
+        if (!tokA.length || !tokB.length) return false;
+        if (tokA.join(' ') === tokB.join(' ')) return true;
+        const setB = new Set(tokB);
+        return tokA.some((t) => setB.has(t));
     };
 
-    // Same logic as WCIM: check if all ingredients are covered by the pantry
     const canMakeRecipe = (recipe) =>
     {
-        if (!recipe || !Array.isArray(recipe.ingredients))
-        {
-            return false;
-        }
-
+        if (!recipe || !Array.isArray(recipe.ingredients)) return false;
         return recipe.ingredients.every((ing) =>
         {
-            const pantryItem = appState.pantryItems.find((item) =>
+            const match = appState.pantryItems.find((item) =>
                 namesLooselyMatch(item.name, ing.name)
             );
-
-            if (!pantryItem)
-            {
-                return false;
-            }
-
-            // null/undefined = "to taste", just need to have it
-            if (ing.quantity === null || ing.quantity === undefined)
-            {
-                return true;
-            }
-
-            // ignore units here, only checking numbers
-            return pantryItem.quantity >= ing.quantity;
+            if (!match) return false;
+            if (ing.quantity === null || ing.quantity === undefined) return true;
+            return match.quantity >= ing.quantity;
         });
     };
 
-    const makeableRecipes = appState.recipes.filter((recipe) => canMakeRecipe(recipe));
+    const makeableRecipes = appState.recipes.filter((r) => canMakeRecipe(r));
 
-    // Stats for the little cards on the dashboard
-    const stats =
-    {
-        pantryCount: appState.pantryItems.length,
-        recipeCount: appState.recipes.length,
+    const stats = {
+        pantryCount:   appState.pantryItems.length,
+        recipeCount:   appState.recipes.length,
         makeableCount: makeableRecipes.length,
     };
 
-    const handleOpenRecipe = (id) =>
-    {
-        // Go to Recipes page and pass which one should be opened
-        history.push(`/recipes?recipeId=${id}`);
-    };
+    const handleOpenRecipe = (id) => history.push(`/recipes?recipeId=${id}`);
 
-    // This page just gathers data + wiring, HomeDashboard does the actual UI
     return (
         <HomeDashboard
             isLoading={appState.loading}
