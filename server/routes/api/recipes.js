@@ -1,107 +1,130 @@
-// Dependencies
 const express = require('express');
-const router = express.Router();
-const recipes = require('../../tempRecipes'); // temp in-memory "database" of recipes
-const uuid = require('uuid');
+const router  = express.Router();
+const Recipe  = require('../../models/Recipe');
 
-// GET all recipe objects
-router.get('/', (req, res) => 
+// GET all recipes
+router.get('/', async (req, res) =>
 {
-    // Just send the whole recipes array back
-    res.json(recipes);
-});
-
-// GET single recipe object by id
-router.get('/:id', (req, res) => 
-{
-    // Check if any recipe has this id
-    const found = recipes.some(recipe => recipe.id === req.params.id);
-
-    if (found)
+    try
     {
-        // Again using filter so it returns an array with that one recipe
-        res.json(recipes.filter(recipe => recipe.id === req.params.id));
+        const recipes = await Recipe.find().sort({ createdAt: -1 });
+        res.json(recipes);
     }
-    else
+    catch (err)
     {
-        res.status(404).json({ msg: `No recipe with the id of ${req.params.id}` });
+        console.error('GET /recipes error:', err.message);
+        res.status(500).json({ msg: 'Server error fetching recipes' });
     }
 });
 
-// POST to create a new recipe object
-router.post('/', (req, res) => 
+// GET single recipe by id
+router.get('/:id', async (req, res) =>
 {
-    // Build a new recipe from body + generate a uuid
-    const newrecipe = {
-        id: uuid.v4(),
-        name: req.body.name,
-        ingredients: req.body.ingredients,       // expecting an array of { name, quantity, unit }
-        instructions: req.body.instructions      // expecting an array of strings (steps)
-    };
-
-    // No nameless recipes, that's illegal here
-    if (!newrecipe.name)
+    try
     {
-        return res.status(404).json({ msg: "Please include a recipe name" });
-    }
+        const recipe = await Recipe.findById(req.params.id);
 
-    // Push into in-memory array and return the full updated list
-    recipes.push(newrecipe);
-    res.json(recipes);
-});
-
-// PUT to update / change a recipe object
-router.put('/:id', (req, res) => 
-{
-    // First see if a recipe with that id exists
-    const found = recipes.some(recipe => recipe.id === req.params.id);
-
-    if (found)
-    {
-        const updaterecipe = req.body;
-
-        // Loop through and patch the one that matches
-        recipes.forEach(recipe => 
+        if (!recipe)
         {
-            if (recipe.id === req.params.id)
-            {
-                // Only overwrite fields that were actually sent
-                recipe.name = updaterecipe.name ? updaterecipe.name : recipe.name;
-                recipe.ingredients = updaterecipe.ingredients ? updaterecipe.ingredients : recipe.ingredients;
-                recipe.instructions = updaterecipe.instructions ? updaterecipe.instructions : recipe.instructions;
+            return res.status(404).json({ msg: `No recipe with id ${req.params.id}` });
+        }
 
-                // Send back the updated recipe
-                res.json({ msg: "recipe updated", recipe });
-            }
-        });
+        res.json(recipe);
     }
-    else
+    catch (err)
     {
-        res.status(404).json({ msg: `No recipe with the id of ${req.params.id}` });
+        console.error('GET /recipes/:id error:', err.message);
+        res.status(500).json({ msg: 'Server error fetching recipe' });
     }
 });
 
-// DELETE to delete a recipe
-router.delete('/:id', (req, res) => 
+// POST — create a new recipe
+router.post('/', async (req, res) =>
 {
-    // Make sure it exists first
-    const found = recipes.some(recipe => recipe.id === req.params.id);
+    const { name, ingredients, instructions, prep, servings } = req.body;
 
-    if (found)
+    if (!name || !name.trim())
     {
-        // Remove it from the original array
-        const index = recipes.findIndex(recipe => recipe.id === req.params.id);
-        recipes.splice(index, 1);
-
-        // Also return a filtered copy even though we already spliced it out
-        res.json({ 
-            msg: "recipe deleted",
-            recipes: recipes.filter(recipe => recipe.id !== req.params.id)
-        });
+        return res.status(400).json({ msg: 'Please include a recipe name' });
     }
-    else
+
+    try
     {
-        res.status(404).json({ msg: `No recipe with the id of ${req.params.id}` });
+        const recipe = new Recipe(
+        {
+            name:         name.trim(),
+            ingredients:  ingredients  || [],
+            instructions: instructions || [],
+            prep:         prep         || '',
+            servings:     servings     || null,
+        });
+
+        await recipe.save();
+
+        // Return full updated list (same shape client expects)
+        const allRecipes = await Recipe.find().sort({ createdAt: -1 });
+        res.json(allRecipes);
+    }
+    catch (err)
+    {
+        console.error('POST /recipes error:', err.message);
+        res.status(500).json({ msg: 'Server error creating recipe' });
+    }
+});
+
+// PUT — update a recipe
+router.put('/:id', async (req, res) =>
+{
+    const { name, ingredients, instructions, prep, servings } = req.body;
+
+    try
+    {
+        const updated = await Recipe.findByIdAndUpdate(
+            req.params.id,
+            {
+                ...(name         !== undefined && { name: name.trim() }),
+                ...(ingredients  !== undefined && { ingredients }),
+                ...(instructions !== undefined && { instructions }),
+                ...(prep         !== undefined && { prep }),
+                ...(servings     !== undefined && { servings }),
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!updated)
+        {
+            return res.status(404).json({ msg: `No recipe with id ${req.params.id}` });
+        }
+
+        // Same shape as old route: { msg, recipe }
+        res.json({ msg: 'Recipe updated', recipe: updated });
+    }
+    catch (err)
+    {
+        console.error('PUT /recipes/:id error:', err.message);
+        res.status(500).json({ msg: 'Server error updating recipe' });
+    }
+});
+
+// DELETE — remove a recipe
+router.delete('/:id', async (req, res) =>
+{
+    try
+    {
+        const deleted = await Recipe.findByIdAndDelete(req.params.id);
+
+        if (!deleted)
+        {
+            return res.status(404).json({ msg: `No recipe with id ${req.params.id}` });
+        }
+
+        const remaining = await Recipe.find().sort({ createdAt: -1 });
+        res.json({ msg: 'Recipe deleted', recipes: remaining });
+    }
+    catch (err)
+    {
+        console.error('DELETE /recipes/:id error:', err.message);
+        res.status(500).json({ msg: 'Server error deleting recipe' });
     }
 });
 

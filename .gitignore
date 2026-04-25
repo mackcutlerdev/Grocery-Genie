@@ -11,6 +11,7 @@ server/node_modules/
 
 # production
 /build
+client/build/
 
 # misc
 .DS_Store
@@ -29,3 +30,8 @@ yarn-error.log*
 # OS junk
 .DS_Store
 Thumbs.db
+
+# Database and Security
+.env
+.env.local
+.env.production

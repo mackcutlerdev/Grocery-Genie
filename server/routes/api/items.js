@@ -1,108 +1,130 @@
-// Dependencies
 const express = require('express');
-const router = express.Router();
-const items = require('../../tempItems'); // temp in-memory "database" of pantry items
-const uuid = require('uuid');
+const router  = express.Router();
+const Item    = require('../../models/Item');
 
-// GET all item objects
-router.get('/', (req, res) => 
+// GET all items
+// Returns every item in the collection (Phase 3 will filter by userId)
+router.get('/', async (req, res) =>
 {
-    // Just dump the whole items array as JSON
-    res.json(items);
-});
-
-// GET single item object by id
-router.get('/:id', (req, res) => 
-{
-    // Check if any item has this id
-    const found = items.some(item => item.id === req.params.id);
-
-    if (found)
+    try
     {
-        // Filter returns an array, even though it should be just one item
-        res.json(items.filter(item => item.id === req.params.id));
+        const items = await Item.find().sort({ createdAt: -1 });
+        res.json(items);
     }
-    else
+    catch (err)
     {
-        // 404 if it doesn't exist
-        res.status(404).json({ msg: `No item with the id of ${req.params.id}` });
+        console.error('GET /items error:', err.message);
+        res.status(500).json({ msg: 'Server error fetching items' });
     }
 });
 
-// POST to create a new item object
-router.post('/', (req, res) => 
+// GET single item by MongoDB _id
+router.get('/:id', async (req, res) =>
 {
-    // Build a new item from the body, plus a fresh uuid
-    const newItem = {
-        id: uuid.v4(),
-        name: req.body.name,
-        quantity: req.body.quantity,
-        unit: req.body.unit || "Unit" // default unit if none is sent
-    };
-
-    // No nameless items allowed
-    if (!newItem.name)
+    try
     {
-        return res.status(404).json({ msg: "Please include an item name" });
-    }
+        const item = await Item.findById(req.params.id);
 
-    // Push into the in-memory array and send back the full list
-    items.push(newItem);
-    res.json(items);
-});
-
-// PUT to update / change an item object
-router.put('/:id', (req, res) => 
-{
-    // First, see if the item exists
-    const found = items.some(item => item.id === req.params.id);
-
-    if (found)
-    {
-        const updateItem = req.body;
-
-        // Loop the array and patch the one that matches
-        items.forEach(item => 
+        if (!item)
         {
-            if (item.id === req.params.id)
-            {
-                // Only overwrite the fields that were sent in
-                item.name = updateItem.name ? updateItem.name : item.name;
-                item.quantity = updateItem.quantity ? updateItem.quantity : item.quantity;
-                item.unit = updateItem.unit ? updateItem.unit : item.unit;
+            return res.status(404).json({ msg: `No item with id ${req.params.id}` });
+        }
 
-                // Send back the updated item
-                res.json({ msg: "Item updated", item });
-            }
-        });
+        res.json(item);
     }
-    else
+    catch (err)
     {
-        res.status(404).json({ msg: `No item with the id of ${req.params.id}` });
+        // findById throws a CastError if the id format is invalid
+        console.error('GET /items/:id error:', err.message);
+        res.status(500).json({ msg: 'Server error fetching item' });
     }
 });
 
-// DELETE to delete an item
-router.delete('/:id', (req, res) => 
+// POST — create a new item
+router.post('/', async (req, res) =>
 {
-    // Check if an item with this id even exists first
-    const found = items.some(item => item.id === req.params.id);
+    const { name, quantity, unit } = req.body;
 
-    if (found)
+    if (!name || !name.trim())
     {
-        // Remove it from the original array
-        const index = items.findIndex(item => item.id === req.params.id);
-        items.splice(index, 1);
-
-        // Also return a filtered copy just to be extra clear in the response
-        res.json({ 
-            msg: "Item deleted",
-            items: items.filter(item => item.id !== req.params.id)
-        });
+        return res.status(400).json({ msg: 'Please include an item name' });
     }
-    else
+
+    try
     {
-        res.status(404).json({ msg: `No item with the id of ${req.params.id}` });
+        const item = new Item(
+        {
+            name:     name.trim(),
+            quantity: Number(quantity) || 0,
+            unit:     unit || 'Unit',
+        });
+
+        await item.save();
+
+        // Return the full updated list (same shape the client already expects)
+        const allItems = await Item.find().sort({ createdAt: -1 });
+        res.json(allItems);
+    }
+    catch (err)
+    {
+        console.error('POST /items error:', err.message);
+        res.status(500).json({ msg: 'Server error creating item' });
+    }
+});
+
+// PUT — update an item by id
+router.put('/:id', async (req, res) =>
+{
+    const { name, quantity, unit } = req.body;
+
+    try
+    {
+        // findByIdAndUpdate with { new: true } returns the updated doc, not the old one
+        const updated = await Item.findByIdAndUpdate(
+            req.params.id,
+            {
+                ...(name     !== undefined && { name:     name.trim() }),
+                ...(quantity !== undefined && { quantity: Number(quantity) }),
+                ...(unit     !== undefined && { unit }),
+            },
+            { new: true, runValidators: true }
+        );
+
+        if (!updated)
+        {
+            return res.status(404).json({ msg: `No item with id ${req.params.id}` });
+        }
+
+        // Same shape as the old route: { msg, item }
+        res.json({ msg: 'Item updated', item: updated });
+    }
+    catch (err)
+    {
+        console.error('PUT /items/:id error:', err.message);
+        res.status(500).json({ msg: 'Server error updating item' });
+    }
+});
+
+// DELETE — remove an item by id
+router.delete('/:id', async (req, res) =>
+{
+    try
+    {
+        const deleted = await Item.findByIdAndDelete(req.params.id);
+
+        if (!deleted)
+        {
+            return res.status(404).json({ msg: `No item with id ${req.params.id}` });
+        }
+
+        // Same shape as old route: { msg, items: [...] }
+        const remaining = await Item.find().sort({ createdAt: -1 });
+        res.json({ msg: 'Item deleted', items: remaining });
+    }
+    catch (err)
+    {
+        console.error('DELETE /items/:id error:', err.message);
+        res.status(500).json({ msg: 'Server error deleting item' });
     }
 });
 
