@@ -71,7 +71,7 @@ const Navbar = () =>
                     <i className={`bi bi-${isDark ? 'sun' : 'moon-stars'}`}></i>
                     <span style={{ marginLeft: '6px' }}>{isDark ? 'Light' : 'Dark'}</span>
                 </button>
-                <div className="gg-version-tag">v<em>0.9.1</em> · prototype</div>
+                <div className="gg-version-tag">v<em>0.9.5</em> · demo</div>
             </div>
         </aside>
     );
