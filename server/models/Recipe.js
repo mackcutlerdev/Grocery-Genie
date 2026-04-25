@@ -36,6 +36,15 @@ const RecipeSchema = new mongoose.Schema(
 },
 {
     timestamps: true,
+    toJSON:
+    {
+        virtuals: true,
+        versionKey: false,
+        transform: (_doc, ret) => { delete ret._id; },
+    },
 });
+
+// "id" virtual: returns _id as a plain hex string
+RecipeSchema.virtual('id').get(function () { return this._id.toHexString(); });
 
 module.exports = mongoose.model('Recipe', RecipeSchema);

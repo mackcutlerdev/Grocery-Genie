@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 // Each pantry item belongs to a user (userId added in Phase 3,
-// but we define the field now so we don't need a migration later, cause that'd be tedious)
+// but we define the field now so we don't need a migration later)
 const ItemSchema = new mongoose.Schema(
 {
     userId:
@@ -32,8 +32,19 @@ const ItemSchema = new mongoose.Schema(
     },
 },
 {
-    // Adds createdAt and updatedAt timestamps automatically
     timestamps: true,
+    // toJSON runs whenever res.json() serialises a document.
+    // We expose _id as a plain string "id" field, matching the
+    // shape the client already expects from the old uuid-based code.
+    toJSON:
+    {
+        virtuals: true,
+        versionKey: false,
+        transform: (_doc, ret) => { delete ret._id; },
+    },
 });
+
+// "id" virtual: returns _id as a plain hex string
+ItemSchema.virtual('id').get(function () { return this._id.toHexString(); });
 
 module.exports = mongoose.model('Item', ItemSchema);

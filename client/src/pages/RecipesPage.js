@@ -5,102 +5,58 @@ import Recipes from '../components/Recipes';
 
 function RecipesPage()
 {
-    const location = useLocation(); // gives us access to ?recipeId=... in the URL
+    const location = useLocation();
     const query = new URLSearchParams(location.search);
-    const initialSelectedRecipeId = query.get('recipeId'); // used to auto-select a recipe when coming from Home
+    const initialSelectedRecipeId = query.get('recipeId');
 
-    // Data for this page (server-side recipes)
     const [appState, setAppState] = useState(
     {
-        loading: false, // spinner / "Loading recipes..."
+        loading: false,
         recipes: [],
+        pantryItems: [],   // ← NEW: needed for ingredient coverage gauge + dot colours
     });
 
-    // Pull recipes from the server
-    const loadRecipes = () =>
+    // Pull both recipes AND pantry in one go
+    const loadData = () =>
     {
-        setAppState(
-        {
-            loading: true,
-            recipes: [],
-        });
+        setAppState({ loading: true, recipes: [], pantryItems: [] });
 
-        fetch('/api/tempRecipes')
-            .then((res) => res.json())
-            .then((data) =>
+        Promise.all([
+            fetch('/api/tempRecipes').then((r) => r.json()),
+            fetch('/api/tempItems').then((r) => r.json()),
+        ])
+            .then(([recipesData, itemsData]) =>
             {
-                setAppState(
-                {
-                    loading: false,
-                    recipes: data,
-                });
+                setAppState({ loading: false, recipes: recipesData, pantryItems: itemsData });
             })
             .catch((err) =>
             {
-                console.log("Failed to load recipes", err);
-                setAppState(
-                {
-                    loading: false,
-                    recipes: [],
-                });
+                console.log('Failed to load recipes/pantry', err);
+                setAppState({ loading: false, recipes: [], pantryItems: [] });
             });
     };
 
-    // Load once on mount
-    useEffect(() =>
-    {
-        loadRecipes();
-    }, []);
+    useEffect(() => { loadData(); }, []);
 
-    // COPIED FROM WCIM, CAUSE IM LAZY, this is so we can get the names to not only match but remove
-    // leaving the comments though cause they no need to repeat
-    const normalizeName = (name) =>
-    {
-        if (!name)
-        {
-            return '';
-        }
-
-        return name.trim().toLowerCase();
-    };
+    // ── Loose name matching (same as WCIM / HomePage) ──────────────────────
+    const normalizeName = (name) => (!name ? '' : name.trim().toLowerCase());
 
     const tokenize = (name) =>
-    {
-        return normalizeName(name)
-            .split(/[^a-z]+/)
-            .filter(Boolean);
-    };
+        normalizeName(name).split(/[^a-z]+/).filter(Boolean);
 
     const namesLooselyMatch = (a, b) =>
     {
         const tokensA = tokenize(a);
         const tokensB = tokenize(b);
-
-        if (tokensA.length === 0 || tokensB.length === 0)
-        {
-            return false;
-        }
-
-        if (tokensA.join(' ') === tokensB.join(' '))
-        {
-            return true;
-        }
-
+        if (tokensA.length === 0 || tokensB.length === 0) return false;
+        if (tokensA.join(' ') === tokensB.join(' ')) return true;
         const setB = new Set(tokensB);
-
         for (let i = 0; i < tokensA.length; i++)
-        {
-            if (setB.has(tokensA[i]))
-            {
-                return true;
-            }
-        }
-
+            if (setB.has(tokensA[i])) return true;
         return false;
     };
-    // END COPY
 
-    // Called by Recipes component when user saves the "add recipe" form
+    // ── CRUD handlers ──────────────────────────────────────────────────────
     const handleAddRecipe = (newRecipe) =>
     {
         fetch('/api/tempRecipes',
@@ -112,20 +68,11 @@ function RecipesPage()
             .then((res) => res.json())
             .then((data) =>
             {
-                // server returns full updated recipes array
-                setAppState(
-                {
-                    loading: false,
-                    recipes: data,
-                });
+                setAppState((prev) => ({ ...prev, loading: false, recipes: data }));
             })
-            .catch((err) =>
-            {
-                console.log("Failed to add recipe", err);
-            });
+            .catch((err) => console.log('Failed to add recipe', err));
     };
 
-    // Called by Recipes when user saves edits on a single recipe
     const handleUpdateRecipe = (id, updatedRecipe) =>
     {
         fetch(`/api/tempRecipes/${id}`,
@@ -137,141 +84,79 @@ function RecipesPage()
             .then((res) => res.json())
             .then((data) =>
             {
-                const updated = data.recipe; // server sends back { msg, recipe }
-
-                // Swap out just the one recipe that changed
-                setAppState((prev) =>
-                ({
-                    loading: prev.loading,
-                    recipes: prev.recipes.map((recipe) =>
-                    {
-                        if (recipe.id === updated.id)
-                        {
-                            return updated;
-                        }
-                        return recipe;
-                    })
+                const updated = data.recipe;
+                setAppState((prev) => ({
+                    ...prev,
+                    recipes: prev.recipes.map((r) => (r.id === updated.id ? updated : r)),
                 }));
             })
-            .catch((err) =>
-            {
-                console.log("Failed to update recipe", err);
-            });
+            .catch((err) => console.log('Failed to update recipe', err));
     };
 
-    // Called by Recipes when user deletes a recipe
     const handleDeleteRecipe = (id) =>
     {
-        fetch(`/api/tempRecipes/${id}`,
-        {
-            method: 'DELETE',
-        })
+        fetch(`/api/tempRecipes/${id}`, { method: 'DELETE' })
             .then((res) => res.json())
             .then((data) =>
             {
-                // server returns { msg, recipes: [...] }
-                setAppState(
-                {
-                    loading: false,
-                    recipes: data.recipes,
-                });
+                setAppState((prev) => ({ ...prev, loading: false, recipes: data.recipes }));
             })
-            .catch((err) =>
-            {
-                console.log("Failed to delete recipe", err);
-            });
+            .catch((err) => console.log('Failed to delete recipe', err));
     };
 
-    // When user clicks "Make Recipe" on the Recipes page (after opening recipe)
-    // This pulls the pantry from the server, subtracts ingredients, and PUTs (see what i did there) the updated stuff back
     const handleMakeRecipe = (recipe) =>
     {
-        if (!recipe || !Array.isArray(recipe.ingredients))
-        {
-            return;
-        }
+        if (!recipe || !Array.isArray(recipe.ingredients)) return;
 
-        // grab the latest pantry from the server
         fetch('/api/tempItems')
             .then((res) => res.json())
             .then((pantryItems) =>
             {
                 const itemsToUpdate = [];
 
-                // For each ingredient in the recipe, try to find a pantry item and subtract
-                recipe.ingredients.forEach((recipeIngredient) =>
+                recipe.ingredients.forEach((recipeIng) =>
                 {
-                    // If it's a "to taste" ingredient (null/undefined amt), skip subtracting, cause it's impossble and easier than converting to 0 
-                    if (recipeIngredient.quantity === null || recipeIngredient.quantity === undefined)
-                    {
-                        return;
-                    }
+                    if (recipeIng.quantity === null || recipeIng.quantity === undefined) return;
 
-                    const matchingPantryItem = pantryItems.find((item) =>
-                        namesLooselyMatch(item.name, recipeIngredient.name)
+                    const match = pantryItems.find((item) =>
+                        namesLooselyMatch(item.name, recipeIng.name)
                     );
+                    if (!match) return;
 
-                    if (!matchingPantryItem)
-                    {
-                        // Pantry just doesn't have this ingredient so nothing to subtract so stop, pls, don't break
-                        return;
-                    }
+                    const currentQty = Number(match.quantity) || 0;
+                    const neededQty  = Number(recipeIng.quantity) || 0;
+                    const newQty     = Math.max(0, currentQty - neededQty);
 
-                    const currentQty = Number(matchingPantryItem.quantity) || 0;
-                    const neededQty = Number(recipeIngredient.quantity) || 0;
-
-                    let newQty = currentQty - neededQty;
-                    if (newQty < 0)
-                    {
-                        newQty = 0; // no negative food either, that would be weird
-                    }
-
-                    // Only bother updating if it actually changed
                     if (newQty !== currentQty)
-                    {
-                        itemsToUpdate.push(
-                        {
-                            id: matchingPantryItem.id,
-                            name: matchingPantryItem.name,
-                            quantity: newQty,
-                            unit: matchingPantryItem.unit,
-                        });
-                    }
+                        itemsToUpdate.push({ id: match.id, name: match.name, quantity: newQty, unit: match.unit });
                 });
 
-                // Next, send PUTs for every pantry item that changed
                 itemsToUpdate.forEach((item) =>
                 {
                     fetch(`/api/tempItems/${item.id}`,
                     {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(
-                        {
-                            name: item.name,
-                            quantity: item.quantity,
-                            unit: item.unit,
-                        }),
-                    })
-                        .catch((err) =>
-                        {
-                            console.log("Error: Couldn't update pantry item after making recipe", err);
-                        });
+                        body: JSON.stringify({ name: item.name, quantity: item.quantity, unit: item.unit }),
+                    }).catch((err) => console.log('Error updating pantry after make', err));
                 });
+
+                // Refresh pantry state so dots/gauge update immediately
+                const updatedPantry = appState.pantryItems.map((p) =>
+                {
+                    const changed = itemsToUpdate.find((u) => u.id === p.id);
+                    return changed ? { ...p, quantity: changed.quantity } : p;
+                });
+                setAppState((prev) => ({ ...prev, pantryItems: updatedPantry }));
             })
-            .catch((err) =>
-            {
-                console.log("Failed to load pantry for Make Recipe", err);
-            });
+            .catch((err) => console.log('Failed to load pantry for Make Recipe', err));
     };
 
-
-    // Same pattern as PantryPage: page handles data + server,
-    // Recipes component handles the UI and all the form states
     return (
         <Recipes
             isLoading={appState.loading}
             recipes={appState.recipes}
+            pantryItems={appState.pantryItems}        // ← NEW prop
             onAddRecipe={handleAddRecipe}
             onUpdateRecipe={handleUpdateRecipe}
             onDeleteRecipe={handleDeleteRecipe}
