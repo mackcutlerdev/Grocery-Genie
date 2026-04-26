@@ -139,6 +139,12 @@ function SourcesPage()
                         <div className="gg-sources-item">
                             <a href="https://cssgradient.io/" target="_blank" rel="noopener noreferrer">CSS Gradient</a>
                         </div>
+                        <div className="gg-sources-item">
+                            <a href="https://www.joshwcomeau.com/css/" target="_blank" rel="noopener noreferrer">Josh W. Comeau's CSS Guide: TONS OF HELP FOR CSS</a>
+                        </div>
+                        <div className="gg-sources-item">
+                            <a href="https://medium.com/css-tutorials/css-spheres-aab1a341deb2" target="_blank" rel="noopener noreferrer">CSS Spheres Tutorial (FOR TEMP LOGO)</a>
+                        </div>
                     </div>
 
                 </div>
