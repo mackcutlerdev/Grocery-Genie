@@ -11,7 +11,7 @@ const Roadmap = () =>
                     GroceryGenie <em>Roadmap</em>
                 </div>
                 <div className="gg-sub-heading" style={{ marginBottom: '28px' }}>
-                    Current Version: v0.9.1
+                    Current Version: v0.9.5
                 </div>
 
                 <div style={{ maxWidth: '740px', display: 'flex', flexDirection: 'column', gap: '14px' }}>

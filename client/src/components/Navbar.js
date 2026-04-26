@@ -108,7 +108,7 @@ const Navbar = () =>
                     <span className="gg-nav-label" style={{ marginLeft: '6px' }}>Logout</span>
                 </button>
 
-                <div className="gg-version-tag">v<em>0.9.1</em> · prototype</div>
+                <div className="gg-version-tag">v<em>0.9.5</em> · prototype</div>
             </div>
         </aside>
     );

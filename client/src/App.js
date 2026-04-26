@@ -1,16 +1,18 @@
 import { Route, Switch, useLocation, Redirect } from 'react-router-dom';
 import './App.css';
-import Navbar           from './components/Navbar';
-import ProtectedRoute   from './pages/ProtectedRoute';
-import LoginPage        from './pages/LoginPage';
-import PantryPage       from './pages/PantryPage';
-import RecipesPage      from './pages/RecipesPage';
+import Navbar from './components/Navbar';
+import ProtectedRoute from './pages/ProtectedRoute';
+import LoginPage from './pages/LoginPage';
+import PantryPage from './pages/PantryPage';
+import RecipesPage from './pages/RecipesPage';
 import WhatCanIMakePage from './pages/WhatCanIMakePage';
-import HomePage         from './pages/HomePage';
-import RoadmapPage      from './pages/RoadmapPage';
-import SourcesPage      from './pages/SourcesPage';
+import HomePage from './pages/HomePage';
+import RoadmapPage from './pages/RoadmapPage';
+import SourcesPage from './pages/SourcesPage';
 
-const PAGE_TITLES = {
+// Maps route paths to top bar titles. The title is split into 2 parts, like you see on the top bar :/
+const PAGE_TITLES = 
+{
     '/':             { italic: 'Dashboard',  strong: null    },
     '/pantry':       { italic: 'Pantry',     strong: null    },
     '/recipes':      { italic: 'Recipe',     strong: 'Book'  },
@@ -19,10 +21,11 @@ const PAGE_TITLES = {
     '/sources':      { italic: 'Sources',    strong: null    },
 };
 
+// Function to actaully render the top bar. Reads the curr path and looks up the title, if no title just do "GroceryGenie"
 function TopBar()
 {
     const location = useLocation();
-    const title    = PAGE_TITLES[location.pathname] || { italic: 'GroceryGenie', strong: null };
+    const title = PAGE_TITLES[location.pathname] || { italic: 'GroceryGenie', strong: null };
 
     return (
         <div id="gg-topbar">
@@ -35,8 +38,8 @@ function TopBar()
     );
 }
 
-// The shell layout — sidebar + topbar + content
-// Only renders when the user is on a non-login route
+// The shell layout: sidebar + topbar + content
+// Only renders when the user is on a non-login route (already logged in)
 function AppShell()
 {
     return (
@@ -60,6 +63,7 @@ function AppShell()
     );
 }
 
+// The main app bit. Decides whether to show the login page or the shell based on the route.
 function App()
 {
     return (
@@ -69,7 +73,7 @@ function App()
 
             {/* Everything else goes through the shell.
                 ProtectedRoute inside AppShell handles the redirect
-                to /login if there's no token — no redirect logic here. */}
+                to /login if there's no token, no redirect logic here. */}
             <Route component={AppShell} />
         </Switch>
     );

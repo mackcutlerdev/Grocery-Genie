@@ -513,9 +513,24 @@ const Recipes = (props) =>
                                             className="gg-btn-teal"
                                             onClick={() =>
                                             {
-                                                if (!window.confirm(`Use pantry items to make "${selectedRecipe.name}"?`)) return;
+                                                const { pct } = getCoverage(selectedRecipe);
+
+                                                if(pct < 1)
+                                                {
+                                                    const proceed = window.confirm(
+                                                    `You don't have all the ingredients for "${selectedRecipe.name}".\n\n` +
+                                                    `Only ingredients you already have will be subtracted from your pantry. ` +
+                                                    `Are you sure you want to proceed?`
+                                                    );
+                                                    if(!proceed) return;
+                                                }
+                                                else
+                                                {
+                                                    if(!window.confirm(`Use pantry items to make "${selectedRecipe.name}"?`)) return;
+                                                }
+
                                                 onMakeRecipe(selectedRecipe);
-                                                window.alert('Ingredients removed from pantry!');
+                                                window.alert('Done! Ingredients removed from pantry.');
                                             }}
                                         >
                                             <i className="bi bi-fire"></i><span>Make Recipe</span>

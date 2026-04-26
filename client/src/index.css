@@ -1,6 +1,6 @@
-/* ═══════════════════════════════════════════════════
-   DESIGN TOKENS
-═══════════════════════════════════════════════════ */
+/* #region DESIGN TOKENS */
+/* Design tokens are like const variables for specific design properties */
+/* -------------------------------------------------- */
 :root {
   --bg-0:          #110C14;
   --bg-1:          #1A1018;
@@ -35,14 +35,16 @@
 
   --sidebar-w: 220px;
 }
+/* #endregion */
 
-/* ═══════════════════════════════════════════════════
-   LIGHT THEME TOKEN OVERRIDES
-   Applied by setting data-theme="light" on <html>.
+/* #region LIGHT THEME TOKEN OVERRIDES */
+
+  /* Applied by setting data-theme="light" on <html>.
    Only the token values change — every component
    inherits the new values automatically via var(--x).
-   No component CSS needs to be touched for theming.
-═══════════════════════════════════════════════════ */
+   No component CSS needs to be touched for theming. */
+
+/* -------------------------------------------------- */
 [data-theme="light"] {
   /* Backgrounds — warm parchment/cream scale, light to slightly deeper */
   --bg-0:       #F0E8DF;
@@ -88,10 +90,10 @@
 [data-theme="light"] #gg-topbar {
   background: rgba(240, 232, 223, 0.80);
 }
+/* #endregion */
 
-/* ═══════════════════════════════════════════════════
-   RESET & BASE
-═══════════════════════════════════════════════════ */
+/* #region RESET & BASE */
+/* -------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { height: 100%; overflow: hidden; }
 
@@ -129,10 +131,10 @@ body::after {
 ::-webkit-scrollbar-track { background: transparent; }
 ::-webkit-scrollbar-thumb { background: var(--bg-raised); border-radius: 3px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--primary-deep); }
+/* #endregion */
 
-/* ═══════════════════════════════════════════════════
-   SHELL LAYOUT  (sidebar | main)
-═══════════════════════════════════════════════════ */
+/* #region SHELL LAYOUT  (sidebar | main) */
+/* -------------------------------------------------- */
 #gg-shell {
   position: relative; z-index: 2;
   display: grid;
@@ -141,10 +143,10 @@ body::after {
   height: 100vh;
   overflow: hidden;
 }
+/* #endregion */
 
-/* ═══════════════════════════════════════════════════
-   SIDEBAR
-═══════════════════════════════════════════════════ */
+/* #region SIDEBAR */
+/* -------------------------------------------------- */
 #gg-sidebar {
   background: linear-gradient(180deg, rgba(26,16,24,0.98) 0%, rgba(17,12,20,0.98) 100%);
   border-right: 1px solid var(--hairline-mid);
@@ -278,12 +280,13 @@ body::after {
   font-family: var(--f-mono);
   font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--text-faint);
+  font-feature-settings: "zero" 0;
 }
 .gg-version-tag em { color: var(--teal); font-style: normal; }
+/* #endregion */
 
-/* ═══════════════════════════════════════════════════
-   MAIN CONTENT AREA
-═══════════════════════════════════════════════════ */
+/* #region MAIN CONTENT AREA */
+/* -------------------------------------------------- */
 #gg-main {
   display: flex; flex-direction: column;
   overflow: hidden;
@@ -333,16 +336,17 @@ body::after {
   opacity: 1; pointer-events: all;
   transform: translateY(0);
 }
+/* #endregion */
 
-/* ═══════════════════════════════════════════════════
-   TYPOGRAPHY HELPERS
-═══════════════════════════════════════════════════ */
+/* #region TYPOGRAPHY HELPERS */
+/* -------------------------------------------------- */
 .gg-kicker {
   font-family: var(--f-mono);
   font-size: 10px; letter-spacing: 0.25em; text-transform: uppercase;
   color: var(--accent);
   display: flex; align-items: center; gap: 10px;
   margin-bottom: 6px;
+  font-feature-settings: "zero" 0;
 }
 .gg-kicker::before {
   content: ''; width: 24px; height: 1px;
@@ -366,10 +370,10 @@ body::after {
   font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--text-dim); margin-bottom: 20px;
 }
+/* #endregion */
 
-/* ═══════════════════════════════════════════════════
-   BUTTONS
-═══════════════════════════════════════════════════ */
+/* #region BUTTONS */
+/* -------------------------------------------------- */
 .gg-btn-primary {
   display: inline-flex; align-items: center; gap: 7px;
   font-family: var(--f-display);
@@ -437,10 +441,10 @@ body::after {
   border-color: rgba(61,140,140,0.4);
   background: rgba(61,140,140,0.1); color: var(--teal);
 }
+/* #endregion */
 
-/* ═══════════════════════════════════════════════════
-   FORM CONTROLS
-═══════════════════════════════════════════════════ */
+/* #region FORM CONTROLS */
+/* -------------------------------------------------- */
 .gg-input {
   background: var(--bg-2) !important;
   border: 1px solid var(--hairline-mid) !important;
@@ -467,10 +471,10 @@ select.gg-input option { background: var(--bg-3); color: var(--text); }
   font-size: 9px; letter-spacing: 0.2em; text-transform: uppercase;
   color: var(--text-dim); margin-bottom: 6px;
 }
+/* #endregion */
 
-/* ═══════════════════════════════════════════════════
-   CARDS / SURFACES
-═══════════════════════════════════════════════════ */
+/* #region CARDS / SURFACES */
+/* -------------------------------------------------- */
 .gg-card {
   background: linear-gradient(145deg, var(--bg-3) 0%, var(--bg-2) 100%);
   border: 1px solid var(--hairline-mid);
@@ -490,9 +494,16 @@ select.gg-input option { background: var(--bg-3); color: var(--text); }
   margin: 18px 0;
 }
 
-/* ═══════════════════════════════════════════════════
-   RESPONSIVE: collapse sidebar on small screens
-═══════════════════════════════════════════════════ */
+/* OVERRIDE */
+.gg-nav-item,
+.gg-label,
+.gg-kicker {
+  font-family: var(--f-body);
+}
+/* #endregion */
+
+/* #region RESPONSIVE */
+/* -------------------------------------------------- */
 @media (max-width: 900px) {
   :root { --sidebar-w: 64px; }
   .gg-logo-wordmark, .gg-nav-label, .gg-sidebar-footer { display: none; }
@@ -500,3 +511,4 @@ select.gg-input option { background: var(--bg-3); color: var(--text); }
   .gg-nav-item { justify-content: center; padding: 12px; }
   .gg-nav-icon { width: auto; font-size: 18px; }
 }
+/* #endregion */
