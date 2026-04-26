@@ -1,6 +1,5 @@
-// Footer removed — version info now lives in the sidebar footer.
-// This file is kept as a no-op so existing imports don't break.
-// You can safely delete Footer.js and remove its import from App.js.
+// Footer removed for now since it just exists as apart of the sidebar (SIDEWAYS NAVBAR :P).
+// This file is kept so existing imports don't break, they shouldn't but I fear...
 
 const Footer = () => null;
 

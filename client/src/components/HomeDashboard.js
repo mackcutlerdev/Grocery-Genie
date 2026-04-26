@@ -29,7 +29,7 @@ const HomeDashboard = (props) =>
                         <div className="gg-stat-label">Recipes You Can Make Now</div>
                         <div className="gg-stat-num col-teal">{stats.makeableCount}</div>
                         <div className="gg-stat-sub">ready to cook tonight</div>
-                        <div className="gg-stat-glyph">✦</div>
+                        <div className="gg-stat-glyph">🟉</div>
                     </div>
                 </div>
 
@@ -58,7 +58,7 @@ const HomeDashboard = (props) =>
                     <div className="gg-dash-cookable-list">
                         {(!makeableRecipes || makeableRecipes.length === 0) && (
                             <div className="gg-dash-empty">
-                                No recipes are fully makeable yet — add more ingredients to your pantry!
+                                No recipes are fully makeable yet, add more ingredients to your pantry!
                             </div>
                         )}
 

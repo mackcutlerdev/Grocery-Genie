@@ -7,7 +7,7 @@ const WhatCanIMake = (props) =>
     // 'all' | 'ready' | 'missing'
     const [filterMode, setFilterMode] = useState('all');
 
-    /* ── Matching logic (unchanged) ── */
+    /* Matching logic */
     const normalizeName = (name) => (!name ? '' : name.trim().toLowerCase());
     const tokenize = (name) => normalizeName(name).split(/[^a-z]+/).filter(Boolean);
     const namesLooselyMatch = (a, b) =>
@@ -37,13 +37,13 @@ const WhatCanIMake = (props) =>
         recipe.ingredients.forEach((ing) =>
         {
             const match = pantryItems.find((p) => namesLooselyMatch(p.name, ing.name));
-            if (!match)
+            if(!match)
             {
                 missing.push({ name: ing.name, needed: ing.quantity ?? null, unit: ing.unit || '' });
                 return;
             }
-            if (ing.quantity !== null && ing.quantity !== undefined)
-                if (match.quantity < ing.quantity)
+            if(ing.quantity !== null && ing.quantity !== undefined)
+                if(match.quantity < ing.quantity)
                     missing.push({ name: ing.name, needed: ing.quantity - match.quantity, unit: ing.unit || '' });
         });
         return missing;
@@ -57,7 +57,7 @@ const WhatCanIMake = (props) =>
         return { total, matched, missingList };
     };
 
-    /* ── Build the accurate meta string for any recipe ── */
+    /* Build the accurate meta string for any recipe */
     const buildMeta = (recipe) =>
     {
         const parts = [];
@@ -89,7 +89,7 @@ const WhatCanIMake = (props) =>
                     <div className="gg-kicker" style={{ marginBottom: '8px' }}>Pantry Intelligence</div>
                     <p style={{ fontFamily: 'var(--f-body)', fontStyle: 'italic', color: 'var(--text-dim)', fontSize: '16px', maxWidth: '680px', lineHeight: '1.6', margin: 0 }}>
                         Based on your current pantry and saved recipes, here's what you can cook right now.
-                        The matching engine understands ingredient variants —{' '}
+                        The matching engine understands ingredient variants: {' '}
                         <em style={{ color: 'var(--accent)' }}>"2% Milk"</em> counts as{' '}
                         <em style={{ color: 'var(--accent)' }}>"Milk"</em>.
                     </p>
@@ -107,7 +107,7 @@ const WhatCanIMake = (props) =>
                         className={`gg-wcim-filter-btn${filterMode === 'ready' ? ' active teal' : ''}`}
                         onClick={() => setFilterMode('ready')}
                     >
-                        ✦ Can Fully Make
+                        🟉 Can Fully Make
                     </button>
                     <button
                         className={`gg-wcim-filter-btn${filterMode === 'missing' ? ' active' : ''}`}
@@ -187,7 +187,7 @@ const WhatCanIMake = (props) =>
 
                         {missingRecipes.length === 0 ? (
                             <div className="gg-dash-empty" style={{ borderColor: 'rgba(232,132,90,0.15)' }}>
-                                ✦ You have all ingredients for every saved recipe!
+                                🟉 You have all ingredients for every saved recipe!
                             </div>
                         ) : (
                             missingRecipes.map((recipe) =>

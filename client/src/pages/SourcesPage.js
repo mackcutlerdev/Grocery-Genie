@@ -31,7 +31,7 @@ function SourcesPage()
                             Used v5 since that's what we covered in class.<br />
                             <a href="https://v5.reactrouter.com/web/api/Hooks" target="_blank" rel="noopener noreferrer">v5.reactrouter.com</a>
                             {' · '}
-                            <a href="https://www.youtube.com/watch?v=TNhaISOUy6Q" target="_blank" rel="noopener noreferrer">YouTube — Fireship</a>
+                            <a href="https://www.youtube.com/watch?v=TNhaISOUy6Q" target="_blank" rel="noopener noreferrer">YouTube: Fireship</a>
                         </div>
 
                         <div className="gg-sources-item">
@@ -63,7 +63,7 @@ function SourcesPage()
 
                         <div className="gg-sources-item">
                             <strong>JavaScript Set.has() performance</strong><br />
-                            Set.has() is O(1) vs Array.indexOf() O(n) — used for faster ingredient matching.<br />
+                            Set.has() is O(1) vs Array.indexOf() O(n), used for faster ingredient matching.<br />
                             <a href="https://stackoverflow.com/questions/55057200/is-the-set-has-method-o1-and-array-indexof-on" target="_blank" rel="noopener noreferrer">Stack Overflow</a>
                         </div>
 
@@ -88,7 +88,7 @@ function SourcesPage()
                         </div>
 
                         <div className="gg-sources-item">
-                            <strong>Render — serving static files</strong><br />
+                            <strong>Render: serving static files</strong><br />
                             When deploying to Render.<br />
                             <a href="https://stackoverflow.com/questions/53308128/problem-serving-static-files-with-express" target="_blank" rel="noopener noreferrer">Stack Overflow</a>
                         </div>
@@ -101,7 +101,7 @@ function SourcesPage()
 
                         <div className="gg-sources-item">
                             <strong>Prop Drilling &amp; Controlled Inputs</strong><br />
-                            General React architecture — controlled inputs and forms.<br />
+                            General React architecture, controlled inputs and forms.<br />
                             <a href="https://react.dev/learn/sharing-state-between-components" target="_blank" rel="noopener noreferrer">React — State Sharing</a>
                             {' · '}
                             <a href="https://www.youtube.com/watch?v=O6P86uwfdR0" target="_blank" rel="noopener noreferrer">YouTube — useState</a>
@@ -118,7 +118,7 @@ function SourcesPage()
                     <div className="gg-sources-card">
                         <div className="gg-sources-card-title">Images &amp; Assets</div>
                         <div className="gg-sources-item">
-                            The favicon was made by my girlfriend — she doesn't post anywhere so no link available.
+                            The favicon was made by my girlfriend, she doesn't post anywhere so no link available.
                         </div>
                     </div>
 

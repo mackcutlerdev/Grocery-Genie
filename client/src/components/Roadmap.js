@@ -31,33 +31,33 @@ const Roadmap = () =>
                         <div className="gg-roadmap-list">
                             <div className="gg-roadmap-item">Shopping List Page</div>
                             <div className="gg-roadmap-item">
-                                Add Missing Ingredients to Shopping List — from the "What Can I Make?" page, instantly send missing ingredients to the shopping list.
+                                Add Missing Ingredients to Shopping List: from the "What Can I Make?" page, instantly send missing ingredients to the shopping list.
                             </div>
                             <div className="gg-roadmap-item">
-                                Post-Recipe Prompt —{' '}
+                                Post-Recipe Prompt: {' '}
                                 <em style={{ color: 'var(--text-faint)', fontStyle: 'italic', fontFamily: 'var(--f-body)' }}>
                                     "Add used ingredients to shopping list?"
                                 </em>
                             </div>
                             <div className="gg-roadmap-item" style={{ color: 'var(--accent)' }}>
                                 <i className="bi bi-database-fill-gear" style={{ fontSize: '11px', marginRight: '6px' }}></i>
-                                MongoDB Integration — full persistence
+                                <s>MongoDB Integration, full persistence</s>
                             </div>
-                            <div className="gg-roadmap-item">Search &amp; Filter — recipes and pantry items, with category filtering</div>
-                            <div className="gg-roadmap-item">Ingredient Persistence (Quantity = 0 but Saved) — visually grayed out</div>
-                            <div className="gg-roadmap-item">Ingredient &amp; Recipe Tags — poultry, seafood, frozen, main dish, etc.</div>
+                            <div className="gg-roadmap-item">Search &amp; Filter: recipes and pantry items, with category filtering</div>
+                            <div className="gg-roadmap-item">Ingredient Persistence (Quantity = 0 but Saved): visually grayed out</div>
+                            <div className="gg-roadmap-item">Ingredient &amp; Recipe Tags: poultry, seafood, frozen, main dish, etc.</div>
                         </div>
                     </div>
 
                     {/* Future ideas */}
                     <div className="gg-card" style={{ padding: '22px 26px' }}>
-                        <div className="gg-roadmap-section-label accent-teal">Future Ideas — Post 1.0</div>
+                        <div className="gg-roadmap-section-label accent-teal">Future Ideas 🟉 Post 1.0.0</div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             <div className="gg-future-item">Export shopping list to PDF or phone-friendly view</div>
                             <div className="gg-future-item">AI-suggested recipes based on partial ingredients</div>
-                            <div className="gg-future-item">Auto-detect duplicates in pantry — e.g. "milk" vs "2% milk"</div>
+                            <div className="gg-future-item">Auto-detect duplicates in pantry: e.g. "milk" vs "2% milk"</div>
                             <div className="gg-future-item">Dark / Light / Cozy / Modern / Cyberpunk themes</div>
-                            <div className="gg-future-item">Ingredient DB — press [+] on an ingredient instead of manual entry</div>
+                            <div className="gg-future-item">Ingredient DB: press [+] on an ingredient instead of manual entry</div>
                             <div className="gg-future-item">Changelog system</div>
                         </div>
                     </div>
@@ -66,7 +66,7 @@ const Roadmap = () =>
                     <div className="gg-card" style={{ padding: '22px 26px' }}>
                         <div className="gg-roadmap-section-label accent-plain">Known Bugs</div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                            <div className="gg-future-item" style={{ '--dot-color': 'var(--primary)' }}>On mobile view the navbar is too wide — no responsive design yet</div>
+                            <div className="gg-future-item" style={{ '--dot-color': 'var(--primary)' }}>On mobile view the navbar is too wide: no responsive design yet</div>
                             <div className="gg-future-item">Duplicate pantry entries possible</div>
                             <div className="gg-future-item">On mobile view in Recipes, the two columns collide</div>
                             <div className="gg-future-item">"Items in Pantry" counts items not total quantity</div>
@@ -92,7 +92,7 @@ const Roadmap = () =>
                         <div className="gg-roadmap-section-label accent-plain">Recipe Book</div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             <div className="gg-future-item">Click [+] in the recipe list to add a new recipe</div>
-                            <div className="gg-future-item">Add ingredients with name, qty, unit — one per row</div>
+                            <div className="gg-future-item">Add ingredients with name, qty, unit, one per row</div>
                             <div className="gg-future-item">Type instructions, one step per line</div>
                             <div className="gg-future-item">Click "Make Recipe" to subtract used ingredients from pantry</div>
                         </div>
@@ -102,7 +102,7 @@ const Roadmap = () =>
                         <div className="gg-roadmap-section-label accent-plain">What Can I Make?</div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                             <div className="gg-future-item">Shows recipes you can make right now with current pantry</div>
-                            <div className="gg-future-item">Also shows recipes you're missing stuff for — tells you what's needed</div>
+                            <div className="gg-future-item">Also shows recipes you're missing stuff for, tells you what's needed</div>
                             <div className="gg-future-item">Use the filter pills to narrow the view</div>
                         </div>
                     </div>

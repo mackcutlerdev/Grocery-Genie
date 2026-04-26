@@ -250,7 +250,7 @@ const Pantry = (props) =>
 
                         <div className="gg-divider"></div>
                         <div style={{ fontFamily: 'var(--f-mono)', fontSize: '9px', letterSpacing: '0.18em', textTransform: 'uppercase', color: 'var(--text-faint)', lineHeight: '1.7' }}>
-                            ✦ Smart matching means "2% Milk" will satisfy a recipe calling for "Milk" — no exact names needed.
+                            🟉 Smart matching means "2% Milk" will satisfy a recipe calling for "Milk", no exact names needed.
                         </div>
                     </div>
 
