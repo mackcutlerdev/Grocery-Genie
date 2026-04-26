@@ -5,12 +5,12 @@ function LoginPage()
 {
     const history = useHistory();
 
-    const [mode,     setMode]     = useState('login');    // 'login' | 'register'
+    const [mode, setMode] = useState('login');      // 'login' | 'register'
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [confirm,  setConfirm]  = useState('');         // only used in register mode
-    const [error,    setError]    = useState('');
-    const [loading,  setLoading]  = useState(false);
+    const [confirm, setConfirm] = useState('');     // only used in register mode
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     const isRegister = mode === 'register';
 
@@ -19,22 +19,44 @@ function LoginPage()
         e.preventDefault();
         setError('');
 
-        if (!username.trim() || !password)
+        if(!username.trim() || !password)
         {
             setError('Please fill in all fields');
             return;
         }
 
-        if (isRegister && password !== confirm)
+        if(isRegister && password !== confirm)
         {
             setError('Passwords do not match');
             return;
         }
 
-        if (isRegister && password.length < 6)
+        /* Password validation */
+        if(isRegister) 
         {
-            setError('Password must be at least 6 characters');
-            return;
+            if (password.trim().length === 0) 
+            {
+                setError('Password cannot be empty or spaces only');
+                return;
+            }
+
+            if(password.length < 6) 
+            {
+                setError('Password must be at least 6 characters');
+                return;
+            }
+
+            if(!/[A-Z]/.test(password)) 
+            {
+                setError('Include at least one uppercase letter');
+                return;
+            }
+
+            if(!/[0-9]/.test(password)) 
+            {
+                setError('Include at least one number');
+                return;
+            }
         }
 
         setLoading(true);
@@ -45,14 +67,14 @@ function LoginPage()
 
             const res = await fetch(endpoint,
             {
-                method:  'POST',
+                method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body:    JSON.stringify({ username: username.trim(), password }),
+                body: JSON.stringify({ username: username.trim(), password }),
             });
 
             const data = await res.json();
 
-            if (!res.ok)
+            if(!res.ok)
             {
                 setError(data.msg || 'Something went wrong');
                 setLoading(false);
@@ -61,12 +83,12 @@ function LoginPage()
 
             // Store token and user info — api.js will pick these up for every future request
             localStorage.setItem('gg-token', data.token);
-            localStorage.setItem('gg-user',  JSON.stringify(data.user));
+            localStorage.setItem('gg-user', JSON.stringify(data.user));
 
             // Send the user to the dashboard
             history.push('/');
         }
-        catch (err)
+        catch(err)
         {
             setError('Could not reach the server. Try again.');
             setLoading(false);
@@ -112,7 +134,7 @@ function LoginPage()
 
                     {/* Heading */}
                     <div className="gg-kicker" style={{ marginBottom: '8px' }}>
-                        {isRegister ? 'Create Account' : 'Welcome Back'}
+                        {isRegister ? 'Create Account' : 'Welcome Back'} 
                     </div>
                     <div style={{ fontFamily: 'var(--f-display)', fontSize: '30px', fontWeight: 500, fontStyle: 'italic', marginBottom: '28px', lineHeight: 1.1 }}>
                         {isRegister ? <>Start your <em style={{ color: 'var(--accent)' }}>kitchen</em></> : <>Sign <em style={{ color: 'var(--accent)' }}>in</em></>}
@@ -143,7 +165,7 @@ function LoginPage()
                                 className="gg-input"
                                 id="lp-username"
                                 type="text"
-                                placeholder="e.g. mack"
+                                placeholder="e.g. johndoe"
                                 autoComplete="username"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}

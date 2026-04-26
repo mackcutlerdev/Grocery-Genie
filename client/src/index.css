@@ -348,6 +348,10 @@ body::after {
   content: ''; width: 24px; height: 1px;
   background: var(--accent); flex-shrink: 0;
 }
+/*.gg-kicker::after {
+  content: ''; flex: 1; height: 1px;
+  background: var(--accent);
+}*/
 
 .gg-panel-heading {
   font-family: var(--f-display);

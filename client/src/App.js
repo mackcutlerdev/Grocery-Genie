@@ -1,14 +1,14 @@
 import { Route, Switch, useLocation, Redirect } from 'react-router-dom';
 import './App.css';
-import Navbar         from './components/Navbar';
-import ProtectedRoute from './pages/ProtectedRoute';
-import LoginPage      from './pages/LoginPage';
-import PantryPage     from './pages/PantryPage';
-import RecipesPage    from './pages/RecipesPage';
+import Navbar           from './components/Navbar';
+import ProtectedRoute   from './pages/ProtectedRoute';
+import LoginPage        from './pages/LoginPage';
+import PantryPage       from './pages/PantryPage';
+import RecipesPage      from './pages/RecipesPage';
 import WhatCanIMakePage from './pages/WhatCanIMakePage';
-import HomePage       from './pages/HomePage';
-import RoadmapPage    from './pages/RoadmapPage';
-import SourcesPage    from './pages/SourcesPage';
+import HomePage         from './pages/HomePage';
+import RoadmapPage      from './pages/RoadmapPage';
+import SourcesPage      from './pages/SourcesPage';
 
 const PAGE_TITLES = {
     '/':             { italic: 'Dashboard',  strong: null    },
@@ -35,43 +35,42 @@ function TopBar()
     );
 }
 
+// The shell layout — sidebar + topbar + content
+// Only renders when the user is on a non-login route
+function AppShell()
+{
+    return (
+        <div id="gg-shell">
+            <Navbar />
+            <div id="gg-main">
+                <TopBar />
+                <div id="gg-content">
+                    <Switch>
+                        <ProtectedRoute path="/"             component={HomePage}        exact />
+                        <ProtectedRoute path="/pantry"       component={PantryPage}            />
+                        <ProtectedRoute path="/recipes"      component={RecipesPage}           />
+                        <ProtectedRoute path="/whatcanimake" component={WhatCanIMakePage}      />
+                        <ProtectedRoute path="/roadmap"      component={RoadmapPage}           />
+                        <ProtectedRoute path="/sources"      component={SourcesPage}           />
+                    </Switch>
+                </div>
+            </div>
+            <div id="gg-toast-container"></div>
+        </div>
+    );
+}
+
 function App()
 {
-    const token = localStorage.getItem('gg-token');
-
     return (
         <Switch>
-            {/* Login page — full screen, no sidebar, no topbar */}
-            <Route path="/login">
-                {token
-                    ? <Redirect to="/" />      // already logged in, go home
-                    : <LoginPage />
-                }
-            </Route>
+            {/* /login is fully public and renders outside the shell */}
+            <Route path="/login" component={LoginPage} />
 
-            {/* All other routes — protected, render inside the shell */}
-            <Route>
-                <div id="gg-shell">
-                    <Navbar />
-
-                    <div id="gg-main">
-                        <TopBar />
-
-                        <div id="gg-content">
-                            <Switch>
-                                <ProtectedRoute path="/"             component={HomePage}        exact />
-                                <ProtectedRoute path="/pantry"       component={PantryPage}            />
-                                <ProtectedRoute path="/recipes"      component={RecipesPage}           />
-                                <ProtectedRoute path="/whatcanimake" component={WhatCanIMakePage}      />
-                                <ProtectedRoute path="/roadmap"      component={RoadmapPage}           />
-                                <ProtectedRoute path="/sources"      component={SourcesPage}           />
-                            </Switch>
-                        </div>
-                    </div>
-
-                    <div id="gg-toast-container"></div>
-                </div>
-            </Route>
+            {/* Everything else goes through the shell.
+                ProtectedRoute inside AppShell handles the redirect
+                to /login if there's no token — no redirect logic here. */}
+            <Route component={AppShell} />
         </Switch>
     );
 }
