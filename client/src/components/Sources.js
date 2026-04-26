@@ -145,6 +145,9 @@ const Sources = () =>
                             <div className="gg-sources-item">
                                 <a href="https://medium.com/css-tutorials/css-spheres-aab1a341deb2" target="_blank" rel="noopener noreferrer">CSS Spheres Tutorial (FOR TEMP LOGO)</a>
                             </div>
+                            <div className="gg-sources-item">
+                                <a href="https://jestjs.io/docs/getting-started" target="_blank" rel="noopener noreferrer">Jest Documentation: UNIT TESTING HELP</a>
+                            </div>
                         </div>
     
                     </div>

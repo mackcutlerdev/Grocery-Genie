@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import HomeDashboard from '../components/HomeDashboard';
 import { apiGet } from '../api';
+import { canMakeRecipe } from '../utils/recipeUtils';
 
 function HomePage()
 {
@@ -34,32 +35,7 @@ function HomePage()
 
     useEffect(() => { loadData(); }, []);
 
-    const normalizeName     = (name) => (!name ? '' : name.trim().toLowerCase());
-    const tokenize          = (name) => normalizeName(name).split(/[^a-z]+/).filter(Boolean);
-    const namesLooselyMatch = (a, b) =>
-    {
-        const tokA = tokenize(a), tokB = tokenize(b);
-        if (!tokA.length || !tokB.length) return false;
-        if (tokA.join(' ') === tokB.join(' ')) return true;
-        const setB = new Set(tokB);
-        return tokA.some((t) => setB.has(t));
-    };
-
-    const canMakeRecipe = (recipe) =>
-    {
-        if (!recipe || !Array.isArray(recipe.ingredients)) return false;
-        return recipe.ingredients.every((ing) =>
-        {
-            const match = appState.pantryItems.find((item) =>
-                namesLooselyMatch(item.name, ing.name)
-            );
-            if (!match) return false;
-            if (ing.quantity === null || ing.quantity === undefined) return true;
-            return match.quantity >= ing.quantity;
-        });
-    };
-
-    const makeableRecipes = appState.recipes.filter((r) => canMakeRecipe(r));
+    const makeableRecipes = appState.recipes.filter((r) => canMakeRecipe(r, appState.pantryItems));
 
     const stats = {
         pantryCount:   appState.pantryItems.length,

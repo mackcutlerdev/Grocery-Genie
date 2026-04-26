@@ -1,4 +1,5 @@
 import React, { Fragment, useState } from 'react';
+import { canMakeRecipe, matchInfo, buildMeta } from '../utils/recipeUtils';
 
 const WhatCanIMake = (props) =>
 {
@@ -7,73 +8,13 @@ const WhatCanIMake = (props) =>
     // 'all' | 'ready' | 'missing'
     const [filterMode, setFilterMode] = useState('all');
 
-    /* Matching logic */
-    const normalizeName = (name) => (!name ? '' : name.trim().toLowerCase());
-    const tokenize = (name) => normalizeName(name).split(/[^a-z]+/).filter(Boolean);
-    const namesLooselyMatch = (a, b) =>
-    {
-        const tokA = tokenize(a), tokB = tokenize(b);
-        if (!tokA.length || !tokB.length) return false;
-        if (tokA.join(' ') === tokB.join(' ')) return true;
-        const setB = new Set(tokB);
-        return tokA.some((t) => setB.has(t));
-    };
-
-    const canMakeRecipe = (recipe) =>
-    {
-        if (!recipe || !Array.isArray(recipe.ingredients)) return false;
-        return recipe.ingredients.every((ing) =>
-        {
-            const match = pantryItems.find((p) => namesLooselyMatch(p.name, ing.name));
-            if (!match) return false;
-            if (ing.quantity === null || ing.quantity === undefined) return true;
-            return match.quantity >= ing.quantity;
-        });
-    };
-
-    const getMissingIngredients = (recipe) =>
-    {
-        const missing = [];
-        recipe.ingredients.forEach((ing) =>
-        {
-            const match = pantryItems.find((p) => namesLooselyMatch(p.name, ing.name));
-            if(!match)
-            {
-                missing.push({ name: ing.name, needed: ing.quantity ?? null, unit: ing.unit || '' });
-                return;
-            }
-            if(ing.quantity !== null && ing.quantity !== undefined)
-                if(match.quantity < ing.quantity)
-                    missing.push({ name: ing.name, needed: ing.quantity - match.quantity, unit: ing.unit || '' });
-        });
-        return missing;
-    };
-
-    const matchInfo = (recipe) =>
-    {
-        const total      = recipe.ingredients ? recipe.ingredients.length : 0;
-        const missingList = getMissingIngredients(recipe);
-        const matched    = total - missingList.length;
-        return { total, matched, missingList };
-    };
-
-    /* Build the accurate meta string for any recipe */
-    const buildMeta = (recipe) =>
-    {
-        const parts = [];
-        if (recipe.prep) parts.push(recipe.prep);
-        const ingCount = Array.isArray(recipe.ingredients) ? recipe.ingredients.length : 0;
-        if (ingCount > 0) parts.push(`${ingCount} ing.`);
-        return parts.join(' · ');
-    };
-
-    const makeableRecipes = recipes.filter((r) => canMakeRecipe(r));
-    const missingRecipes  = recipes.filter((r) => !canMakeRecipe(r));
+    const makeableRecipes = recipes.filter((r) => canMakeRecipe(r, pantryItems));
+    const missingRecipes  = recipes.filter((r) => !canMakeRecipe(r, pantryItems));
 
     // Sort missing by % matched descending (closest to ready first)
     missingRecipes.sort((a, b) =>
     {
-        const mA = matchInfo(a), mB = matchInfo(b);
+        const mA = matchInfo(a, pantryItems), mB = matchInfo(b, pantryItems);
         return (mB.matched / (mB.total || 1)) - (mA.matched / (mA.total || 1));
     });
 
@@ -192,7 +133,7 @@ const WhatCanIMake = (props) =>
                         ) : (
                             missingRecipes.map((recipe) =>
                             {
-                                const m    = matchInfo(recipe);
+                                const m    = matchInfo(recipe, pantryItems);
                                 const meta = buildMeta(recipe);
                                 return (
                                     <div key={recipe.id} className="gg-wcim-missing-card">
@@ -202,7 +143,6 @@ const WhatCanIMake = (props) =>
                                         >
                                             <div>
                                                 <div className="gg-wcim-missing-name">{recipe.name}</div>
-                                                {/* Accurate meta: "30 min · 6 ing." */}
                                                 {meta && (
                                                     <div style={{ fontFamily: 'var(--f-mono)', fontSize: '9px', letterSpacing: '0.12em', color: 'var(--text-faint)', marginTop: '3px' }}>
                                                         {meta}
