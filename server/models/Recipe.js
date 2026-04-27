@@ -30,7 +30,7 @@ const RecipeSchema = new mongoose.Schema(
     // Instructions stored as an array of strings, one string per step
     instructions: [{ type: String, trim: true }],
 
-    // Optional fields — client can send these, we store them if present
+    // Optional fields, client can send these, we store them if present
     prep:     { type: String, default: '' },
     servings: { type: Number, default: null },
 },

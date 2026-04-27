@@ -1,7 +1,7 @@
 import { canMakeRecipe, getMissingIngredients, matchInfo, getCoverage, buildMeta } from '../utils/recipeUtils';
 
 
-// ─── Shared test data ────────────────────────────────────────────────────────
+// Shared test data
 
 const fullPantry = [
     { name: 'Eggs',   quantity: 6,   unit: 'Unit' },
@@ -32,7 +32,7 @@ const chili = {
 };
 
 
-// ─── canMakeRecipe ───────────────────────────────────────────────────────────
+// canMakeRecipe 
 
 describe('canMakeRecipe', () =>
 {
@@ -110,7 +110,7 @@ describe('canMakeRecipe', () =>
 });
 
 
-// ─── getMissingIngredients ───────────────────────────────────────────────────
+// getMissingIngredients
 
 describe('getMissingIngredients', () =>
 {
@@ -160,7 +160,7 @@ describe('getMissingIngredients', () =>
 });
 
 
-// ─── matchInfo ───────────────────────────────────────────────────────────────
+// matchInfo
 
 describe('matchInfo', () =>
 {
@@ -203,7 +203,7 @@ describe('matchInfo', () =>
 });
 
 
-// ─── getCoverage ─────────────────────────────────────────────────────────────
+// getCoverage
 
 describe('getCoverage', () =>
 {
@@ -246,7 +246,7 @@ describe('getCoverage', () =>
 });
 
 
-// ─── buildMeta ───────────────────────────────────────────────────────────────
+// buildMeta
 
 describe('buildMeta', () =>
 {

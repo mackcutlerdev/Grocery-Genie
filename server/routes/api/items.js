@@ -22,7 +22,7 @@ router.get('/', async (req, res) =>
     }
 });
 
-// GET single item — must belong to the logged-in user
+// GET single item, must belong to the logged-in user
 router.get('/:id', async (req, res) =>
 {
     try
@@ -41,7 +41,7 @@ router.get('/:id', async (req, res) =>
     }
 });
 
-// POST — create a new item owned by the logged-in user
+// POST: create a new item owned by the logged-in user
 router.post('/', async (req, res) =>
 {
     const { name, quantity, unit } = req.body;
@@ -70,7 +70,7 @@ router.post('/', async (req, res) =>
     }
 });
 
-// PUT — update an item, only if it belongs to the logged-in user
+// PUT: update an item, only if it belongs to the logged-in user
 router.put('/:id', async (req, res) =>
 {
     const { name, quantity, unit } = req.body;
@@ -99,7 +99,7 @@ router.put('/:id', async (req, res) =>
     }
 });
 
-// DELETE — remove an item, only if it belongs to the logged-in user
+// DELETE: remove an item, only if it belongs to the logged-in user
 router.delete('/:id', async (req, res) =>
 {
     try

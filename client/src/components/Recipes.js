@@ -28,7 +28,7 @@ const Recipes = (props) =>
 
     useEffect(() =>
     {
-        if (initialSelectedRecipeId) setSelectedRecipeId(initialSelectedRecipeId);
+        if(initialSelectedRecipeId) setSelectedRecipeId(initialSelectedRecipeId);
     }, [initialSelectedRecipeId]);
 
     const selectedRecipe = recipes.find((r) => r.id === selectedRecipeId) || null;
@@ -38,28 +38,28 @@ const Recipes = (props) =>
     const parseInstructionsText = (text) =>
         text.split('\n').map((l) => l.trim()).filter((l) => l !== '');
 
-    /* ── New ingredient helpers ── */
+    /* New ingredient helpers */
     const handleNewIngChange = (index, field, value) =>
         setNewRecipeIngredients((prev) => { const u=[...prev]; u[index]={...u[index],[field]:value}; return u; });
 
     const addIngRow    = () => setNewRecipeIngredients((p) => [...p, { name:'', quantity:'', unit:'Unit' }]);
     const removeIngRow = (i) => setNewRecipeIngredients((p) => p.filter((_,idx) => idx !== i));
 
-    /* ── Edit ingredient helpers ── */
+    /* Edit ingredient helpers */
     const handleEditIngChange = (index, field, value) =>
         setEditRecipeIngredients((prev) => { const u=[...prev]; u[index]={...u[index],[field]:value}; return u; });
 
     const addEditIngRow    = () => setEditRecipeIngredients((p) => [...p, { name:'', quantity:'', unit:'Unit' }]);
     const removeEditIngRow = (i) => setEditRecipeIngredients((p) => p.filter((_,idx) => idx !== i));
 
-    /* ── Selection ── */
+    /* Selection */
     const handleSelectRecipe = (id) =>
     {
         setSelectedRecipeId(id);
         if (editingId && editingId !== id) cancelEditing();
     };
 
-    /* ── Add form toggle ── */
+    /* Add form toggle */
     const handleToggleAddForm = () =>
     {
         setShowAddForm(!showAddForm);
@@ -93,7 +93,7 @@ const Recipes = (props) =>
         setShowAddForm(false);
     };
 
-    /* ── Edit form ── */
+    /* Edit form */
     const startEditing = (recipe) =>
     {
         setEditingId(recipe.id);
@@ -227,7 +227,7 @@ const Recipes = (props) =>
         </div>
     );
 
-    /* ── Ingredient rows in read-only detail ── */
+    /* Ingredient rows in read-only detail */
     const renderDetailIngredients = (ingredients) =>
     {
         if (!ingredients || ingredients.length === 0)
@@ -263,7 +263,7 @@ const Recipes = (props) =>
         ));
     };
 
-    /* ── Pantry coverage gauge ── */
+    /* Pantry coverage gauge */
     const renderCoverageGauge = (recipe) =>
     {
         const { matched, total, pct } = getCoverage(recipe, pantryItems);
@@ -369,7 +369,7 @@ const Recipes = (props) =>
                         </div>
                     </div>
 
-                    {/* ── Right: detail / edit ── */}
+                    {/* Right: detail / edit */}
                     <div className="gg-recipe-detail-col">
 
                         {!selectedRecipe && editingId === null && (

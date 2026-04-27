@@ -5,7 +5,7 @@ const jwt      = require('jsonwebtoken');
 
 process.env.JWT_SECRET = 'test-secret';
 
-// ── Mock the User model so no real DB is needed ──────────────────────────
+// Mock the User model so no real DB is needed
 jest.mock('../../models/User');
 const User = require('../../models/User');
 
@@ -15,7 +15,7 @@ app.use(express.json());
 app.use('/api/auth', require('./auth'));
 
 
-// ── Register ─────────────────────────────────────────────────────────────
+// Register
 
 describe('POST /api/auth/register', () =>
 {
@@ -89,7 +89,7 @@ describe('POST /api/auth/register', () =>
 });
 
 
-// ── Login ─────────────────────────────────────────────────────────────────
+// Login
 
 describe('POST /api/auth/login', () =>
 {

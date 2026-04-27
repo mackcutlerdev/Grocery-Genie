@@ -1,7 +1,7 @@
 import { normalizeName, tokenize, namesLooselyMatch } from './matchingUtils';
 
 
-// ─── normalizeName ───────────────────────────────────────────────────────────
+// normalizeName
 
 describe('normalizeName', () =>
 {
@@ -32,7 +32,7 @@ describe('normalizeName', () =>
 });
 
 
-// ─── tokenize ────────────────────────────────────────────────────────────────
+// tokenize
 
 describe('tokenize', () =>
 {
@@ -63,11 +63,11 @@ describe('tokenize', () =>
 });
 
 
-// ─── namesLooselyMatch ───────────────────────────────────────────────────────
+// namesLooselyMatch
 
 describe('namesLooselyMatch', () =>
 {
-    // ── Exact matches ──
+    // Exact matches 
 
     test('matches identical names', () =>
     {
@@ -84,7 +84,7 @@ describe('namesLooselyMatch', () =>
         expect(namesLooselyMatch('  Eggs  ', 'Eggs')).toBe(true);
     });
 
-    // ── Token overlap matches ──
+    // Token overlap matches
 
     test('matches when pantry name contains the recipe ingredient word', () =>
     {
@@ -111,7 +111,7 @@ describe('namesLooselyMatch', () =>
         expect(namesLooselyMatch('Whole Milk', 'Milk')).toBe(true);
     });
 
-    // ── The critical non-match: salt vs unsalted ──
+    // The critical non-match: salt vs unsalted
 
     test('does NOT match Salt against Unsalted Butter', () =>
     {
@@ -132,7 +132,7 @@ describe('namesLooselyMatch', () =>
         expect(namesLooselyMatch('Flour', 'Sugar')).toBe(false);
     });
 
-    // ── Edge cases ──
+    // Edge cases
 
     test('returns false when first name is empty', () =>
     {
@@ -159,7 +159,7 @@ describe('namesLooselyMatch', () =>
         expect(namesLooselyMatch('Milk', null)).toBe(false);
     });
 
-    // ── Numbers in names ──
+    // Numbers in names
 
     test('matches names that share a numeric token', () =>
     {

@@ -74,7 +74,7 @@ const WhatCanIMake = (props) =>
                     </div>
                 )}
 
-                {/* ── Can Fully Make ── */}
+                {/* Can Fully Make */}
                 {showReady && recipes.length > 0 && (
                     <div id="wcim-ready-section">
                         <div className="gg-wcim-section-title">
@@ -118,7 +118,7 @@ const WhatCanIMake = (props) =>
                     </div>
                 )}
 
-                {/* ── Missing Ingredients ── */}
+                {/* Missing Ingredients */}
                 {showMissing && recipes.length > 0 && (
                     <div id="wcim-missing-section" style={{ marginTop: showReady ? '32px' : '0' }}>
                         <div className="gg-wcim-section-title">

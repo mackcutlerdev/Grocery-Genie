@@ -19,7 +19,7 @@ beforeEach(() =>
 });
 
 
-// ─── 1. Basic rendering ──────────────────────────────────────────────────────
+// 1. Basic rendering
 
 describe('basic rendering', () =>
 {
@@ -53,7 +53,7 @@ describe('basic rendering', () =>
 });
 
 
-// ─── 2. Login validation ─────────────────────────────────────────────────────
+// 2. Login validation
 
 describe('login validation', () =>
 {
@@ -76,7 +76,7 @@ describe('login validation', () =>
 });
 
 
-// ─── 3. Register validation ──────────────────────────────────────────────────
+// 3. Register validation
 
 describe('register validation', () =>
 {
@@ -133,7 +133,7 @@ describe('register validation', () =>
 });
 
 
-// ─── 4. Successful login ─────────────────────────────────────────────────────
+// 4. Successful login
 
 describe('successful login', () =>
 {

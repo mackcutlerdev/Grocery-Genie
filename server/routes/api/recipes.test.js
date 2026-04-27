@@ -39,7 +39,7 @@ const fakeRecipes = [
 beforeEach(() => jest.clearAllMocks());
 
 
-// ── Auth guard ────────────────────────────────────────────────────────────
+// Auth guard
 
 describe('auth guard on recipes routes', () =>
 {
@@ -51,7 +51,7 @@ describe('auth guard on recipes routes', () =>
 });
 
 
-// ── GET / ─────────────────────────────────────────────────────────────────
+// GET /
 
 describe('GET /api/tempRecipes', () =>
 {
@@ -81,7 +81,7 @@ describe('GET /api/tempRecipes', () =>
 });
 
 
-// ── GET /:id ──────────────────────────────────────────────────────────────
+// GET /:id
 
 describe('GET /api/tempRecipes/:id', () =>
 {
@@ -110,7 +110,7 @@ describe('GET /api/tempRecipes/:id', () =>
 });
 
 
-// ── POST / ────────────────────────────────────────────────────────────────
+// POST /
 
 describe('POST /api/tempRecipes', () =>
 {
@@ -166,7 +166,7 @@ describe('POST /api/tempRecipes', () =>
 });
 
 
-// ── PUT /:id ──────────────────────────────────────────────────────────────
+// PUT /:id
 
 describe('PUT /api/tempRecipes/:id', () =>
 {
@@ -198,7 +198,7 @@ describe('PUT /api/tempRecipes/:id', () =>
 });
 
 
-// ── DELETE /:id ───────────────────────────────────────────────────────────
+// DELETE /:id 
 
 describe('DELETE /api/tempRecipes/:id', () =>
 {

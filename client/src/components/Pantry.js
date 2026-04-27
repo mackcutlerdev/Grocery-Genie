@@ -72,7 +72,7 @@ const Pantry = (props) =>
             <div className="gg-panel active" id="panel-pantry">
                 <div className="gg-pantry-layout">
 
-                    {/* ── Left: table ───────────────────── */}
+                    {/* Left: table */}
                     <div>
                         <div className="gg-table-wrap">
                             <table className="gg-table">
@@ -193,7 +193,7 @@ const Pantry = (props) =>
                         </div>
                     </div>
 
-                    {/* ── Right: add-item form card ─────── */}
+                    {/* Right: add-item form card */}
                     <div className="gg-add-form-card">
                         <div className="gg-add-form-title">
                             Add <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>New Item</em>

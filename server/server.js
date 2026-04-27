@@ -8,7 +8,7 @@ const path      = require('path');
 const server = express();
 const PORT   = process.env.PORT || 5000;
 
-// ── Connect to MongoDB ─────────────────────────────────────────────────────
+// Connect to MongoDB 
 mongoose.connect(process.env.MONGODB_URI)
     .then(() => console.log('MongoDB connected'))
     .catch((err) =>
@@ -17,20 +17,20 @@ mongoose.connect(process.env.MONGODB_URI)
         process.exit(1);
     });
 
-// ── Middleware ─────────────────────────────────────────────────────────────
+// Middleware 
 server.use(logger);
 server.use(express.json());
 server.use(express.urlencoded({ extended: false }));
 
-// ── API Routes ─────────────────────────────────────────────────────────────
-// Auth is public — no JWT needed to register or login
+// API Routes
+// Auth is public, no JWT needed to register or login
 server.use('/api/auth',        require('./routes/api/auth'));
 
-// Data routes — protected by JWT inside each router via auth middleware
+// Data routes, protected by JWT inside each router via auth middleware
 server.use('/api/tempItems',   require('./routes/api/items'));
 server.use('/api/tempRecipes', require('./routes/api/recipes'));
 
-// ── Serve React build in production ───────────────────────────────────────
+// Serve React build in production 
 if (process.env.NODE_ENV === 'production')
 {
     const clientBuildPath = path.join(__dirname, '../client/build');
@@ -44,5 +44,5 @@ if (process.env.NODE_ENV === 'production')
     });
 }
 
-// ── Start ──────────────────────────────────────────────────────────────────
+// Start
 server.listen(PORT, () => console.log(`Server started on port ${PORT}`));

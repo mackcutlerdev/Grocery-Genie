@@ -4,16 +4,16 @@ const jwt     = require('jsonwebtoken');
 
 process.env.JWT_SECRET = 'test-secret';
 
-// ── Mock Item model ───────────────────────────────────────────────────────
+// Mock Item model 
 jest.mock('../../models/Item');
 const Item = require('../../models/Item');
 
-// ── Build app ─────────────────────────────────────────────────────────────
+// Build app
 const app = express();
 app.use(express.json());
 app.use('/api/tempItems', require('./items'));
 
-// Valid token for a fake user — reused across all tests
+// Valid token for a fake user, reused across all tests
 const USER_ID    = 'user111';
 const validToken = jwt.sign({ userId: USER_ID }, 'test-secret');
 const authHeader = { Authorization: `Bearer ${validToken}` };
@@ -27,7 +27,7 @@ const fakeItems = [
 beforeEach(() => jest.clearAllMocks());
 
 
-// ── Auth guard ────────────────────────────────────────────────────────────
+// Auth guard
 
 describe('auth guard on items routes', () =>
 {
@@ -39,7 +39,7 @@ describe('auth guard on items routes', () =>
 });
 
 
-// ── GET / ─────────────────────────────────────────────────────────────────
+// GET /
 
 describe('GET /api/tempItems', () =>
 {
@@ -69,7 +69,7 @@ describe('GET /api/tempItems', () =>
 });
 
 
-// ── GET /:id ──────────────────────────────────────────────────────────────
+// GET /:id
 
 describe('GET /api/tempItems/:id', () =>
 {
@@ -98,7 +98,7 @@ describe('GET /api/tempItems/:id', () =>
 });
 
 
-// ── POST / ────────────────────────────────────────────────────────────────
+// POST /
 
 describe('POST /api/tempItems', () =>
 {
@@ -149,7 +149,7 @@ describe('POST /api/tempItems', () =>
 });
 
 
-// ── PUT /:id ──────────────────────────────────────────────────────────────
+// PUT /:id
 
 describe('PUT /api/tempItems/:id', () =>
 {
@@ -181,7 +181,7 @@ describe('PUT /api/tempItems/:id', () =>
 });
 
 
-// ── DELETE /:id ───────────────────────────────────────────────────────────
+// DELETE /:id
 
 describe('DELETE /api/tempItems/:id', () =>
 {

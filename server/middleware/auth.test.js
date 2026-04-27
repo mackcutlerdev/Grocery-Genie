@@ -3,7 +3,7 @@ const jwt  = require('jsonwebtoken');
 
 process.env.JWT_SECRET = 'test-secret';
 
-// Minimal req/res/next fakes — just enough for the middleware to run
+// Minimal req/res/next fakes, just enough for the middleware to run
 const makeReq  = (token) => ({
     headers: { authorization: token ? `Bearer ${token}` : undefined }
 });

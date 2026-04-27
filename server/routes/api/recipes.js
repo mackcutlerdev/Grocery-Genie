@@ -21,7 +21,7 @@ router.get('/', async (req, res) =>
     }
 });
 
-// GET single recipe — must belong to the logged-in user
+// GET single recipe, must belong to the logged-in user
 router.get('/:id', async (req, res) =>
 {
     try
@@ -40,7 +40,7 @@ router.get('/:id', async (req, res) =>
     }
 });
 
-// POST — create a new recipe owned by the logged-in user
+// POST: create a new recipe owned by the logged-in user
 router.post('/', async (req, res) =>
 {
     const { name, ingredients, instructions, prep, servings } = req.body;
@@ -71,7 +71,7 @@ router.post('/', async (req, res) =>
     }
 });
 
-// PUT — update a recipe, only if it belongs to the logged-in user
+// PUT: update a recipe, only if it belongs to the logged-in user
 router.put('/:id', async (req, res) =>
 {
     const { name, ingredients, instructions, prep, servings } = req.body;
@@ -102,7 +102,7 @@ router.put('/:id', async (req, res) =>
     }
 });
 
-// DELETE — remove a recipe, only if it belongs to the logged-in user
+// DELETE: remove a recipe, only if it belongs to the logged-in user
 router.delete('/:id', async (req, res) =>
 {
     try

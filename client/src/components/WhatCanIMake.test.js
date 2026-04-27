@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import WhatCanIMake from './WhatCanIMake';
 
-// ─── Shared test data ────────────────────────────────────────────────────────
+// Shared test data
 
 const mockPantryItems = [
     { id: 'p1', name: 'Eggs',   quantity: 6,  unit: 'Unit' },
@@ -45,7 +45,7 @@ const renderWCIM = (overrides = {}) =>
 beforeEach(() => jest.clearAllMocks());
 
 
-// ─── 1. Basic rendering ──────────────────────────────────────────────────────
+// 1. Basic rendering
 
 describe('basic rendering', () =>
 {
@@ -71,7 +71,7 @@ describe('basic rendering', () =>
 });
 
 
-// ─── 2. Recipe matching ──────────────────────────────────────────────────────
+// 2. Recipe matching
 
 describe('recipe matching', () =>
 {
@@ -110,7 +110,7 @@ describe('recipe matching', () =>
 });
 
 
-// ─── 3. Filter buttons ───────────────────────────────────────────────────────
+// 3. Filter buttons
 
 describe('filter buttons', () =>
 {
@@ -141,7 +141,7 @@ describe('filter buttons', () =>
 });
 
 
-// ─── 4. Interactions ─────────────────────────────────────────────────────────
+// 4. Interactions
 
 describe('interactions', () =>
 {

@@ -8,7 +8,7 @@ const HomeDashboard = (props) =>
         <Fragment>
             <div className="gg-panel active" id="panel-dashboard">
 
-                {/* ── Stat cards ───────────────────────── */}
+                {/* Stat cards */}
                 <div className="gg-dash-stats">
 
                     <div className="gg-stat-card accent-red">
@@ -33,7 +33,7 @@ const HomeDashboard = (props) =>
                     </div>
                 </div>
 
-                {/* ── Section header ───────────────────── */}
+                {/* Section header */}
                 <div className="gg-kicker" style={{ marginBottom: '12px' }}>Tonight's options</div>
                 <div className="gg-dash-section-title">
                     What Can I Make <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>Today?</em>
@@ -42,7 +42,7 @@ const HomeDashboard = (props) =>
                     Recipes fully covered by your current pantry
                 </div>
 
-                {/* Reload button — subtle ghost */}
+                {/* Reload button, subtle ghost */}
                 <div style={{ marginBottom: '20px' }}>
                     <button onClick={onReload} className="gg-btn-ghost">
                         <i className="bi bi-arrow-clockwise"></i> Refresh
@@ -53,7 +53,7 @@ const HomeDashboard = (props) =>
                     <div className="gg-dash-empty">Loading data…</div>
                 )}
 
-                {/* ── Cookable recipe list ──────────────── */}
+                {/* Cookable recipe list */}
                 {!isLoading && (
                     <div className="gg-dash-cookable-list">
                         {(!makeableRecipes || makeableRecipes.length === 0) && (
