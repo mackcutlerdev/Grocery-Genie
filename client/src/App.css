@@ -162,6 +162,22 @@
   display: flex; align-items: center; justify-content: flex-end; gap: 4px;
 }
 
+/* Depleted row — quantity hit 0, item persists but is visually muted */
+.gg-table tbody tr.row-depleted { opacity: 0.5; }
+.gg-table tbody tr.row-depleted:hover { opacity: 0.75; background: rgba(240,222,200,0.02); }
+.gg-table tbody tr.row-depleted td:first-child { color: var(--text-dim); }
+.gg-table tbody tr.row-depleted td.td-qty { color: var(--text-faint); }
+
+.gg-depleted-pill {
+  font-family: var(--f-mono);
+  font-size: 9px; letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--text-faint);
+  background: rgba(240,222,200,0.04);
+  border: 1px solid var(--hairline);
+  padding: 3px 8px; border-radius: 99px; white-space: nowrap;
+  margin-left: 8px; vertical-align: middle;
+}
+
 /* Add-item form card (right sticky sidebar) */
 .gg-add-form-card {
   background: linear-gradient(145deg, var(--bg-3), var(--bg-2));

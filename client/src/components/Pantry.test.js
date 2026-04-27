@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Pantry from './Pantry';
 
-// Shared test data
+// ─── Shared test data ────────────────────────────────────────────────────────
 
 const mockItems = [
     { id: '1', name: 'Eggs',   quantity: 12, unit: 'Unit' },
@@ -25,7 +25,7 @@ const renderPantry = (overrides = {}) =>
 beforeEach(() => jest.clearAllMocks());
 
 
-// 1. Basic rendering
+// ─── 1. Basic rendering ──────────────────────────────────────────────────────
 
 describe('basic rendering', () =>
 {
@@ -51,7 +51,7 @@ describe('basic rendering', () =>
 });
 
 
-// 2. Add item form 
+// ─── 2. Add item form ────────────────────────────────────────────────────────
 
 describe('add item form', () =>
 {
@@ -139,7 +139,7 @@ describe('add item form', () =>
 });
 
 
-// 3. Delete item
+// ─── 3. Delete item ──────────────────────────────────────────────────────────
 
 describe('delete item', () =>
 {
@@ -163,7 +163,7 @@ describe('delete item', () =>
 });
 
 
-// 4. Edit item
+// ─── 4. Edit item ────────────────────────────────────────────────────────────
 
 describe('edit item', () =>
 {
@@ -247,5 +247,85 @@ describe('edit item', () =>
         // Only the second item's name should be in an input now
         expect(screen.queryByDisplayValue('Eggs')).not.toBeInTheDocument();
         expect(screen.getByDisplayValue('Milk')).toBeInTheDocument();
+    });
+});
+
+
+// ─── 5. Depleted items (quantity = 0) ───────────────────────────────────────
+
+describe('depleted items', () =>
+{
+    const depletedItems = [
+        { id: '1', name: 'Eggs',   quantity: 0,  unit: 'Unit' },
+        { id: '2', name: 'Butter', quantity: 2,  unit: 'tbsp' },
+    ];
+
+    test('shows the "Empty" pill for items with quantity 0', () =>
+    {
+        renderPantry({ items: depletedItems });
+        expect(screen.getByText('Empty')).toBeInTheDocument();
+    });
+
+    test('does not show the "Empty" pill for items with quantity > 0', () =>
+    {
+        renderPantry({ items: depletedItems });
+        // Butter has qty 2, so no second Empty pill
+        const pills = screen.queryAllByText('Empty');
+        expect(pills).toHaveLength(1);
+    });
+
+    test('adds row-depleted class to rows with quantity 0', () =>
+    {
+        renderPantry({ items: depletedItems });
+        const rows = document.querySelectorAll('tbody tr.row-depleted');
+        expect(rows).toHaveLength(1);
+    });
+
+    test('does not add row-depleted class to rows with quantity > 0', () =>
+    {
+        renderPantry({ items: depletedItems });
+        const rows = document.querySelectorAll('tbody tr:not(.row-depleted)');
+        // 1 row with qty > 0
+        expect(rows).toHaveLength(1);
+    });
+
+    test('depleted item still renders Edit and Delete buttons', () =>
+    {
+        renderPantry({ items: [{ id: '1', name: 'Eggs', quantity: 0, unit: 'Unit' }] });
+        expect(screen.getByTitle('Edit')).toBeInTheDocument();
+        expect(screen.getByTitle('Delete')).toBeInTheDocument();
+    });
+
+    test('depleted item can still be edited to restore quantity', () =>
+    {
+        renderPantry({ items: [{ id: '1', name: 'Eggs', quantity: 0, unit: 'Unit' }] });
+        fireEvent.click(screen.getByTitle('Edit'));
+
+        // Should pre-fill with 0
+        expect(screen.getByDisplayValue('0')).toBeInTheDocument();
+
+        // Update to a real quantity
+        fireEvent.change(screen.getByDisplayValue('0'), { target: { value: '6' } });
+        fireEvent.click(screen.getByText('Save'));
+
+        expect(defaultProps.onUpdateItem).toHaveBeenCalledWith('1', {
+            name:     'Eggs',
+            quantity: 6,
+            unit:     'Unit',
+        });
+    });
+
+    test('depleted item does not show Empty pill when in edit mode', () =>
+    {
+        renderPantry({ items: [{ id: '1', name: 'Eggs', quantity: 0, unit: 'Unit' }] });
+        fireEvent.click(screen.getByTitle('Edit'));
+        expect(screen.queryByText('Empty')).not.toBeInTheDocument();
+    });
+
+    test('item with exactly 0 quantity is treated as depleted, not normal', () =>
+    {
+        renderPantry({ items: [{ id: '1', name: 'Salt', quantity: 0, unit: 'tsp' }] });
+        expect(screen.getByText('Empty')).toBeInTheDocument();
+        expect(document.querySelector('tr.row-depleted')).toBeInTheDocument();
     });
 });

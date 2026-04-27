@@ -72,7 +72,7 @@ const Pantry = (props) =>
             <div className="gg-panel active" id="panel-pantry">
                 <div className="gg-pantry-layout">
 
-                    {/* Left: table */}
+                    {/* ── Left: table ───────────────────── */}
                     <div>
                         <div className="gg-table-wrap">
                             <table className="gg-table">
@@ -106,8 +106,11 @@ const Pantry = (props) =>
                                         </tr>
                                     )}
 
-                                    {items && items.map((item) => (
-                                        <tr key={item.id}>
+                                    {items && items.map((item) =>
+                                    {
+                                        const isDepleted = Number(item.quantity) === 0 && editingId !== item.id;
+                                        return (
+                                        <tr key={item.id} className={isDepleted ? 'row-depleted' : ''}>
                                             <td>
                                                 {editingId === item.id ? (
                                                     <input
@@ -117,7 +120,12 @@ const Pantry = (props) =>
                                                         onChange={(e) => setEditName(e.target.value)}
                                                     />
                                                 ) : (
-                                                    item.name
+                                                    <>
+                                                        {item.name}
+                                                        {isDepleted && (
+                                                            <span className="gg-depleted-pill">Empty</span>
+                                                        )}
+                                                    </>
                                                 )}
                                             </td>
                                             <td className="td-qty">
@@ -187,13 +195,14 @@ const Pantry = (props) =>
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))}
+                                        );
+                                    })}
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    {/* Right: add-item form card */}
+                    {/* ── Right: add-item form card ─────── */}
                     <div className="gg-add-form-card">
                         <div className="gg-add-form-title">
                             Add <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>New Item</em>
