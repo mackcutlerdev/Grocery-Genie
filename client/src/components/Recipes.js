@@ -1,4 +1,6 @@
 import React, { Fragment, useState, useEffect } from 'react';
+import { namesLooselyMatch } from '../utils/matchingUtils';
+import { getCoverage } from '../utils/recipeUtils';
 
 const Recipes = (props) =>
 {
@@ -10,7 +12,7 @@ const Recipes = (props) =>
         onDeleteRecipe,
         initialSelectedRecipeId,
         onMakeRecipe,
-        pantryItems = [],   // new: for gauge + dot colouring
+        pantryItems = [],
     } = props;
 
     const [selectedRecipeId,       setSelectedRecipeId]       = useState(null);
@@ -35,36 +37,6 @@ const Recipes = (props) =>
 
     const parseInstructionsText = (text) =>
         text.split('\n').map((l) => l.trim()).filter((l) => l !== '');
-
-    /* ── Loose matching (same as WCIM/HomePage) ── */
-    const normalizeName = (name) => (!name ? '' : name.trim().toLowerCase());
-    const tokenize = (name) => normalizeName(name).split(/[^a-z]+/).filter(Boolean);
-    const namesLooselyMatch = (a, b) =>
-    {
-        const tokA = tokenize(a), tokB = tokenize(b);
-        if (!tokA.length || !tokB.length) return false;
-        if (tokA.join(' ') === tokB.join(' ')) return true;
-        const setB = new Set(tokB);
-        return tokA.some((t) => setB.has(t));
-    };
-
-    /* ── Pantry coverage for a recipe ── */
-    const getCoverage = (recipe) =>
-    {
-        if (!recipe || !Array.isArray(recipe.ingredients) || recipe.ingredients.length === 0)
-            return { matched: 0, total: 0, pct: 0 };
-
-        const total   = recipe.ingredients.length;
-        const matched = recipe.ingredients.filter((ing) =>
-        {
-            const p = pantryItems.find((pi) => namesLooselyMatch(pi.name, ing.name));
-            if (!p) return false;
-            if (ing.quantity === null || ing.quantity === undefined) return true;
-            return p.quantity >= ing.quantity;
-        }).length;
-
-        return { matched, total, pct: total > 0 ? matched / total : 0 };
-    };
 
     /* ── New ingredient helpers ── */
     const handleNewIngChange = (index, field, value) =>
@@ -255,7 +227,7 @@ const Recipes = (props) =>
         </div>
     );
 
-    /* ── Ingredient rows in read-only detail (now pantry-aware for check/x) ── */
+    /* ── Ingredient rows in read-only detail ── */
     const renderDetailIngredients = (ingredients) =>
     {
         if (!ingredients || ingredients.length === 0)
@@ -291,10 +263,10 @@ const Recipes = (props) =>
         ));
     };
 
-    /* ── (ii) Pantry coverage gauge ── */
+    /* ── Pantry coverage gauge ── */
     const renderCoverageGauge = (recipe) =>
     {
-        const { matched, total, pct } = getCoverage(recipe);
+        const { matched, total, pct } = getCoverage(recipe, pantryItems);
         if (total === 0) return null;
 
         const isFull    = pct >= 1;
@@ -310,7 +282,6 @@ const Recipes = (props) =>
 
         return (
             <div style={{ marginBottom: '22px' }}>
-                {/* Label row */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '7px' }}>
                     <span style={{ fontFamily: 'var(--f-mono)', fontSize: '9px', letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--text-dim)' }}>
                         Pantry Coverage
@@ -319,7 +290,6 @@ const Recipes = (props) =>
                         {matched} / {total} ingredients
                     </span>
                 </div>
-                {/* Track */}
                 <div style={{ height: '3px', background: 'rgba(240,222,200,0.07)', borderRadius: '99px', overflow: 'hidden' }}>
                     <div style={{
                         height: '100%',
@@ -340,7 +310,7 @@ const Recipes = (props) =>
             <div className="gg-panel active" id="panel-recipes">
                 <div className="gg-recipe-layout">
 
-                    {/* ── Left: recipe list ─────────────────────────── */}
+                    {/* ── Left: recipe list ── */}
                     <div className="gg-recipe-list-col">
                         <div className="gg-recipe-list-header">
                             <div className="gg-recipe-list-title">All Recipes</div>
@@ -368,15 +338,13 @@ const Recipes = (props) =>
 
                             {recipes && recipes.map((recipe) =>
                             {
-                                // (iii) Cyan dot if fully makeable
-                                const { pct } = getCoverage(recipe);
+                                const { pct }    = getCoverage(recipe, pantryItems);
                                 const isMakeable = pct >= 1;
 
-                                // (i) Meta line: "X ing. · yy min"
                                 const ingCount  = Array.isArray(recipe.ingredients) ? recipe.ingredients.length : 0;
                                 const metaParts = [];
-                                if (ingCount > 0)   metaParts.push(`${ingCount} ing.`);
-                                if (recipe.prep)    metaParts.push(recipe.prep);
+                                if (ingCount > 0) metaParts.push(`${ingCount} ing.`);
+                                if (recipe.prep)  metaParts.push(recipe.prep);
 
                                 return (
                                     <div
@@ -384,13 +352,11 @@ const Recipes = (props) =>
                                         className={`gg-recipe-list-item${selectedRecipeId === recipe.id ? ' selected' : ''}`}
                                         onClick={() => handleSelectRecipe(recipe.id)}
                                     >
-                                        {/* (iii) Cyan if makeable, dim grey otherwise */}
                                         <div className={isMakeable ? 'gg-recipe-cookable-dot' : 'gg-recipe-not-dot'}
                                              style={{ flexShrink: 0 }}></div>
 
                                         <div style={{ minWidth: 0 }}>
                                             <div className="gg-recipe-item-name">{recipe.name}</div>
-                                            {/* (i) Meta line */}
                                             {metaParts.length > 0 && (
                                                 <div className="gg-recipe-item-meta">
                                                     {metaParts.join(' · ')}
@@ -403,7 +369,7 @@ const Recipes = (props) =>
                         </div>
                     </div>
 
-                    {/* ── Right: detail / edit ──────────────────────── */}
+                    {/* ── Right: detail / edit ── */}
                     <div className="gg-recipe-detail-col">
 
                         {!selectedRecipe && editingId === null && (
@@ -495,7 +461,6 @@ const Recipes = (props) =>
                                 </div>
 
                                 <div className="gg-recipe-detail-body">
-                                    {/* (ii) Coverage gauge — above ingredient list */}
                                     {renderCoverageGauge(selectedRecipe)}
 
                                     <div className="gg-detail-section-label" style={{ marginBottom: '10px' }}>Ingredients</div>
@@ -513,20 +478,20 @@ const Recipes = (props) =>
                                             className="gg-btn-teal"
                                             onClick={() =>
                                             {
-                                                const { pct } = getCoverage(selectedRecipe);
+                                                const { pct } = getCoverage(selectedRecipe, pantryItems);
 
-                                                if(pct < 1)
+                                                if (pct < 1)
                                                 {
                                                     const proceed = window.confirm(
-                                                    `You don't have all the ingredients for "${selectedRecipe.name}".\n\n` +
-                                                    `Only ingredients you already have will be subtracted from your pantry. ` +
-                                                    `Are you sure you want to proceed?`
+                                                        `You don't have all the ingredients for "${selectedRecipe.name}".\n\n` +
+                                                        `Only ingredients you already have will be subtracted from your pantry. ` +
+                                                        `Are you sure you want to proceed?`
                                                     );
-                                                    if(!proceed) return;
+                                                    if (!proceed) return;
                                                 }
                                                 else
                                                 {
-                                                    if(!window.confirm(`Use pantry items to make "${selectedRecipe.name}"?`)) return;
+                                                    if (!window.confirm(`Use pantry items to make "${selectedRecipe.name}"?`)) return;
                                                 }
 
                                                 onMakeRecipe(selectedRecipe);

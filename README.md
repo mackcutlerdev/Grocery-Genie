@@ -30,3 +30,73 @@ GroceryGenie’s goal is an app that tracks items in your pantry at home, manage
 ### Extra notes
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+
+```
+Grocery-Genie
+├─ client
+│  ├─ package-lock.json
+│  ├─ package.json
+│  ├─ public
+│  │  ├─ favicon.ico
+│  │  ├─ favicon.png
+│  │  ├─ index.html
+│  │  └─ manifest.json
+│  └─ src
+│     ├─ api.js
+│     ├─ App.css
+│     ├─ App.js
+│     ├─ components
+│     │  ├─ Footer.js
+│     │  ├─ HomeDashboard.js
+│     │  ├─ Navbar.js
+│     │  ├─ Pantry.js
+│     │  ├─ Pantry.test.js
+│     │  ├─ Recipes.js
+│     │  ├─ Recipes.test.js
+│     │  ├─ Roadmap.js
+│     │  ├─ Sources.js
+│     │  ├─ Spinner.js
+│     │  ├─ WhatCanIMake.js
+│     │  └─ WhatCanIMake.test.js
+│     ├─ index.css
+│     ├─ index.js
+│     ├─ pages
+│     │  ├─ HomePage.js
+│     │  ├─ LoginPage.js
+│     │  ├─ LoginPage.test.js
+│     │  ├─ PantryPage.js
+│     │  ├─ ProtectedRoute.js
+│     │  ├─ ProtectedRoute.test.js
+│     │  ├─ RecipesPage.js
+│     │  ├─ RoadmapPage.js
+│     │  ├─ SourcesPage.js
+│     │  └─ WhatCanIMakePage.js
+│     ├─ setupTests.js
+│     └─ utils
+│        ├─ matchingUtils.js
+│        ├─ matchingUtils.test.js
+│        ├─ recipeUtils.js
+│        └─ recipeUtils.test.js
+├─ README.md
+└─ server
+   ├─ middleware
+   │  ├─ auth.js
+   │  ├─ auth.test.js
+   │  └─ logger.js
+   ├─ models
+   │  ├─ Item.js
+   │  ├─ Recipe.js
+   │  └─ User.js
+   ├─ package-lock.json
+   ├─ package.json
+   ├─ routes
+   │  └─ api
+   │     ├─ auth.js
+   │     ├─ auth.test.js
+   │     ├─ items.js
+   │     ├─ items.test.js
+   │     ├─ recipes.js
+   │     └─ recipes.test.js
+   └─ server.js
+
+```

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import Recipes from '../components/Recipes';
 import { apiGet, apiPost, apiPut, apiDelete } from '../api';
+import { namesLooselyMatch } from '../utils/matchingUtils';
 
 function RecipesPage()
 {
@@ -10,8 +11,8 @@ function RecipesPage()
     const initialSelectedRecipeId = query.get('recipeId');
 
     const [appState, setAppState] = useState({
-        loading: false,
-        recipes: [],
+        loading:     false,
+        recipes:     [],
         pantryItems: [],
     });
 
@@ -35,18 +36,6 @@ function RecipesPage()
     };
 
     useEffect(() => { loadData(); }, []);
-
-    // Loose matching — used by handleMakeRecipe
-    const normalizeName    = (name) => (!name ? '' : name.trim().toLowerCase());
-    const tokenize         = (name) => normalizeName(name).split(/[^a-z]+/).filter(Boolean);
-    const namesLooselyMatch = (a, b) =>
-    {
-        const tokA = tokenize(a), tokB = tokenize(b);
-        if (!tokA.length || !tokB.length) return false;
-        if (tokA.join(' ') === tokB.join(' ')) return true;
-        const setB = new Set(tokB);
-        return tokA.some((t) => setB.has(t));
-    };
 
     const handleAddRecipe = (newRecipe) =>
     {
@@ -99,7 +88,12 @@ function RecipesPage()
                     const newQty     = Math.max(0, currentQty - neededQty);
 
                     if (newQty !== currentQty)
-                        itemsToUpdate.push({ id: match.id, name: match.name, quantity: newQty, unit: match.unit });
+                        itemsToUpdate.push({
+                            id:       match.id,
+                            name:     match.name,
+                            quantity: newQty,
+                            unit:     match.unit,
+                        });
                 });
 
                 itemsToUpdate.forEach((item) =>
