@@ -340,7 +340,7 @@ const Recipes = (props) =>
                                 <input
                                     className="gg-input gg-search-input gg-recipe-search-input"
                                     type="text"
-                                    placeholder="Search recipes\u2026"
+                                    placeholder="Search recipes"
                                     value={recipeSearch}
                                     onChange={(e) => setRecipeSearch(e.target.value)}
                                     aria-label="Search recipes"

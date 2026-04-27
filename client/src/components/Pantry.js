@@ -88,7 +88,7 @@ const Pantry = (props) =>
     const UNITS = ['Unit','g','kg','ml','L','cup','tbsp','tsp','Box','oz','Package'];
 
     // Placeholder pills — shown only while AVAILABLE_TAGS is empty, non-interactive
-    const PLACEHOLDER_TAGS = ['Poultry', 'Seafood', 'Dairy', 'Produce', 'Frozen', 'Pantry Staple'];
+    const PLACEHOLDER_TAGS = ['Poultry', 'Seafood', 'Dairy', 'Produce', 'Frozen', 'Favorite'];
 
     return (
         <Fragment>
