@@ -56,7 +56,7 @@ const renderRecipes = (overrides = {}) =>
 beforeEach(() => jest.clearAllMocks());
 
 
-// 1. Basic rendering 
+// ─── 1. Basic rendering ───
 describe('basic rendering', () =>
 {
     test('renders the recipe list', () =>
@@ -86,7 +86,7 @@ describe('basic rendering', () =>
 });
 
 
-// 2. Selecting a recipe
+// ─── 2. Selecting a recipe ───
 describe('selecting a recipe', () =>
 {
     test('shows recipe detail when a recipe is clicked', () =>
@@ -116,7 +116,7 @@ describe('selecting a recipe', () =>
 });
 
 
-// 3. Add recipe form
+// ─── 3. Add recipe form ───
 
 describe('add recipe form', () =>
 {
@@ -220,7 +220,8 @@ describe('add recipe form', () =>
 });
 
 
-// 4. Deleting a recipe
+// ─── 4. Deleting a recipe ─
+
 describe('deleting a recipe', () =>
 {
     test('calls onDeleteRecipe when confirmed', () =>
@@ -252,7 +253,8 @@ describe('deleting a recipe', () =>
 });
 
 
-// 5. Edit form
+// ─── 5. Edit form ─────────
+
 describe('edit form', () =>
 {
     const openEditForm = () =>
@@ -295,7 +297,8 @@ describe('edit form', () =>
 });
 
 
-// 6. Pantry coverage (getCoverage)
+// ─── 6. Pantry coverage (getCoverage) ───────────────────────────────────────
+
 describe('pantry coverage', () =>
 {
     test('shows coverage gauge when a recipe is selected', () =>
@@ -342,7 +345,7 @@ describe('pantry coverage', () =>
 });
 
 
-// 7. Make Recipe
+// ─── 7. Make Recipe ───────
 
 describe('make recipe', () =>
 {
@@ -377,5 +380,109 @@ describe('make recipe', () =>
         expect(window.confirm).toHaveBeenCalledWith(
             expect.stringContaining("don't have all the ingredients")
         );
+    });
+});
+
+// ─── 8. Recipe search ────────────────────────────────────────────────────────
+
+describe('recipe search', () =>
+{
+    test('renders the recipe search input', () =>
+    {
+        renderRecipes();
+        expect(screen.getByPlaceholderText(/search recipes/i)).toBeInTheDocument();
+    });
+
+    test('shows all recipes when search is empty', () =>
+    {
+        renderRecipes();
+        expect(screen.getByText('Omelette')).toBeInTheDocument();
+        expect(screen.getByText('Toast')).toBeInTheDocument();
+    });
+
+    test('filters recipes by name substring match', () =>
+    {
+        renderRecipes();
+        fireEvent.change(screen.getByPlaceholderText(/search recipes/i), {
+            target: { value: 'omel' },
+        });
+        expect(screen.getByText('Omelette')).toBeInTheDocument();
+        expect(screen.queryByText('Toast')).not.toBeInTheDocument();
+    });
+
+    test('search is case-insensitive', () =>
+    {
+        renderRecipes();
+        fireEvent.change(screen.getByPlaceholderText(/search recipes/i), {
+            target: { value: 'TOAST' },
+        });
+        expect(screen.getByText('Toast')).toBeInTheDocument();
+    });
+
+    test('shows no-match message when search returns nothing', () =>
+    {
+        renderRecipes();
+        fireEvent.change(screen.getByPlaceholderText(/search recipes/i), {
+            target: { value: 'zzznomatch' },
+        });
+        expect(screen.getByText(/no recipes match/i)).toBeInTheDocument();
+    });
+
+    test('shows a Clear button in the no-match state', () =>
+    {
+        renderRecipes();
+        fireEvent.change(screen.getByPlaceholderText(/search recipes/i), {
+            target: { value: 'zzznomatch' },
+        });
+        expect(screen.getByText('Clear')).toBeInTheDocument();
+    });
+
+    test('Clear button in no-match state resets the search', () =>
+    {
+        renderRecipes();
+        fireEvent.change(screen.getByPlaceholderText(/search recipes/i), {
+            target: { value: 'zzznomatch' },
+        });
+        fireEvent.click(screen.getByText('Clear'));
+        expect(screen.getByText('Omelette')).toBeInTheDocument();
+        expect(screen.getByText('Toast')).toBeInTheDocument();
+    });
+
+    test('shows clear (X) button inside the input when query is not empty', () =>
+    {
+        renderRecipes();
+        fireEvent.change(screen.getByPlaceholderText(/search recipes/i), {
+            target: { value: 'omel' },
+        });
+        expect(screen.getByLabelText('Clear search')).toBeInTheDocument();
+    });
+
+    test('clear (X) button inside input resets the search', () =>
+    {
+        renderRecipes();
+        const input = screen.getByPlaceholderText(/search recipes/i);
+        fireEvent.change(input, { target: { value: 'omel' } });
+        fireEvent.click(screen.getByLabelText('Clear search'));
+        expect(input.value).toBe('');
+        expect(screen.getByText('Toast')).toBeInTheDocument();
+    });
+
+    test('filtered list still selects and shows recipe details correctly', () =>
+    {
+        renderRecipes();
+        fireEvent.change(screen.getByPlaceholderText(/search recipes/i), {
+            target: { value: 'toast' },
+        });
+        fireEvent.click(screen.getByText('Toast'));
+        expect(screen.getByText('Toast bread')).toBeInTheDocument();
+    });
+
+    test('does not show the "no recipes yet" message during a no-match search', () =>
+    {
+        renderRecipes();
+        fireEvent.change(screen.getByPlaceholderText(/search recipes/i), {
+            target: { value: 'zzznomatch' },
+        });
+        expect(screen.queryByText(/no recipes yet/i)).not.toBeInTheDocument();
     });
 });

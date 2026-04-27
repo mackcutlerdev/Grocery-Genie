@@ -43,8 +43,14 @@ const Roadmap = () =>
                                 <i className="bi bi-database-fill-gear" style={{ fontSize: '11px', marginRight: '6px' }}></i>
                                 <s>MongoDB Integration, full persistence</s>
                             </div>
-                            <div className="gg-roadmap-item">Search &amp; Filter: recipes and pantry items, with category filtering</div>
-                            <div className="gg-roadmap-item">Ingredient Persistence (Quantity = 0 but Saved): visually grayed out</div>
+                            <div className="gg-roadmap-item" style={{ color: 'var(--accent)' }}>
+                                <i className="bi bi-search" style={{ fontSize: '11px', marginRight: '6px' }}></i>
+                                <s>Search &amp; Filter: recipes and pantry items — name search live, tag filtering framework in place</s>
+                            </div>
+                            <div className="gg-roadmap-item" style={{ color: 'var(--accent)' }}>
+                                <i className="bi bi-archive" style={{ fontSize: '11px', marginRight: '6px' }}></i>
+                                <s>Ingredient Persistence (Quantity = 0 but Saved): visually grayed out</s>
+                            </div>
                             <div className="gg-roadmap-item">Ingredient &amp; Recipe Tags: poultry, seafood, frozen, main dish, etc.</div>
                         </div>
                     </div>

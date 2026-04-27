@@ -678,3 +678,97 @@
 }
 .gg-sources-item a:hover { color: var(--accent); text-decoration: underline; }
 /* #endregion */
+/* #region SEARCH & TAG FILTER */
+/* -------------------------------------------------- */
+
+/* Pantry: search row sits above the tag row and table */
+.gg-pantry-search-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 8px;
+}
+
+/* Recipes: search row sits between the list header and the scroll area */
+.gg-recipe-search-row {
+  padding: 0 8px 8px;
+  border-bottom: 1px solid var(--hairline);
+  flex-shrink: 0;
+}
+
+/* Shared search input wrapper — positions the icon and clear button */
+.gg-search-wrap {
+  position: relative; flex: 1;
+}
+.gg-search-icon {
+  position: absolute; left: 11px; top: 50%; transform: translateY(-50%);
+  color: var(--text-faint); font-size: 12px; pointer-events: none;
+}
+.gg-search-input {
+  padding-left: 32px !important;   /* make room for the icon */
+  padding-right: 32px !important;  /* make room for the clear btn */
+}
+.gg-recipe-search-input {
+  font-size: 13px !important;
+  padding-top: 7px !important; padding-bottom: 7px !important;
+}
+.gg-search-clear {
+  position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+  background: none; border: none; cursor: pointer;
+  color: var(--text-faint); font-size: 10px; padding: 2px 4px;
+  line-height: 1; transition: color 0.15s;
+}
+.gg-search-clear:hover { color: var(--accent); }
+
+/* Result count badge */
+.gg-search-count {
+  font-family: var(--f-mono); font-size: 10px;
+  letter-spacing: 0.12em; color: var(--text-faint);
+  white-space: nowrap; flex-shrink: 0;
+}
+
+/* Tag filter row */
+.gg-tag-filter-row {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; margin-bottom: 12px;
+}
+.gg-tag-filter-label {
+  font-family: var(--f-mono); font-size: 9px;
+  letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--text-faint); flex-shrink: 0; margin-right: 2px;
+}
+
+/* Live tag pill — clickable, toggleable */
+.gg-tag-pill {
+  font-family: var(--f-mono); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 99px;
+  border: 1px solid var(--hairline-mid);
+  background: transparent; color: var(--text-dim);
+  cursor: pointer; transition: all 0.15s;
+}
+.gg-tag-pill:hover {
+  border-color: rgba(61,140,140,0.35);
+  color: var(--teal);
+  background: rgba(61,140,140,0.06);
+}
+.gg-tag-pill.active {
+  border-color: rgba(61,140,140,0.5);
+  background: rgba(61,140,140,0.12);
+  color: var(--teal);
+}
+
+/* Placeholder pill — not a button, non-interactive, visually muted */
+.gg-tag-pill-soon {
+  opacity: 0.35; cursor: default; pointer-events: none;
+}
+
+/* Clear-tag button */
+.gg-tag-clear {
+  font-family: var(--f-mono); font-size: 9px;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 4px 8px; border-radius: 99px;
+  border: 1px solid rgba(232,132,90,0.25);
+  background: rgba(232,132,90,0.06); color: var(--accent);
+  cursor: pointer; transition: all 0.15s; display: flex; align-items: center; gap: 3px;
+}
+.gg-tag-clear:hover { background: rgba(232,132,90,0.14); }
+/* #endregion */

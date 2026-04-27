@@ -10,30 +10,54 @@ const Pantry = (props) =>
     const [newUnit,     setNewUnit]     = useState('Unit');
 
     // Inline-edit state
-    const [editingId,   setEditingId]   = useState(null);
-    const [editName,    setEditName]    = useState('');
-    const [editQuantity,setEditQuantity]= useState('');
-    const [editUnit,    setEditUnit]    = useState('Unit');
+    const [editingId,    setEditingId]    = useState(null);
+    const [editName,     setEditName]     = useState('');
+    const [editQuantity, setEditQuantity] = useState('');
+    const [editUnit,     setEditUnit]     = useState('Unit');
 
-    const resetAddForm = () =>
+    // Search & filter state
+    const [searchQuery, setSearchQuery] = useState('');
+    const [activeTag,   setActiveTag]   = useState(null);   // null = no tag filter active
+
+    // ── Tag filter framework ──────────────────────────────────────────────
+    // Tags will be populated here once the Ingredient & Recipe Tags feature lands.
+    // Shape: [{ label: 'Poultry', value: 'poultry' }, ...]
+    // For now the array is empty — the pill row renders placeholder pills.
+    const AVAILABLE_TAGS = [];
+
+    const handleTagFilter = (tagValue) =>
     {
-        setNewName(''); setNewQuantity(''); setNewUnit('Unit');
+        setActiveTag((prev) => (prev === tagValue ? null : tagValue));
     };
+
+    // ── Filtering logic ───────────────────────────────────────────────────
+    const q = searchQuery.trim().toLowerCase();
+
+    const filteredItems = (items || []).filter((item) =>
+    {
+        const matchesSearch = !q || item.name.toLowerCase().includes(q);
+        // Tag filter hook: when tags exist, item.tags (array) would be checked here.
+        // const matchesTag = !activeTag || (Array.isArray(item.tags) && item.tags.includes(activeTag));
+        const matchesTag = !activeTag; // placeholder — always passes until tags exist
+        return matchesSearch && matchesTag;
+    });
+
+    const hasItems   = items && items.length > 0;
+    const hasResults = filteredItems.length > 0;
+    const isFiltered = q.length > 0 || activeTag !== null;
+
+    // ── Add form ──────────────────────────────────────────────────────────
+    const resetAddForm = () => { setNewName(''); setNewQuantity(''); setNewUnit('Unit'); };
 
     const handleAddSubmit = (e) =>
     {
         e.preventDefault();
         if (!newName.trim()) return;
-
-        onAddItem({
-            name:     newName,
-            quantity: Number(newQuantity) || 0,
-            unit:     newUnit,
-        });
-
+        onAddItem({ name: newName, quantity: Number(newQuantity) || 0, unit: newUnit });
         resetAddForm();
     };
 
+    // ── Edit ──────────────────────────────────────────────────────────────
     const handleDelete = (id) =>
     {
         if (!window.confirm('Delete this item?')) return;
@@ -57,23 +81,93 @@ const Pantry = (props) =>
     const handleEditSubmit = (e, id) =>
     {
         e.preventDefault();
-        onUpdateItem(id, {
-            name:     editName,
-            quantity: Number(editQuantity) || 0,
-            unit:     editUnit,
-        });
+        onUpdateItem(id, { name: editName, quantity: Number(editQuantity) || 0, unit: editUnit });
         cancelEditing();
     };
 
     const UNITS = ['Unit','g','kg','ml','L','cup','tbsp','tsp','Box','oz','Package'];
+
+    // Placeholder pills — shown only while AVAILABLE_TAGS is empty, non-interactive
+    const PLACEHOLDER_TAGS = ['Poultry', 'Seafood', 'Dairy', 'Produce', 'Frozen', 'Pantry Staple'];
 
     return (
         <Fragment>
             <div className="gg-panel active" id="panel-pantry">
                 <div className="gg-pantry-layout">
 
-                    {/* ── Left: table ───────────────────── */}
+                    {/* ── Left: search + filter + table ── */}
                     <div>
+
+                        {/* Search bar */}
+                        <div className="gg-pantry-search-row">
+                            <div className="gg-search-wrap">
+                                <i className="bi bi-search gg-search-icon"></i>
+                                <input
+                                    className="gg-input gg-search-input"
+                                    type="text"
+                                    placeholder="Search ingredients…"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    aria-label="Search pantry items"
+                                />
+                                {searchQuery && (
+                                    <button
+                                        className="gg-search-clear"
+                                        onClick={() => setSearchQuery('')}
+                                        title="Clear search"
+                                        aria-label="Clear search"
+                                    >
+                                        <i className="bi bi-x-lg"></i>
+                                    </button>
+                                )}
+                            </div>
+
+                            {/* Result count — only shown while a query is active */}
+                            {q && (
+                                <div className="gg-search-count">
+                                    {filteredItems.length} of {items ? items.length : 0}
+                                </div>
+                            )}
+                        </div>
+
+                        {/* Tag filter row — framework ready, pills disabled until Tags feature ships */}
+                        <div className="gg-tag-filter-row">
+                            <span className="gg-tag-filter-label">Tags</span>
+
+                            {/* Live tags — this map populates once tags exist on items */}
+                            {AVAILABLE_TAGS.map((tag) => (
+                                <button
+                                    key={tag.value}
+                                    className={`gg-tag-pill${activeTag === tag.value ? ' active' : ''}`}
+                                    onClick={() => handleTagFilter(tag.value)}
+                                >
+                                    {tag.label}
+                                </button>
+                            ))}
+
+                            {/* Placeholder pills — visible preview while feature is pending */}
+                            {AVAILABLE_TAGS.length === 0 && PLACEHOLDER_TAGS.map((label) => (
+                                <span
+                                    key={label}
+                                    className="gg-tag-pill gg-tag-pill-soon"
+                                    title="Tag filtering coming soon — assign tags to your ingredients first"
+                                >
+                                    {label}
+                                </span>
+                            ))}
+
+                            {/* Clear active tag button */}
+                            {activeTag && (
+                                <button
+                                    className="gg-tag-clear"
+                                    onClick={() => setActiveTag(null)}
+                                >
+                                    <i className="bi bi-x"></i> Clear
+                                </button>
+                            )}
+                        </div>
+
+                        {/* Table */}
                         <div className="gg-table-wrap">
                             <table className="gg-table">
                                 <thead>
@@ -95,7 +189,8 @@ const Pantry = (props) =>
                                         </tr>
                                     )}
 
-                                    {!isLoading && (!items || items.length === 0) && (
+                                    {/* True empty — pantry has no items at all */}
+                                    {!isLoading && !hasItems && (
                                         <tr>
                                             <td colSpan="4">
                                                 <div className="gg-table-empty">
@@ -106,7 +201,30 @@ const Pantry = (props) =>
                                         </tr>
                                     )}
 
-                                    {items && items.map((item) =>
+                                    {/* Items exist but search/filter returned nothing */}
+                                    {!isLoading && hasItems && !hasResults && (
+                                        <tr>
+                                            <td colSpan="4">
+                                                <div className="gg-table-empty">
+                                                    <div className="gg-table-empty-icon" style={{ fontSize: '1.4rem' }}>🔍</div>
+                                                    No ingredients match{' '}
+                                                    {q && <em style={{ color: 'var(--accent)' }}>"{searchQuery}"</em>}
+                                                    {activeTag && <> with tag <em style={{ color: 'var(--teal)' }}>{activeTag}</em></>}
+                                                    <div style={{ marginTop: '10px' }}>
+                                                        <button
+                                                            className="gg-btn-ghost"
+                                                            style={{ fontSize: '10px', padding: '5px 12px' }}
+                                                            onClick={() => { setSearchQuery(''); setActiveTag(null); }}
+                                                        >
+                                                            Clear filters
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    )}
+
+                                    {filteredItems.map((item) =>
                                     {
                                         const isDepleted = Number(item.quantity) === 0 && editingId !== item.id;
                                         return (
@@ -202,7 +320,7 @@ const Pantry = (props) =>
                         </div>
                     </div>
 
-                    {/* ── Right: add-item form card ─────── */}
+                    {/* ── Right: add-item form card ── */}
                     <div className="gg-add-form-card">
                         <div className="gg-add-form-title">
                             Add <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>New Item</em>

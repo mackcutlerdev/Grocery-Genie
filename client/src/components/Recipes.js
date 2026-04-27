@@ -26,40 +26,49 @@ const Recipes = (props) =>
     const [editRecipeIngredients,  setEditRecipeIngredients]  = useState([]);
     const [editRecipeInstructions, setEditRecipeInstructions] = useState('');
 
+    // Search state
+    const [recipeSearch, setRecipeSearch] = useState('');
+
     useEffect(() =>
     {
-        if(initialSelectedRecipeId) setSelectedRecipeId(initialSelectedRecipeId);
+        if (initialSelectedRecipeId) setSelectedRecipeId(initialSelectedRecipeId);
     }, [initialSelectedRecipeId]);
 
     const selectedRecipe = recipes.find((r) => r.id === selectedRecipeId) || null;
+
+    // Filtered recipe list — searches by name, case-insensitive substring match
+    const rq = recipeSearch.trim().toLowerCase();
+    const filteredRecipes = rq
+        ? recipes.filter((r) => r.name.toLowerCase().includes(rq))
+        : recipes;
 
     const UNITS = ['Unit','g','kg','ml','L','cup','tbsp','tsp','Box','oz','Package'];
 
     const parseInstructionsText = (text) =>
         text.split('\n').map((l) => l.trim()).filter((l) => l !== '');
 
-    /* New ingredient helpers */
+    /* ── New ingredient helpers ── */
     const handleNewIngChange = (index, field, value) =>
         setNewRecipeIngredients((prev) => { const u=[...prev]; u[index]={...u[index],[field]:value}; return u; });
 
     const addIngRow    = () => setNewRecipeIngredients((p) => [...p, { name:'', quantity:'', unit:'Unit' }]);
     const removeIngRow = (i) => setNewRecipeIngredients((p) => p.filter((_,idx) => idx !== i));
 
-    /* Edit ingredient helpers */
+    /* ── Edit ingredient helpers ── */
     const handleEditIngChange = (index, field, value) =>
         setEditRecipeIngredients((prev) => { const u=[...prev]; u[index]={...u[index],[field]:value}; return u; });
 
     const addEditIngRow    = () => setEditRecipeIngredients((p) => [...p, { name:'', quantity:'', unit:'Unit' }]);
     const removeEditIngRow = (i) => setEditRecipeIngredients((p) => p.filter((_,idx) => idx !== i));
 
-    /* Selection */
+    /* ── Selection ── */
     const handleSelectRecipe = (id) =>
     {
         setSelectedRecipeId(id);
         if (editingId && editingId !== id) cancelEditing();
     };
 
-    /* Add form toggle */
+    /* ── Add form toggle ── */
     const handleToggleAddForm = () =>
     {
         setShowAddForm(!showAddForm);
@@ -93,7 +102,7 @@ const Recipes = (props) =>
         setShowAddForm(false);
     };
 
-    /* Edit form */
+    /* ── Edit form ── */
     const startEditing = (recipe) =>
     {
         setEditingId(recipe.id);
@@ -227,7 +236,7 @@ const Recipes = (props) =>
         </div>
     );
 
-    /* Ingredient rows in read-only detail */
+    /* ── Ingredient rows in read-only detail ── */
     const renderDetailIngredients = (ingredients) =>
     {
         if (!ingredients || ingredients.length === 0)
@@ -263,7 +272,7 @@ const Recipes = (props) =>
         ));
     };
 
-    /* Pantry coverage gauge */
+    /* ── Pantry coverage gauge ── */
     const renderCoverageGauge = (recipe) =>
     {
         const { matched, total, pct } = getCoverage(recipe, pantryItems);
@@ -324,10 +333,35 @@ const Recipes = (props) =>
                             </button>
                         </div>
 
+                        {/* Recipe search */}
+                        <div className="gg-recipe-search-row">
+                            <div className="gg-search-wrap">
+                                <i className="bi bi-search gg-search-icon"></i>
+                                <input
+                                    className="gg-input gg-search-input gg-recipe-search-input"
+                                    type="text"
+                                    placeholder="Search recipes\u2026"
+                                    value={recipeSearch}
+                                    onChange={(e) => setRecipeSearch(e.target.value)}
+                                    aria-label="Search recipes"
+                                />
+                                {recipeSearch && (
+                                    <button
+                                        className="gg-search-clear"
+                                        onClick={() => setRecipeSearch('')}
+                                        title="Clear search"
+                                        aria-label="Clear search"
+                                    >
+                                        <i className="bi bi-x-lg"></i>
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+
                         <div className="gg-recipe-items-scroll">
                             {isLoading && (
                                 <div style={{ padding: '20px 14px', fontFamily: 'var(--f-mono)', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
-                                    Loading recipes…
+                                    Loading recipes\u2026
                                 </div>
                             )}
                             {!isLoading && (!recipes || recipes.length === 0) && (
@@ -336,7 +370,23 @@ const Recipes = (props) =>
                                 </div>
                             )}
 
-                            {recipes && recipes.map((recipe) =>
+                            {/* Search returned nothing but recipes exist */}
+                            {!isLoading && recipes && recipes.length > 0 && filteredRecipes.length === 0 && (
+                                <div style={{ padding: '16px 14px' }}>
+                                    <div style={{ fontFamily: 'var(--f-body)', fontStyle: 'italic', fontSize: '13px', color: 'var(--text-faint)', marginBottom: '8px' }}>
+                                        No recipes match "{recipeSearch}"
+                                    </div>
+                                    <button
+                                        className="gg-btn-ghost"
+                                        style={{ fontSize: '9px', padding: '4px 10px' }}
+                                        onClick={() => setRecipeSearch('')}
+                                    >
+                                        Clear
+                                    </button>
+                                </div>
+                            )}
+
+                            {filteredRecipes.map((recipe) =>
                             {
                                 const { pct }    = getCoverage(recipe, pantryItems);
                                 const isMakeable = pct >= 1;
@@ -369,7 +419,7 @@ const Recipes = (props) =>
                         </div>
                     </div>
 
-                    {/* Right: detail / edit */}
+                    {/* ── Right: detail / edit ── */}
                     <div className="gg-recipe-detail-col">
 
                         {!selectedRecipe && editingId === null && (

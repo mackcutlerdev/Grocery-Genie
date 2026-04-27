@@ -329,3 +329,142 @@ describe('depleted items', () =>
         expect(document.querySelector('tr.row-depleted')).toBeInTheDocument();
     });
 });
+
+// ─── 6. Search bar ──────────────────────────────────────────────────────────
+
+describe('search bar', () =>
+{
+    test('renders the search input', () =>
+    {
+        renderPantry();
+        expect(screen.getByPlaceholderText(/search ingredients/i)).toBeInTheDocument();
+    });
+
+    test('shows all items when search is empty', () =>
+    {
+        renderPantry();
+        expect(screen.getByText('Eggs')).toBeInTheDocument();
+        expect(screen.getByText('Milk')).toBeInTheDocument();
+        expect(screen.getByText('Butter')).toBeInTheDocument();
+    });
+
+    test('filters items by name substring match', () =>
+    {
+        renderPantry();
+        fireEvent.change(screen.getByPlaceholderText(/search ingredients/i), {
+            target: { value: 'mi' },
+        });
+        expect(screen.getByText('Milk')).toBeInTheDocument();
+        expect(screen.queryByText('Eggs')).not.toBeInTheDocument();
+        expect(screen.queryByText('Butter')).not.toBeInTheDocument();
+    });
+
+    test('search is case-insensitive', () =>
+    {
+        renderPantry();
+        fireEvent.change(screen.getByPlaceholderText(/search ingredients/i), {
+            target: { value: 'EGGS' },
+        });
+        expect(screen.getByText('Eggs')).toBeInTheDocument();
+    });
+
+    test('shows no-results message when nothing matches', () =>
+    {
+        renderPantry();
+        fireEvent.change(screen.getByPlaceholderText(/search ingredients/i), {
+            target: { value: 'zzznomatch' },
+        });
+        expect(screen.getByText(/no ingredients match/i)).toBeInTheDocument();
+    });
+
+    test('shows a clear-filters button in the no-results state', () =>
+    {
+        renderPantry();
+        fireEvent.change(screen.getByPlaceholderText(/search ingredients/i), {
+            target: { value: 'zzznomatch' },
+        });
+        expect(screen.getByText('Clear filters')).toBeInTheDocument();
+    });
+
+    test('clear-filters button resets the search and shows all items', () =>
+    {
+        renderPantry();
+        fireEvent.change(screen.getByPlaceholderText(/search ingredients/i), {
+            target: { value: 'zzznomatch' },
+        });
+        fireEvent.click(screen.getByText('Clear filters'));
+        expect(screen.getByText('Eggs')).toBeInTheDocument();
+    });
+
+    test('shows clear (X) button inside the input when query is not empty', () =>
+    {
+        renderPantry();
+        fireEvent.change(screen.getByPlaceholderText(/search ingredients/i), {
+            target: { value: 'eggs' },
+        });
+        expect(screen.getByLabelText('Clear search')).toBeInTheDocument();
+    });
+
+    test('clear (X) button resets the search', () =>
+    {
+        renderPantry();
+        const input = screen.getByPlaceholderText(/search ingredients/i);
+        fireEvent.change(input, { target: { value: 'eggs' } });
+        fireEvent.click(screen.getByLabelText('Clear search'));
+        expect(input.value).toBe('');
+        expect(screen.getByText('Eggs')).toBeInTheDocument();
+    });
+
+    test('shows result count while a query is active', () =>
+    {
+        renderPantry();
+        fireEvent.change(screen.getByPlaceholderText(/search ingredients/i), {
+            target: { value: 'e' },
+        });
+        // "Eggs" and "Butter" both contain "e" — count should show "2 of 3"
+        expect(screen.getByText(/2 of 3/i)).toBeInTheDocument();
+    });
+
+    test('does not show result count when search is empty', () =>
+    {
+        renderPantry();
+        expect(screen.queryByText(/of 3/i)).not.toBeInTheDocument();
+    });
+
+    test('does not show the "empty pantry" message during a no-results search', () =>
+    {
+        renderPantry();
+        fireEvent.change(screen.getByPlaceholderText(/search ingredients/i), {
+            target: { value: 'zzznomatch' },
+        });
+        expect(screen.queryByText(/your pantry is empty/i)).not.toBeInTheDocument();
+    });
+});
+
+
+// ─── 7. Tag filter framework ─────────────────────────────────────────────────
+
+describe('tag filter framework', () =>
+{
+    test('renders the tag filter row', () =>
+    {
+        renderPantry();
+        expect(screen.getByText('Tags')).toBeInTheDocument();
+    });
+
+    test('renders placeholder tag pills when no tags exist', () =>
+    {
+        renderPantry();
+        // At least one placeholder like "Dairy" should be visible
+        expect(screen.getByText('Dairy')).toBeInTheDocument();
+    });
+
+    test('placeholder pills are not interactive (no click response)', () =>
+    {
+        renderPantry();
+        // Clicking a placeholder pill should not trigger any filter change
+        // (they are <span> not <button>, and CSS has pointer-events: none)
+        const dairyPill = screen.getByText('Dairy');
+        expect(dairyPill.tagName.toLowerCase()).toBe('span');
+    });
+});
