@@ -7,6 +7,7 @@ import PantryPage from './pages/PantryPage';
 import RecipesPage from './pages/RecipesPage';
 import WhatCanIMakePage from './pages/WhatCanIMakePage';
 import HomePage from './pages/HomePage';
+import ShoppingListPage from './pages/ShoppingListPage';
 import RoadmapPage from './pages/RoadmapPage';
 import SourcesPage from './pages/SourcesPage';
 
@@ -17,6 +18,7 @@ const PAGE_TITLES =
     '/pantry':       { italic: 'Pantry',     strong: null    },
     '/recipes':      { italic: 'Recipe',     strong: 'Book'  },
     '/whatcanimake': { italic: 'What Can I', strong: 'Make?' },
+    '/shoppinglist': { italic: 'Shopping',   strong: 'List'  },
     '/roadmap':      { italic: 'Roadmap',    strong: null    },
     '/sources':      { italic: 'Sources',    strong: null    },
 };
@@ -53,6 +55,7 @@ function AppShell()
                         <ProtectedRoute path="/pantry"       component={PantryPage}            />
                         <ProtectedRoute path="/recipes"      component={RecipesPage}           />
                         <ProtectedRoute path="/whatcanimake" component={WhatCanIMakePage}      />
+                        <ProtectedRoute path="/shoppinglist" component={ShoppingListPage}      />
                         <ProtectedRoute path="/roadmap"      component={RoadmapPage}           />
                         <ProtectedRoute path="/sources"      component={SourcesPage}           />
                     </Switch>

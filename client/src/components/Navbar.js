@@ -66,6 +66,10 @@ const Navbar = () =>
                     <span className="gg-nav-icon"><i className="bi bi-stars"></i></span>
                     <span className="gg-nav-label">What Can I Make?</span>
                 </NavLink>
+                <NavLink to="/shoppinglist"          className="gg-nav-item" activeClassName="active">
+                    <span className="gg-nav-icon"><i className="bi bi-list-check"></i></span>
+                    <span className="gg-nav-label">Shopping List</span>
+                </NavLink>
                 <NavLink to="/roadmap"          className="gg-nav-item" activeClassName="active">
                     <span className="gg-nav-icon"><i className="bi bi-map"></i></span>
                     <span className="gg-nav-label">Roadmap</span>
