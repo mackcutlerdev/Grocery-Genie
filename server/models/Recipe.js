@@ -33,6 +33,12 @@ const RecipeSchema = new mongoose.Schema(
     // Optional fields, client can send these, we store them if present
     prep:     { type: String, default: '' },
     servings: { type: Number, default: null },
+    // Tags user-assigned, mix of defaults and custom strings
+    tags: 
+    { 
+        type: [String], 
+        default: [] 
+    },
 },
 {
     timestamps: true,

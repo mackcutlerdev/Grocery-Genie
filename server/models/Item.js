@@ -30,6 +30,12 @@ const ItemSchema = new mongoose.Schema(
         default: 'Unit',
         trim: true,
     },
+    // Tags user-assigned, mix of defaults and custom strings
+    tags: 
+    { 
+        type: [String], 
+        default: [] 
+    },
 },
 {
     timestamps: true,

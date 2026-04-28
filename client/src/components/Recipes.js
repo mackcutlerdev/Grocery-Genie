@@ -30,6 +30,41 @@ const Recipes = (props) =>
     // Search state
     const [recipeSearch, setRecipeSearch] = useState('');
 
+    // NEW CODE BLOCK BEGIN — recipe tag filter state
+    const [activeRecipeTag, setActiveRecipeTag] = useState(null);
+    // NEW CODE BLOCK END
+
+    // NEW CODE BLOCK BEGIN — tag state for add and edit forms
+    const DEFAULT_TAGS = ['Vegetarian', 'Vegan', 'Keto', 'Gluten-Free', 'Dairy-Free', 'Quick', 'Comfort Food', 'Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack', 'Favorite'];
+
+    const [newRecipeTags,      setNewRecipeTags]      = useState([]);
+    const [newRecipeTagInput,  setNewRecipeTagInput]  = useState('');
+    const [editRecipeTags,     setEditRecipeTags]     = useState([]);
+    const [editRecipeTagInput, setEditRecipeTagInput] = useState('');
+
+    const handleNewRecipeTagKeyDown = (e) =>
+    {
+        if (e.key !== 'Enter' && e.key !== ',') return;
+        e.preventDefault();
+        const tag = newRecipeTagInput.trim();
+        if (tag && !newRecipeTags.includes(tag)) setNewRecipeTags((prev) => [...prev, tag]);
+        setNewRecipeTagInput('');
+    };
+    const removeNewRecipeTag = (tag) => setNewRecipeTags((prev) => prev.filter((t) => t !== tag));
+    const toggleNewRecipeTag = (tag) => setNewRecipeTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+
+    const handleEditRecipeTagKeyDown = (e) =>
+    {
+        if (e.key !== 'Enter' && e.key !== ',') return;
+        e.preventDefault();
+        const tag = editRecipeTagInput.trim();
+        if (tag && !editRecipeTags.includes(tag)) setEditRecipeTags((prev) => [...prev, tag]);
+        setEditRecipeTagInput('');
+    };
+    const removeEditRecipeTag = (tag) => setEditRecipeTags((prev) => prev.filter((t) => t !== tag));
+    const toggleEditRecipeTag = (tag) => setEditRecipeTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+    // NEW CODE BLOCK END
+
     useEffect(() =>
     {
         if (initialSelectedRecipeId) setSelectedRecipeId(initialSelectedRecipeId);
@@ -37,11 +72,19 @@ const Recipes = (props) =>
 
     const selectedRecipe = recipes.find((r) => r.id === selectedRecipeId) || null;
 
-    // Filtered recipe list — searches by name, case-insensitive substring match
+    // NEW CODE BLOCK BEGIN — build tag pool from defaults + any tags already on recipes
+    const usedRecipeTags = [...new Set((recipes || []).flatMap((r) => r.tags || []))];
+    const allRecipeTags  = [...new Set([...DEFAULT_TAGS, ...usedRecipeTags])];
+    // NEW CODE BLOCK END
+
+    // Filtered recipe list — searches by name and filters by active tag
     const rq = recipeSearch.trim().toLowerCase();
-    const filteredRecipes = rq
-        ? recipes.filter((r) => r.name.toLowerCase().includes(rq))
-        : recipes;
+    const filteredRecipes = recipes.filter((r) =>
+    {
+        const matchesSearch = !rq || r.name.toLowerCase().includes(rq);
+        const matchesTag    = !activeRecipeTag || (Array.isArray(r.tags) && r.tags.includes(activeRecipeTag)); // NEW CODE UPDATED, added tag filter
+        return matchesSearch && matchesTag;
+    });
 
     const UNITS = ['Unit','g','kg','ml','L','cup','tbsp','tsp','Box','oz','Package'];
 
@@ -76,6 +119,7 @@ const Recipes = (props) =>
         setNewRecipeName('');
         setNewRecipeIngredients([{ name:'', quantity:'', unit:'Unit' }]);
         setNewRecipeInstructions('');
+        setNewRecipeTags([]); setNewRecipeTagInput(''); // reset tags
     };
 
     const handleAddRecipeSubmit = (e) =>
@@ -95,11 +139,13 @@ const Recipes = (props) =>
             name:         newRecipeName,
             ingredients,
             instructions: parseInstructionsText(newRecipeInstructions),
+            tags:         newRecipeTags, // NEW CODE UPDATED — pass tags
         });
 
         setNewRecipeName('');
         setNewRecipeIngredients([{ name:'', quantity:'', unit:'Unit' }]);
         setNewRecipeInstructions('');
+        setNewRecipeTags([]); setNewRecipeTagInput(''); // reset tags
         setShowAddForm(false);
     };
 
@@ -120,6 +166,8 @@ const Recipes = (props) =>
         setEditRecipeInstructions(
             Array.isArray(recipe.instructions) ? recipe.instructions.join('\n') : recipe.instructions || ''
         );
+        setEditRecipeTags(Array.isArray(recipe.tags) ? [...recipe.tags] : []); // NEW CODE UPDATED — load existing tags
+        setEditRecipeTagInput('');
     };
 
     const cancelEditing = () =>
@@ -128,6 +176,7 @@ const Recipes = (props) =>
         setEditRecipeName('');
         setEditRecipeIngredients([]);
         setEditRecipeInstructions('');
+        setEditRecipeTags([]); setEditRecipeTagInput(''); // reset tags
     };
 
     const handleEditSubmit = (e, id) =>
@@ -145,6 +194,7 @@ const Recipes = (props) =>
             name:         editRecipeName,
             ingredients,
             instructions: parseInstructionsText(editRecipeInstructions),
+            tags:         editRecipeTags, // NEW CODE UPDATED — pass tags
         });
         cancelEditing();
     };
@@ -156,6 +206,44 @@ const Recipes = (props) =>
         if (selectedRecipeId === id) setSelectedRecipeId(null);
         if (editingId === id) cancelEditing();
     };
+
+    /* ── Tag editor section — shared render helper ── */
+    // NEW CODE BLOCK BEGIN
+    const renderTagEditor = (activeTags, onToggle, onRemove, tagInput, setTagInput, onKeyDown) => (
+        <div className="gg-item-tag-editor">
+            <div className="gg-item-tag-pills">
+                {activeTags.map((tag) => (
+                    <span key={tag} className="gg-item-tag-active">
+                        {tag}
+                        <button type="button" onClick={() => onRemove(tag)} className="gg-item-tag-remove">×</button>
+                    </span>
+                ))}
+            </div>
+            <div className="gg-item-tag-defaults" style={{ marginTop: '8px' }}>
+                {DEFAULT_TAGS.filter((t) => !activeTags.includes(t)).map((tag) => (
+                    <button
+                        key={tag}
+                        type="button"
+                        className="gg-tag-pill"
+                        style={{ fontSize: '8px', padding: '2px 8px' }}
+                        onClick={() => onToggle(tag)}
+                    >
+                        + {tag}
+                    </button>
+                ))}
+            </div>
+            <input
+                className="gg-input"
+                type="text"
+                placeholder="Custom tag, press Enter…"
+                value={tagInput}
+                onChange={(e) => setTagInput(e.target.value)}
+                onKeyDown={onKeyDown}
+                style={{ marginTop: '8px', fontSize: '13px' }}
+            />
+        </div>
+    );
+    // NEW CODE BLOCK END
 
     /* ── Add-form modal ── */
     const renderAddFormModal = () => !showAddForm ? null : (
@@ -193,6 +281,13 @@ const Recipes = (props) =>
                         <input className="gg-input" id="m-name" placeholder="e.g. Mushroom Omelette"
                             value={newRecipeName} onChange={(e) => setNewRecipeName(e.target.value)} />
                     </div>
+
+                    {/* NEW CODE BLOCK BEGIN — tags in add modal */}
+                    <div style={{ marginBottom: '16px' }}>
+                        <label className="gg-label">Tags</label>
+                        {renderTagEditor(newRecipeTags, toggleNewRecipeTag, removeNewRecipeTag, newRecipeTagInput, setNewRecipeTagInput, handleNewRecipeTagKeyDown)}
+                    </div>
+                    {/* NEW CODE BLOCK END */}
 
                     <div className="gg-divider"></div>
                     <div className="gg-detail-section-label" style={{ marginBottom: '12px' }}>Ingredients</div>
@@ -359,10 +454,29 @@ const Recipes = (props) =>
                             </div>
                         </div>
 
+                        {/* NEW CODE BLOCK BEGIN — tag filter row */}
+                        <div className="gg-recipe-tag-filter-row">
+                            {allRecipeTags.map((tag) => (
+                                <button
+                                    key={tag}
+                                    className={`gg-tag-pill${activeRecipeTag === tag ? ' active' : ''}`}
+                                    onClick={() => setActiveRecipeTag((prev) => (prev === tag ? null : tag))}
+                                >
+                                    {tag}
+                                </button>
+                            ))}
+                            {activeRecipeTag && (
+                                <button className="gg-tag-clear" onClick={() => setActiveRecipeTag(null)}>
+                                    <i className="bi bi-x"></i> Clear
+                                </button>
+                            )}
+                        </div>
+                        {/* NEW CODE BLOCK END */}
+
                         <div className="gg-recipe-items-scroll">
                             {isLoading && (
                                 <div style={{ padding: '20px 14px', fontFamily: 'var(--f-mono)', fontSize: '10px', letterSpacing: '0.15em', textTransform: 'uppercase', color: 'var(--text-faint)' }}>
-                                    Loading recipes\u2026
+                                    Loading recipes…
                                 </div>
                             )}
                             {!isLoading && (!recipes || recipes.length === 0) && (
@@ -371,16 +485,18 @@ const Recipes = (props) =>
                                 </div>
                             )}
 
-                            {/* Search returned nothing but recipes exist */}
+                            {/* Search or tag filter returned nothing but recipes exist */}
                             {!isLoading && recipes && recipes.length > 0 && filteredRecipes.length === 0 && (
                                 <div style={{ padding: '16px 14px' }}>
                                     <div style={{ fontFamily: 'var(--f-body)', fontStyle: 'italic', fontSize: '13px', color: 'var(--text-faint)', marginBottom: '8px' }}>
-                                        No recipes match "{recipeSearch}"
+                                        No recipes match
+                                        {recipeSearch && <> "{recipeSearch}"</>}
+                                        {activeRecipeTag && <> · tag <em style={{ color: 'var(--teal)' }}>{activeRecipeTag}</em></>} {/* NEW CODE UPDATED, mention active tag */}
                                     </div>
                                     <button
                                         className="gg-btn-ghost"
                                         style={{ fontSize: '9px', padding: '4px 10px' }}
-                                        onClick={() => setRecipeSearch('')}
+                                        onClick={() => { setRecipeSearch(''); setActiveRecipeTag(null); }} // NEW CODE UPDATED, clear both filters
                                     >
                                         Clear
                                     </button>
@@ -446,6 +562,13 @@ const Recipes = (props) =>
                                         onChange={(e) => setEditRecipeName(e.target.value)} />
                                 </div>
 
+                                {/* NEW CODE BLOCK BEGIN — tags in edit form */}
+                                <div>
+                                    <label className="gg-label">Tags</label>
+                                    {renderTagEditor(editRecipeTags, toggleEditRecipeTag, removeEditRecipeTag, editRecipeTagInput, setEditRecipeTagInput, handleEditRecipeTagKeyDown)}
+                                </div>
+                                {/* NEW CODE BLOCK END */}
+
                                 <div>
                                     <div className="gg-detail-section-label" style={{ marginBottom: '10px' }}>Ingredients</div>
                                     {editRecipeIngredients.map((ing, index) => (
@@ -508,6 +631,15 @@ const Recipes = (props) =>
                                                 <i className="bi bi-list-ul"></i> {selectedRecipe.ingredients.length} ingredients
                                             </span>
                                         )}
+                                        {/* NEW CODE BLOCK BEGIN — show tags in detail header */}
+                                        {Array.isArray(selectedRecipe.tags) && selectedRecipe.tags.length > 0 && (
+                                            selectedRecipe.tags.map((tag) => (
+                                                <span key={tag} className="gg-item-tag">
+                                                    {tag}
+                                                </span>
+                                            ))
+                                        )}
+                                        {/* NEW CODE BLOCK END */}
                                     </div>
                                 </div>
 

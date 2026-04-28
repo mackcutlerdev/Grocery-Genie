@@ -8,22 +8,28 @@ const Pantry = (props) =>
     const [newName,     setNewName]     = useState('');
     const [newQuantity, setNewQuantity] = useState('');
     const [newUnit,     setNewUnit]     = useState('Unit');
+    const [newTags,     setNewTags]     = useState([]);       // NEW CODE BLOCK BEGIN — add form tags
+    const [newTagInput, setNewTagInput] = useState('');       // NEW CODE BLOCK END
 
     // Inline-edit state
     const [editingId,    setEditingId]    = useState(null);
     const [editName,     setEditName]     = useState('');
     const [editQuantity, setEditQuantity] = useState('');
     const [editUnit,     setEditUnit]     = useState('Unit');
+    const [editTags,     setEditTags]     = useState([]);     // NEW CODE BLOCK BEGIN — edit row tags
+    const [editTagInput, setEditTagInput] = useState('');     // NEW CODE BLOCK END
 
     // Search & filter state
     const [searchQuery, setSearchQuery] = useState('');
-    const [activeTag,   setActiveTag]   = useState(null);   // null = no tag filter active
+    const [activeTag,   setActiveTag]   = useState(null);
 
-    // ── Tag filter framework ──────────────────────────────────────────────
-    // Tags will be populated here once the Ingredient & Recipe Tags feature lands.
-    // Shape: [{ label: 'Poultry', value: 'poultry' }, ...]
-    // For now the array is empty — the pill row renders placeholder pills.
-    const AVAILABLE_TAGS = [];
+    // NEW CODE BLOCK BEGIN — default tags + collect all tags in use across items
+    const DEFAULT_TAGS = ['Produce', 'Dairy', 'Meat', 'Seafood', 'Frozen', 'Pantry Staple', 'Spice', 'Beverage', 'Snack', 'Bakery', 'Favorite'];
+
+    // build the full tag pool: defaults + any custom tags the user has already used
+    const usedTags = [...new Set((items || []).flatMap((item) => item.tags || []))];
+    const allTags  = [...new Set([...DEFAULT_TAGS, ...usedTags])];
+    // NEW CODE BLOCK END
 
     const handleTagFilter = (tagValue) =>
     {
@@ -36,26 +42,41 @@ const Pantry = (props) =>
     const filteredItems = (items || []).filter((item) =>
     {
         const matchesSearch = !q || item.name.toLowerCase().includes(q);
-        // Tag filter hook: when tags exist, item.tags (array) would be checked here.
-        // const matchesTag = !activeTag || (Array.isArray(item.tags) && item.tags.includes(activeTag));
-        const matchesTag = !activeTag; // placeholder — always passes until tags exist
+        const matchesTag    = !activeTag || (Array.isArray(item.tags) && item.tags.includes(activeTag)); // was placeholder, now real
         return matchesSearch && matchesTag;
     });
 
     const hasItems   = items && items.length > 0;
     const hasResults = filteredItems.length > 0;
-    const isFiltered = q.length > 0 || activeTag !== null;
 
     // ── Add form ──────────────────────────────────────────────────────────
-    const resetAddForm = () => { setNewName(''); setNewQuantity(''); setNewUnit('Unit'); };
+    const resetAddForm = () =>
+    {
+        setNewName(''); setNewQuantity(''); setNewUnit('Unit');
+        setNewTags([]); setNewTagInput(''); // reset tags too
+    };
 
     const handleAddSubmit = (e) =>
     {
         e.preventDefault();
         if (!newName.trim()) return;
-        onAddItem({ name: newName, quantity: Number(newQuantity) || 0, unit: newUnit });
+        onAddItem({ name: newName, quantity: Number(newQuantity) || 0, unit: newUnit, tags: newTags }); // pass tags
         resetAddForm();
     };
+
+    // NEW CODE BLOCK BEGIN — tag helpers for add form
+    const handleNewTagKeyDown = (e) =>
+    {
+        if (e.key !== 'Enter' && e.key !== ',') return;
+        e.preventDefault();
+        const tag = newTagInput.trim();
+        if (tag && !newTags.includes(tag)) setNewTags((prev) => [...prev, tag]);
+        setNewTagInput('');
+    };
+
+    const removeNewTag = (tag) => setNewTags((prev) => prev.filter((t) => t !== tag));
+    const toggleNewTag = (tag) => setNewTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+    // NEW CODE BLOCK END
 
     // ── Edit ──────────────────────────────────────────────────────────────
     const handleDelete = (id) =>
@@ -70,25 +91,44 @@ const Pantry = (props) =>
         setEditName(item.name);
         setEditQuantity(item.quantity);
         setEditUnit(item.unit || 'Unit');
+        setEditTags(Array.isArray(item.tags) ? [...item.tags] : []); // load existing tags
+        setEditTagInput('');
+        setEditTagPickerOpen(false); // NEW CODE UPDATED, collapse picker on each new edit
     };
 
     const cancelEditing = () =>
     {
         setEditingId(null);
         setEditName(''); setEditQuantity(''); setEditUnit('Unit');
+        setEditTags([]); setEditTagInput(''); // reset tags
+        setEditTagPickerOpen(false); // NEW CODE UPDATED, reset picker on cancel
     };
 
     const handleEditSubmit = (e, id) =>
     {
         e.preventDefault();
-        onUpdateItem(id, { name: editName, quantity: Number(editQuantity) || 0, unit: editUnit });
+        onUpdateItem(id, { name: editName, quantity: Number(editQuantity) || 0, unit: editUnit, tags: editTags }); // pass tags
         cancelEditing();
     };
 
-    const UNITS = ['Unit','g','kg','ml','L','cup','tbsp','tsp','Box','oz','Package'];
+    // NEW CODE BLOCK BEGIN — tag helpers for edit row
+    const handleEditTagKeyDown = (e) =>
+    {
+        if (e.key !== 'Enter' && e.key !== ',') return;
+        e.preventDefault();
+        const tag = editTagInput.trim();
+        if (tag && !editTags.includes(tag)) setEditTags((prev) => [...prev, tag]);
+        setEditTagInput('');
+    };
 
-    // Placeholder pills — shown only while AVAILABLE_TAGS is empty, non-interactive
-    const PLACEHOLDER_TAGS = ['Poultry', 'Seafood', 'Dairy', 'Produce', 'Frozen', 'Favorite'];
+    const removeEditTag = (tag) => setEditTags((prev) => prev.filter((t) => t !== tag));
+    const toggleEditTag = (tag) => setEditTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
+
+    // controls whether the tag pill grid is expanded in the edit row
+    const [editTagPickerOpen, setEditTagPickerOpen] = useState(false);
+    // NEW CODE BLOCK END
+
+    const UNITS = ['Unit','g','kg','ml','L','cup','tbsp','tsp','Box','oz','Package'];
 
     return (
         <Fragment>
@@ -121,8 +161,6 @@ const Pantry = (props) =>
                                     </button>
                                 )}
                             </div>
-
-                            {/* Result count — only shown while a query is active */}
                             {q && (
                                 <div className="gg-search-count">
                                     {filteredItems.length} of {items ? items.length : 0}
@@ -130,38 +168,20 @@ const Pantry = (props) =>
                             )}
                         </div>
 
-                        {/* Tag filter row — framework ready, pills disabled until Tags feature ships */}
+                        {/* Tag filter row — now uses real allTags */}
                         <div className="gg-tag-filter-row">
                             <span className="gg-tag-filter-label">Tags</span>
-
-                            {/* Live tags — this map populates once tags exist on items */}
-                            {AVAILABLE_TAGS.map((tag) => (
+                            {allTags.map((tag) => (
                                 <button
-                                    key={tag.value}
-                                    className={`gg-tag-pill${activeTag === tag.value ? ' active' : ''}`}
-                                    onClick={() => handleTagFilter(tag.value)}
+                                    key={tag}
+                                    className={`gg-tag-pill${activeTag === tag ? ' active' : ''}`}
+                                    onClick={() => handleTagFilter(tag)}
                                 >
-                                    {tag.label}
+                                    {tag}
                                 </button>
                             ))}
-
-                            {/* Placeholder pills — visible preview while feature is pending */}
-                            {AVAILABLE_TAGS.length === 0 && PLACEHOLDER_TAGS.map((label) => (
-                                <span
-                                    key={label}
-                                    className="gg-tag-pill gg-tag-pill-soon"
-                                    title="Tag filtering coming soon — assign tags to your ingredients first"
-                                >
-                                    {label}
-                                </span>
-                            ))}
-
-                            {/* Clear active tag button */}
                             {activeTag && (
-                                <button
-                                    className="gg-tag-clear"
-                                    onClick={() => setActiveTag(null)}
-                                >
+                                <button className="gg-tag-clear" onClick={() => setActiveTag(null)}>
                                     <i className="bi bi-x"></i> Clear
                                 </button>
                             )}
@@ -189,7 +209,6 @@ const Pantry = (props) =>
                                         </tr>
                                     )}
 
-                                    {/* True empty — pantry has no items at all */}
                                     {!isLoading && !hasItems && (
                                         <tr>
                                             <td colSpan="4">
@@ -201,7 +220,6 @@ const Pantry = (props) =>
                                         </tr>
                                     )}
 
-                                    {/* Items exist but search/filter returned nothing */}
                                     {!isLoading && hasItems && !hasResults && (
                                         <tr>
                                             <td colSpan="4">
@@ -231,18 +249,77 @@ const Pantry = (props) =>
                                         <tr key={item.id} className={isDepleted ? 'row-depleted' : ''}>
                                             <td>
                                                 {editingId === item.id ? (
-                                                    <input
-                                                        className="gg-edit-input"
-                                                        type="text"
-                                                        value={editName}
-                                                        onChange={(e) => setEditName(e.target.value)}
-                                                    />
+                                                    <>
+                                                        <input
+                                                            className="gg-edit-input"
+                                                            type="text"
+                                                            value={editName}
+                                                            onChange={(e) => setEditName(e.target.value)}
+                                                        />
+                                                        {/* NEW CODE BLOCK BEGIN — compact tag editor in edit row */}
+                                                        <div className="gg-item-tag-editor">
+                                                            <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
+                                                                {editTags.map((tag) => (
+                                                                    <span key={tag} className="gg-item-tag-active">
+                                                                        {tag}
+                                                                        <button type="button" onClick={() => removeEditTag(tag)} className="gg-item-tag-remove">×</button>
+                                                                    </span>
+                                                                ))}
+                                                                <button
+                                                                    type="button"
+                                                                    className="gg-tag-pill"
+                                                                    style={{ fontSize: '8px', padding: '2px 8px' }}
+                                                                    onClick={() => setEditTagPickerOpen((prev) => !prev)}
+                                                                >
+                                                                    {editTagPickerOpen ? '− tags' : '+ tags'}
+                                                                </button>
+                                                            </div>
+                                                            {editTagPickerOpen && (
+                                                                <div style={{ marginTop: '6px' }}>
+                                                                    <div className="gg-item-tag-defaults">
+                                                                        {allTags.filter((t) => !editTags.includes(t)).map((tag) => (
+                                                                            <button
+                                                                                key={tag}
+                                                                                type="button"
+                                                                                className="gg-tag-pill"
+                                                                                style={{ fontSize: '8px', padding: '2px 8px' }}
+                                                                                onClick={() => toggleEditTag(tag)}
+                                                                            >
+                                                                                + {tag}
+                                                                            </button>
+                                                                        ))}
+                                                                    </div>
+                                                                    <input
+                                                                        className="gg-edit-input"
+                                                                        type="text"
+                                                                        placeholder="Custom tag, press Enter…"
+                                                                        value={editTagInput}
+                                                                        onChange={(e) => setEditTagInput(e.target.value)}
+                                                                        onKeyDown={handleEditTagKeyDown}
+                                                                        style={{ marginTop: '6px', fontSize: '12px' }}
+                                                                    />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        {/* NEW CODE BLOCK END */}
+                                                    </>
                                                 ) : (
                                                     <>
                                                         {item.name}
                                                         {isDepleted && (
                                                             <span className="gg-depleted-pill">Empty</span>
                                                         )}
+                                                        {/* NEW CODE BLOCK BEGIN — show tags on item row */}
+                                                        {Array.isArray(item.tags) && item.tags.length > 0 && (
+                                                            <span style={{ marginLeft: '8px' }}>
+                                                                {item.tags.map((tag) => (
+                                                                    <span key={tag} className="gg-item-tag">
+                                                                        {tag}
+                                                                    </span>
+                                                                ))}
+                                                            </span>
+                                                        )}
+                                                        {/* NEW CODE BLOCK END */}
                                                     </>
                                                 )}
                                             </td>
@@ -364,6 +441,44 @@ const Pantry = (props) =>
                                     </select>
                                 </div>
                             </div>
+
+                            {/* NEW CODE BLOCK BEGIN — tags in add form */}
+                            <div className="gg-add-form-row">
+                                <label className="gg-label">Tags</label>
+                                {newTags.length > 0 && (
+                                    <div className="gg-item-tag-pills" style={{ marginBottom: '6px' }}>
+                                        {newTags.map((tag) => (
+                                            <span key={tag} className="gg-item-tag-active">
+                                                {tag}
+                                                <button type="button" onClick={() => removeNewTag(tag)} className="gg-item-tag-remove">×</button>
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
+                                <div className="gg-item-tag-defaults" style={{ marginBottom: '6px' }}>
+                                    {DEFAULT_TAGS.filter((t) => !newTags.includes(t)).map((tag) => (
+                                        <button
+                                            key={tag}
+                                            type="button"
+                                            className="gg-tag-pill"
+                                            style={{ fontSize: '8px', padding: '2px 8px' }}
+                                            onClick={() => toggleNewTag(tag)}
+                                        >
+                                            + {tag}
+                                        </button>
+                                    ))}
+                                </div>
+                                <input
+                                    className="gg-input"
+                                    type="text"
+                                    placeholder="Custom tag, press Enter…"
+                                    value={newTagInput}
+                                    onChange={(e) => setNewTagInput(e.target.value)}
+                                    onKeyDown={handleNewTagKeyDown}
+                                    style={{ fontSize: '13px' }}
+                                />
+                            </div>
+                            {/* NEW CODE BLOCK END */}
 
                             <button
                                 type="submit"

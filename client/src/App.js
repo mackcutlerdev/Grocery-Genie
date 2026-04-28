@@ -3,6 +3,7 @@ import './App.css';
 import Navbar from './components/Navbar';
 import ProtectedRoute from './pages/ProtectedRoute';
 import LoginPage from './pages/LoginPage';
+import LandingPage from './pages/LandingPage';
 import PantryPage from './pages/PantryPage';
 import RecipesPage from './pages/RecipesPage';
 import WhatCanIMakePage from './pages/WhatCanIMakePage';
@@ -73,6 +74,9 @@ function App()
         <Switch>
             {/* /login is fully public and renders outside the shell */}
             <Route path="/login" component={LoginPage} />
+
+            {/* public landing page, no auth */}
+            <Route path="/landing" component={LandingPage} />
 
             {/* Everything else goes through the shell.
                 ProtectedRoute inside AppShell handles the redirect

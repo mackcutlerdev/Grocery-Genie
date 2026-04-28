@@ -44,7 +44,7 @@ router.get('/:id', async (req, res) =>
 // POST: create a new item owned by the logged-in user
 router.post('/', async (req, res) =>
 {
-    const { name, quantity, unit } = req.body;
+    const { name, quantity, unit, tags } = req.body;
 
     if (!name || !name.trim())
         return res.status(400).json({ msg: 'Please include an item name' });
@@ -56,6 +56,7 @@ router.post('/', async (req, res) =>
             name:     name.trim(),
             quantity: Number(quantity) || 0,
             unit:     unit || 'Unit',
+            tags:     tags || [],
         });
 
         await item.save();
@@ -73,7 +74,7 @@ router.post('/', async (req, res) =>
 // PUT: update an item, only if it belongs to the logged-in user
 router.put('/:id', async (req, res) =>
 {
-    const { name, quantity, unit } = req.body;
+    const { name, quantity, unit, tags } = req.body;
 
     try
     {
@@ -83,6 +84,7 @@ router.put('/:id', async (req, res) =>
                 ...(name     !== undefined && { name:     name.trim() }),
                 ...(quantity !== undefined && { quantity: Number(quantity) }),
                 ...(unit     !== undefined && { unit }),
+                ...(tags     !== undefined && { tags }), // tags added
             },
             { new: true, runValidators: true }
         );

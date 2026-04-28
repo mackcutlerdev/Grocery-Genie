@@ -24,16 +24,16 @@ describe('ProtectedRoute', () =>
         expect(screen.getByText('Protected Content')).toBeInTheDocument();
     });
 
-    test('redirects to /login when no token exists', () =>
+    test('redirects to /landing when no token exists', () => // NEW CODE UPDATED, was /login
     {
         render(
             <MemoryRouter initialEntries={['/pantry']}>
                 <ProtectedRoute path="/pantry" component={DummyPage} />
-                <Route path="/login" render={() => <div>Login Page</div>} />
+                <Route path="/landing" render={() => <div>Landing Page</div>} /> 
             </MemoryRouter>
         );
 
-        expect(screen.getByText('Login Page')).toBeInTheDocument();
+        expect(screen.getByText('Landing Page')).toBeInTheDocument(); // NEW CODE UPDATED, was 'Login Page'
         expect(screen.queryByText('Protected Content')).not.toBeInTheDocument();
     });
 });

@@ -31,6 +31,7 @@ GroceryGenie’s goal is an app that tracks items in your pantry at home, manage
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+
 ```
 Grocery-Genie
 ├─ client
@@ -54,6 +55,7 @@ Grocery-Genie
 │     │  ├─ Recipes.js
 │     │  ├─ Recipes.test.js
 │     │  ├─ Roadmap.js
+│     │  ├─ ShoppingList.js
 │     │  ├─ Sources.js
 │     │  ├─ Spinner.js
 │     │  ├─ WhatCanIMake.js
@@ -69,6 +71,7 @@ Grocery-Genie
 │     │  ├─ ProtectedRoute.test.js
 │     │  ├─ RecipesPage.js
 │     │  ├─ RoadmapPage.js
+│     │  ├─ ShoppingListPage.js
 │     │  ├─ SourcesPage.js
 │     │  └─ WhatCanIMakePage.js
 │     ├─ setupTests.js
@@ -78,6 +81,7 @@ Grocery-Genie
 │        ├─ recipeUtils.js
 │        └─ recipeUtils.test.js
 ├─ README.md
+├─ robots.txt
 └─ server
    ├─ middleware
    │  ├─ auth.js
@@ -86,6 +90,7 @@ Grocery-Genie
    ├─ models
    │  ├─ Item.js
    │  ├─ Recipe.js
+   │  ├─ ShoppingItem.js
    │  └─ User.js
    ├─ package-lock.json
    ├─ package.json
@@ -96,7 +101,8 @@ Grocery-Genie
    │     ├─ items.js
    │     ├─ items.test.js
    │     ├─ recipes.js
-   │     └─ recipes.test.js
+   │     ├─ recipes.test.js
+   │     └─ shoppingList.js
    └─ server.js
 
 ```

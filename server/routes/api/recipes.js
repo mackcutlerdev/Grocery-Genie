@@ -43,7 +43,7 @@ router.get('/:id', async (req, res) =>
 // POST: create a new recipe owned by the logged-in user
 router.post('/', async (req, res) =>
 {
-    const { name, ingredients, instructions, prep, servings } = req.body;
+    const { name, ingredients, instructions, prep, servings, tags } = req.body;
 
     if (!name || !name.trim())
         return res.status(400).json({ msg: 'Please include a recipe name' });
@@ -57,6 +57,7 @@ router.post('/', async (req, res) =>
             instructions: instructions || [],
             prep:         prep         || '',
             servings:     servings     || null,
+            tags:         tags         || [],
         });
 
         await recipe.save();
@@ -74,7 +75,7 @@ router.post('/', async (req, res) =>
 // PUT: update a recipe, only if it belongs to the logged-in user
 router.put('/:id', async (req, res) =>
 {
-    const { name, ingredients, instructions, prep, servings } = req.body;
+    const { name, ingredients, instructions, prep, servings, tags } = req.body;
 
     try
     {
@@ -86,6 +87,7 @@ router.put('/:id', async (req, res) =>
                 ...(instructions !== undefined && { instructions }),
                 ...(prep         !== undefined && { prep }),
                 ...(servings     !== undefined && { servings }),
+                ...(tags         !== undefined && { tags }),
             },
             { new: true, runValidators: true }
         );
