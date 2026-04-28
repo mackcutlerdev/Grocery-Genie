@@ -208,8 +208,8 @@ function LandingPage()
                             Smart Pantry Management
                         </div>
                         <h1 className="gg-land-hero-heading">
-                            Stop throwing out<br />
-                            food you <em>forgot</em> you had.
+                            Save the extra<br />
+                            time it takes to <em>figure out</em> what you have.
                         </h1>
                         <p className="gg-land-hero-sub">
                             GroceryGenie tracks your pantry, matches it against your recipes,
