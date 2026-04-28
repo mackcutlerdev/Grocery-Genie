@@ -1,36 +1,36 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import './LandingPage.css'; // NEW CODE UPDATED, landing page styles
+import './LandingPage.css';
 
-// ── Fake review data ──────────────────────────────────────────────────────────
+// Fake review data 
 const REVIEWS = [
     {
-        name: 'Sarah K.',
-        handle: '@sarahcooks',
-        text: 'I used to throw out so much food every week. GroceryGenie basically eliminated that. I see what I can make before I even open the fridge.',
+        name: 'Conner J.',
+        handle: '@epicteddy',
+        text: 'Really saves time, I was getting sick of searching my kitchen every night to figure out what I can make. Now I can just see what I can make.',
         stars: 5,
     },
     {
-        name: 'Marcus T.',
-        handle: '@marcust',
-        text: 'The smart matching is actually smart. It knew "2% Milk" covered my recipe that just said "Milk". Tiny thing but it matters.',
+        name: 'Tony N.',
+        handle: '@ton',
+        text: 'Its super nice to be able to have all my recipes in one place, and make a shopping list from what I dont have automatically.',
         stars: 5,
     },
     {
-        name: 'Priya N.',
-        handle: '@priya_eats',
-        text: 'My shopping list used to be a mess of sticky notes. Now its one click from the recipe page. Genuinely changed how I grocery shop.',
+        name: 'Jenny N.',
+        handle: '@ruppert',
+        text: 'I really love it! Its so pretty to look at and use! Excited to see where it goes.',
         stars: 5,
     },
     {
-        name: 'James L.',
-        handle: '@jamesl',
-        text: 'Really clean interface. Doesnt feel like another clunky food app. Its fast, its nice to look at, and it actually works.',
+        name: 'Maple P.',
+        handle: '@pearlmaple',
+        text: 'Clean interface. Doesnt feel like another clunky food app. Its fast, its nice to look at, and it actually works.',
         stars: 5,
     },
 ];
 
-// ── Features data ─────────────────────────────────────────────────────────────
+// Features data
 const FEATURES = [
     {
         icon: 'bi-basket2',
@@ -45,7 +45,7 @@ const FEATURES = [
     {
         icon: 'bi-magic',
         title: 'What Can I Make?',
-        desc: 'The matching engine cross-references your pantry and recipes in real time. It understands variants — "2% Milk" satisfies "Milk".',
+        desc: 'The matching engine cross-references your pantry and recipes in real time. It understands variants: "2% Milk" satisfies "Milk".',
     },
     {
         icon: 'bi-cart3',
@@ -54,7 +54,7 @@ const FEATURES = [
     },
 ];
 
-// ── Logo orb (replicates the sidebar orb in pure JSX) ────────────────────────
+// Logo orb
 function LogoOrb({ size = 48 })
 {
     return (
@@ -80,7 +80,7 @@ function LogoOrb({ size = 48 })
     );
 }
 
-// ── Star row ─────────────────────────────────────────────────────────────────
+// Star row 
 function Stars({ count = 5 })
 {
     return (
@@ -92,7 +92,7 @@ function Stars({ count = 5 })
     );
 }
 
-// ── Review card ───────────────────────────────────────────────────────────────
+// Review card
 function ReviewCard({ review, delay = 0 })
 {
     return (
@@ -107,7 +107,7 @@ function ReviewCard({ review, delay = 0 })
     );
 }
 
-// ── Feature card ──────────────────────────────────────────────────────────────
+// Feature card 
 function FeatureCard({ feature, delay = 0 })
 {
     return (
@@ -121,7 +121,7 @@ function FeatureCard({ feature, delay = 0 })
     );
 }
 
-// ── Fake app screenshot ───────────────────────────────────────────────────────
+// Fake app screenshot
 // Renders a simplified mockup of the pantry table so there's something visual
 function AppMockup()
 {
@@ -171,19 +171,19 @@ function AppMockup()
     );
 }
 
-// ── Main landing page ─────────────────────────────────────────────────────────
+// Main landing page
 function LandingPage()
 {
     return (
         <div className="gg-land-root">
 
-            {/* ── Ambient blobs (same as app body::before) ── */}
+            {/* Ambient blobs (same as app body::before) */}
             <div className="gg-land-blobs" />
 
-            {/* ── Grain overlay ── */}
+            {/* Grain overlay */}
             <div className="gg-land-grain" />
 
-            {/* ── Nav ── */}
+            {/* Nav */}
             <nav className="gg-land-nav">
                 <div className="gg-land-nav-inner">
                     <div className="gg-land-nav-logo">
@@ -199,7 +199,7 @@ function LandingPage()
                 </div>
             </nav>
 
-            {/* ── Hero ── */}
+            {/* Hero */}
             <section className="gg-land-hero">
                 <div className="gg-land-hero-inner">
                     <div className="gg-land-hero-text">
@@ -213,12 +213,12 @@ function LandingPage()
                         </h1>
                         <p className="gg-land-hero-sub">
                             GroceryGenie tracks your pantry, matches it against your recipes,
-                            and tells you exactly what you can cook right now —
+                            and tells you exactly what you can cook right now;
                             no guessing, no waste.
                         </p>
                         <div className="gg-land-hero-actions">
                             <Link to="/login" className="gg-land-btn-primary">
-                                Get Started — it's free
+                                Get Started, it's free!
                                 <i className="bi bi-arrow-right"></i>
                             </Link>
                             <a href="#features" className="gg-land-btn-ghost">
@@ -236,7 +236,7 @@ function LandingPage()
                 </div>
             </section>
 
-            {/* ── Features ── */}
+            {/* Features */}
             <section className="gg-land-section" id="features">
                 <div className="gg-land-section-inner">
                     <div className="gg-land-section-kicker">
@@ -254,7 +254,7 @@ function LandingPage()
                 </div>
             </section>
 
-            {/* ── How it works ── */}
+            {/* How it works */}
             <section className="gg-land-section gg-land-section-alt">
                 <div className="gg-land-section-inner">
                     <div className="gg-land-section-kicker">
@@ -268,7 +268,7 @@ function LandingPage()
                         <div className="gg-land-step">
                             <div className="gg-land-step-num">01</div>
                             <div className="gg-land-step-title">Add your pantry</div>
-                            <div className="gg-land-step-desc">Type in what you have at home — name, quantity, unit. Done in two minutes.</div>
+                            <div className="gg-land-step-desc">Type in what you have at home: name, quantity, unit. Done in two minutes.</div>
                         </div>
                         <div className="gg-land-step-arrow"><i className="bi bi-arrow-right"></i></div>
                         <div className="gg-land-step">
@@ -286,7 +286,7 @@ function LandingPage()
                 </div>
             </section>
 
-            {/* ── Reviews ── */}
+            {/* Reviews */}
             <section className="gg-land-section">
                 <div className="gg-land-section-inner">
                     <div className="gg-land-section-kicker">
@@ -304,7 +304,7 @@ function LandingPage()
                 </div>
             </section>
 
-            {/* ── Final CTA ── */}
+            {/* Final CTA (Call to Action) */}
             <section className="gg-land-section gg-land-cta-section">
                 <div className="gg-land-cta-inner">
                     <div className="gg-land-cta-orb">
@@ -329,7 +329,7 @@ function LandingPage()
                 <div className="gg-land-footer-inner">
                     <div className="gg-land-footer-logo">
                         <LogoOrb size={24} />
-                        <span style={{ fontFamily: 'var(--f-display)', fontSize: 15, fontStyle: 'italic', color: 'var(--accent)' }}>GroceryGenie</span>
+                        <span style={{ fontFamily: 'var(--f-display)', fontSize: 15, fontStyle: 'italic', color: 'var(--accent)' }}>GroceryGenie</span> <div className="gg-land-footer-note">· by Mack Cutler</div>
                     </div>
                     <div className="gg-land-footer-note">v0.9.5 · Beta · Built with React &amp; MongoDB</div>
                 </div>
