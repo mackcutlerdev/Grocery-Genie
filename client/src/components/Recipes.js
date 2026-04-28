@@ -13,6 +13,7 @@ const Recipes = (props) =>
         initialSelectedRecipeId,
         onMakeRecipe,
         pantryItems = [],
+        onAddMissingToList,
     } = props;
 
     const [selectedRecipeId,       setSelectedRecipeId]       = useState(null);
@@ -526,29 +527,14 @@ const Recipes = (props) =>
                                     {onMakeRecipe && (
                                         <button
                                             className="gg-btn-teal"
-                                            onClick={() =>
-                                            {
-                                                const { pct } = getCoverage(selectedRecipe, pantryItems);
-
-                                                if (pct < 1)
-                                                {
-                                                    const proceed = window.confirm(
-                                                        `You don't have all the ingredients for "${selectedRecipe.name}".\n\n` +
-                                                        `Only ingredients you already have will be subtracted from your pantry. ` +
-                                                        `Are you sure you want to proceed?`
-                                                    );
-                                                    if (!proceed) return;
-                                                }
-                                                else
-                                                {
-                                                    if (!window.confirm(`Use pantry items to make "${selectedRecipe.name}"?`)) return;
-                                                }
-
-                                                onMakeRecipe(selectedRecipe);
-                                                window.alert('Done! Ingredients removed from pantry.');
-                                            }}
+                                            onClick={() => onMakeRecipe(selectedRecipe)}
                                         >
                                             <i className="bi bi-fire"></i><span>Make Recipe</span>
+                                        </button>
+                                    )}
+                                    {onAddMissingToList && getCoverage(selectedRecipe, pantryItems).pct < 1 && (
+                                        <button className="gg-btn-ghost" onClick={() => onAddMissingToList(selectedRecipe)}>
+                                            <i className="bi bi-cart-plus"></i> Add Missing to List
                                         </button>
                                     )}
                                     <button className="gg-btn-ghost" onClick={() => startEditing(selectedRecipe)}>

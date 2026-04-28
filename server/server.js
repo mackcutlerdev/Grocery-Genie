@@ -29,6 +29,7 @@ server.use('/api/auth',        require('./routes/api/auth'));
 // Data routes, protected by JWT inside each router via auth middleware
 server.use('/api/tempItems',   require('./routes/api/items'));
 server.use('/api/tempRecipes', require('./routes/api/recipes'));
+server.use('/api/shoppingList', require('./routes/api/shoppingList'));
 
 // Serve React build in production 
 if (process.env.NODE_ENV === 'production')

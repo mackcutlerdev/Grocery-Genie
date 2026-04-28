@@ -1,9 +1,10 @@
-import React, { Fragment, useState } from 'react';
-import { canMakeRecipe, matchInfo, buildMeta } from '../utils/recipeUtils';
+import React, { Fragment, useState, useEffect } from 'react';
+import { canMakeRecipe, matchInfo, buildMeta, getCoverage } from '../utils/recipeUtils';
+import { namesLooselyMatch } from '../utils/matchingUtils';
 
 const WhatCanIMake = (props) =>
 {
-    const { pantryItems, recipes, isLoading, onReload, onOpenRecipe } = props;
+    const { pantryItems, recipes, isLoading, onReload, onOpenRecipe, onAddMissingToList, } = props;
 
     // 'all' | 'ready' | 'missing'
     const [filterMode, setFilterMode] = useState('all');
@@ -150,6 +151,11 @@ const WhatCanIMake = (props) =>
                                                 )}
                                             </div>
                                             <span className="gg-wcim-match-info">{m.matched} / {m.total} have</span>
+                                            {onAddMissingToList && (
+                                            <button className="gg-btn-ghost" onClick={(e) => {e.stopPropagation(); onAddMissingToList(recipe);}}>
+                                                <i className="bi bi-cart-plus"></i> Add Missing to List
+                                            </button>
+                                            )}
                                         </div>
 
                                         <div className="gg-wcim-missing-body">

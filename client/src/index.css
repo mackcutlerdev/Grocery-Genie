@@ -10,6 +10,7 @@
 
   --text:          #F0DEC8;
   --text-dim:      #9C7A6A;
+  --text-dim-two:  #f07a7a;
   --text-faint:    #5C3F38;
 
   --primary:       #852030;
@@ -420,6 +421,22 @@ body::after {
   cursor: pointer; transition: all 0.18s; white-space: nowrap;
 }
 .gg-btn-ghost:hover {
+  border-color: rgba(232,132,90,0.3);
+  color: var(--accent);
+  background: rgba(232,132,90,0.05);
+}
+
+.gg-btn-ghost-attention {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--f-mono);
+  font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 7px 14px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--hairline-mid);
+  background: transparent; color: var(--text-dim-two);
+  cursor: pointer; transition: all 0.18s; white-space: nowrap;
+}
+.gg-btn-ghost-attention:hover {
   border-color: rgba(232,132,90,0.3);
   color: var(--accent);
   background: rgba(232,132,90,0.05);

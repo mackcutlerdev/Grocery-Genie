@@ -11,7 +11,7 @@ const Roadmap = () =>
                     GroceryGenie <em>Roadmap</em>
                 </div>
                 <div className="gg-sub-heading" style={{ marginBottom: '28px' }}>
-                    Current Version: v0.9.5
+                    Current Version: v0.9.5 · Beta Stage
                 </div>
 
                 <div style={{ maxWidth: '740px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
@@ -20,8 +20,7 @@ const Roadmap = () =>
                     <div className="gg-card" style={{ padding: '22px 26px' }}>
                         <div className="gg-roadmap-section-label accent-plain">Current Status</div>
                         <div style={{ fontFamily: 'var(--f-body)', fontSize: '15px', color: 'var(--text-dim)', lineHeight: '1.65' }}>
-                            Core features are implemented and working, but data is still stored in-memory.
-                            MongoDB persistence is planned for before the official v1.0 release.
+                            Core features are fully implemented with MongoDB persistence. Shopping list, recipe integration, smart merge, and restock prompts are all live. Remaining v1.0 work is tags, PWA support, and polish.
                         </div>
                     </div>
 
@@ -29,15 +28,20 @@ const Roadmap = () =>
                     <div className="gg-card" style={{ padding: '22px 26px' }}>
                         <div className="gg-roadmap-section-label accent-red">Upcoming Features — v1.0.0</div>
                         <div className="gg-roadmap-list">
-                            <div className="gg-roadmap-item">Shopping List Page</div>
                             <div className="gg-roadmap-item">
-                                Add Missing Ingredients to Shopping List: from the "What Can I Make?" page, instantly send missing ingredients to the shopping list.
+                                OCR: Take a picture of your grocery receipt and extract item information, which auto add to your pantry.
                             </div>
-                            <div className="gg-roadmap-item">
-                                Post-Recipe Prompt: {' '}
-                                <em style={{ color: 'var(--text-faint)', fontStyle: 'italic', fontFamily: 'var(--f-body)' }}>
-                                    "Add used ingredients to shopping list?"
-                                </em>
+                            <div className="gg-roadmap-item" style={{ color: 'var(--accent)' }}>
+                                <i className="bi bi-cart" style={{ fontSize: '11px', marginRight: '6px' }}></i>
+                                <s>Shopping List Page: add, check off, delete, clear completed, clear all, copy to clipboard</s>
+                            </div>
+                            <div className="gg-roadmap-item" style={{ color: 'var(--accent)' }}>
+                                <i className="bi bi-cart-plus" style={{ fontSize: '11px', marginRight: '6px' }}></i>
+                                <s>Add Missing Ingredients to Shopping List: from Recipe Book and What Can I Make?, with smart merge</s>
+                            </div>
+                            <div className="gg-roadmap-item" style={{ color: 'var(--accent)' }}>
+                                <i className="bi bi-bell" style={{ fontSize: '11px', marginRight: '6px' }}></i>
+                                <s>Post-Recipe Restock Prompt: when an item hits 0 after Make Recipe, prompts to add to shopping list</s>
                             </div>
                             <div className="gg-roadmap-item" style={{ color: 'var(--accent)' }}>
                                 <i className="bi bi-database-fill-gear" style={{ fontSize: '11px', marginRight: '6px' }}></i>
@@ -65,6 +69,7 @@ const Roadmap = () =>
                             <div className="gg-future-item">Dark / Light / Cozy / Modern / Cyberpunk themes</div>
                             <div className="gg-future-item">Ingredient DB: press [+] on an ingredient instead of manual entry</div>
                             <div className="gg-future-item">Changelog system</div>
+                            <div className="gg-future-item">PWA support: installable, offline, mobile-first responsive design</div>
                         </div>
                     </div>
 
