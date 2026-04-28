@@ -32,7 +32,7 @@ export const getMissingIngredients = (recipe, pantryItems) =>
     return missing;
 };
 
-// Returns { total, matched, missingList } — used by WCIM for the "X / Y have" display
+// Returns { total, matched, missingList }: used by WCIM for the "X / Y have" display
 export const matchInfo = (recipe, pantryItems) =>
 {
     const total       = recipe.ingredients ? recipe.ingredients.length : 0;
@@ -41,7 +41,7 @@ export const matchInfo = (recipe, pantryItems) =>
     return { total, matched, missingList };
 };
 
-// Returns { matched, total, pct } — used by Recipes for the coverage gauge and dot colour
+// Returns { matched, total, pct }: used by Recipes for the coverage gauge and dot colour
 export const getCoverage = (recipe, pantryItems) =>
 {
     if (!recipe || !Array.isArray(recipe.ingredients) || recipe.ingredients.length === 0)

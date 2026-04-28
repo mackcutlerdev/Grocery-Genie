@@ -81,7 +81,7 @@ function LoginPage()
                 return;
             }
 
-            // Store token and user info — api.js will pick these up for every future request
+            // Store token and user info, api.js will pick these up for every future request
             localStorage.setItem('gg-token', data.token);
             localStorage.setItem('gg-user', JSON.stringify(data.user));
 

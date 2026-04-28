@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, within } from '@testing-library/react';
 import Recipes from './Recipes';
 
-// ─── Shared test data ────
+// Shared test data
 const mockRecipes = [
     {
         id: '1',
@@ -56,7 +56,7 @@ const renderRecipes = (overrides = {}) =>
 beforeEach(() => jest.clearAllMocks());
 
 
-// ─── 1. Basic rendering ───
+// 1. Basic rendering
 describe('basic rendering', () =>
 {
     test('renders the recipe list', () =>
@@ -86,7 +86,7 @@ describe('basic rendering', () =>
 });
 
 
-// ─── 2. Selecting a recipe ───
+// 2. Selecting a recipe
 describe('selecting a recipe', () =>
 {
     test('shows recipe detail when a recipe is clicked', () =>
@@ -116,7 +116,7 @@ describe('selecting a recipe', () =>
 });
 
 
-// ─── 3. Add recipe form ───
+// 3. Add recipe form
 
 describe('add recipe form', () =>
 {
@@ -220,8 +220,7 @@ describe('add recipe form', () =>
 });
 
 
-// ─── 4. Deleting a recipe ─
-
+// 4. Deleting a recipe
 describe('deleting a recipe', () =>
 {
     test('calls onDeleteRecipe when confirmed', () =>
@@ -253,8 +252,7 @@ describe('deleting a recipe', () =>
 });
 
 
-// ─── 5. Edit form ─────────
-
+// 5. Edit form
 describe('edit form', () =>
 {
     const openEditForm = () =>
@@ -297,8 +295,7 @@ describe('edit form', () =>
 });
 
 
-// ─── 6. Pantry coverage (getCoverage) ───────────────────────────────────────
-
+// 6. Pantry coverage (getCoverage)
 describe('pantry coverage', () =>
 {
     test('shows coverage gauge when a recipe is selected', () =>
@@ -345,8 +342,7 @@ describe('pantry coverage', () =>
 });
 
 
-// ─── 7. Make Recipe ───────
-
+// 7. Make Recipe
 describe('make recipe', () =>
 {
     test('calls onMakeRecipe when fully covered and confirmed', () =>
@@ -383,8 +379,7 @@ describe('make recipe', () =>
     });
 });
 
-// ─── 8. Recipe search ────────────────────────────────────────────────────────
-
+// 8. Recipe search
 describe('recipe search', () =>
 {
     test('renders the recipe search input', () =>

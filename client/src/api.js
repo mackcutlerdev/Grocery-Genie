@@ -13,7 +13,7 @@
 
 const getToken = () => localStorage.getItem('gg-token');
 
-// Central 401 handler — clears storage and redirects to login
+// Central 401 handler: clears storage and redirects to login
 const handleUnauthorized = () =>
 {
     localStorage.removeItem('gg-token');

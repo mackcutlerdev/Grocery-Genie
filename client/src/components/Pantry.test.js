@@ -3,7 +3,7 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import Pantry from './Pantry';
 
-// ─── Shared test data ────────────────────────────────────────────────────────
+//  Shared test data
 
 const mockItems = [
     { id: '1', name: 'Eggs',   quantity: 12, unit: 'Unit' },
@@ -25,7 +25,7 @@ const renderPantry = (overrides = {}) =>
 beforeEach(() => jest.clearAllMocks());
 
 
-// ─── 1. Basic rendering ──────────────────────────────────────────────────────
+// 1. Basic rendering
 
 describe('basic rendering', () =>
 {
@@ -51,7 +51,7 @@ describe('basic rendering', () =>
 });
 
 
-// ─── 2. Add item form ────────────────────────────────────────────────────────
+// 2. Add item form
 
 describe('add item form', () =>
 {
@@ -139,7 +139,7 @@ describe('add item form', () =>
 });
 
 
-// ─── 3. Delete item ──────────────────────────────────────────────────────────
+// 3. Delete item
 
 describe('delete item', () =>
 {
@@ -163,7 +163,7 @@ describe('delete item', () =>
 });
 
 
-// ─── 4. Edit item ────────────────────────────────────────────────────────────
+// 4. Edit item
 
 describe('edit item', () =>
 {
@@ -251,7 +251,7 @@ describe('edit item', () =>
 });
 
 
-// ─── 5. Depleted items (quantity = 0) ───────────────────────────────────────
+// 5. Depleted items (quantity = 0)
 
 describe('depleted items', () =>
 {
@@ -330,7 +330,7 @@ describe('depleted items', () =>
     });
 });
 
-// ─── 6. Search bar ──────────────────────────────────────────────────────────
+// 6. Search bar
 
 describe('search bar', () =>
 {
@@ -421,7 +421,7 @@ describe('search bar', () =>
         fireEvent.change(screen.getByPlaceholderText(/search ingredients/i), {
             target: { value: 'e' },
         });
-        // "Eggs" and "Butter" both contain "e" — count should show "2 of 3"
+        // "Eggs" and "Butter" both contain "e", count should show "2 of 3"
         expect(screen.getByText(/2 of 3/i)).toBeInTheDocument();
     });
 
@@ -442,7 +442,7 @@ describe('search bar', () =>
 });
 
 
-// ─── 7. Tag filter framework ─────────────────────────────────────────────────
+// 7. Tag filter framework
 
 describe('tag filter framework', () =>
 {

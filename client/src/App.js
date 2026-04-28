@@ -80,7 +80,7 @@ function App()
 
             {/* Everything else goes through the shell.
                 ProtectedRoute inside AppShell handles the redirect
-                to /login if there's no token, no redirect logic here. */}
+                to /landing if there's no token, no redirect logic here. */}
             <Route component={AppShell} />
         </Switch>
     );

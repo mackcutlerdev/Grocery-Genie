@@ -53,7 +53,7 @@ function WhatCanIMakePage()
     
                         if (existing)
                         {
-                            // item already on list — bump the quantity
+                            // item already on list, bump the quantity
                             apiPut(`/api/shoppingList/${existing.id}`, {
                                 name:     existing.name,
                                 quantity: existing.quantity + (ing.needed || 0),
@@ -62,7 +62,7 @@ function WhatCanIMakePage()
                         }
                         else
                         {
-                            // not on list — add it fresh
+                            // not on list, add it fresh
                             apiPost('/api/shoppingList', {
                                 name:     ing.name,
                                 quantity: ing.needed || 0,

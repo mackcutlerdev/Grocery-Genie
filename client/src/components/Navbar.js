@@ -80,7 +80,7 @@ const Navbar = () =>
                 </NavLink>
             </nav>
 
-            {/* Footer — username, theme toggle, logout */}
+            {/* Footer: username, theme toggle, logout */}
             <div className="gg-sidebar-footer">
 
                 {/* Logged-in user */}

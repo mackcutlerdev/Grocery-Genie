@@ -1,8 +1,8 @@
 const jwt = require('jsonwebtoken');
 
-// Attach this middleware to any route that requires a logged-in user.
-// On success it adds req.userId so the route handler knows whose data to touch.
-// On failure it returns 401 immediately and the route handler never runs.
+// Attach this middleware to any route that requires a logged-in user
+// On success it adds req.userId so the route handler knows whose data to touch
+// On failure it returns 401 immediately and the route handler never runs
 const auth = (req, res, next) =>
 {
     // The client sends: Authorization: Bearer <token>

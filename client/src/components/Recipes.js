@@ -30,11 +30,8 @@ const Recipes = (props) =>
     // Search state
     const [recipeSearch, setRecipeSearch] = useState('');
 
-    // NEW CODE BLOCK BEGIN — recipe tag filter state
     const [activeRecipeTag, setActiveRecipeTag] = useState(null);
-    // NEW CODE BLOCK END
 
-    // NEW CODE BLOCK BEGIN — tag state for add and edit forms
     const DEFAULT_TAGS = ['Vegetarian', 'Vegan', 'Keto', 'Gluten-Free', 'Dairy-Free', 'Quick', 'Comfort Food', 'Breakfast', 'Lunch', 'Dinner', 'Dessert', 'Snack', 'Favorite'];
 
     const [newRecipeTags,      setNewRecipeTags]      = useState([]);
@@ -63,7 +60,6 @@ const Recipes = (props) =>
     };
     const removeEditRecipeTag = (tag) => setEditRecipeTags((prev) => prev.filter((t) => t !== tag));
     const toggleEditRecipeTag = (tag) => setEditRecipeTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
-    // NEW CODE BLOCK END
 
     useEffect(() =>
     {
@@ -72,12 +68,11 @@ const Recipes = (props) =>
 
     const selectedRecipe = recipes.find((r) => r.id === selectedRecipeId) || null;
 
-    // NEW CODE BLOCK BEGIN — build tag pool from defaults + any tags already on recipes
+    // build tag pool from defaults + any tags already on recipes
     const usedRecipeTags = [...new Set((recipes || []).flatMap((r) => r.tags || []))];
     const allRecipeTags  = [...new Set([...DEFAULT_TAGS, ...usedRecipeTags])];
-    // NEW CODE BLOCK END
 
-    // Filtered recipe list — searches by name and filters by active tag
+    // Filtered recipe list, searches by name and filters by active tag
     const rq = recipeSearch.trim().toLowerCase();
     const filteredRecipes = recipes.filter((r) =>
     {
@@ -91,28 +86,28 @@ const Recipes = (props) =>
     const parseInstructionsText = (text) =>
         text.split('\n').map((l) => l.trim()).filter((l) => l !== '');
 
-    /* ── New ingredient helpers ── */
+    /* New ingredient helpers */
     const handleNewIngChange = (index, field, value) =>
         setNewRecipeIngredients((prev) => { const u=[...prev]; u[index]={...u[index],[field]:value}; return u; });
 
     const addIngRow    = () => setNewRecipeIngredients((p) => [...p, { name:'', quantity:'', unit:'Unit' }]);
     const removeIngRow = (i) => setNewRecipeIngredients((p) => p.filter((_,idx) => idx !== i));
 
-    /* ── Edit ingredient helpers ── */
+    /* Edit ingredient helpers */
     const handleEditIngChange = (index, field, value) =>
         setEditRecipeIngredients((prev) => { const u=[...prev]; u[index]={...u[index],[field]:value}; return u; });
 
     const addEditIngRow    = () => setEditRecipeIngredients((p) => [...p, { name:'', quantity:'', unit:'Unit' }]);
     const removeEditIngRow = (i) => setEditRecipeIngredients((p) => p.filter((_,idx) => idx !== i));
 
-    /* ── Selection ── */
+    /* Selection */
     const handleSelectRecipe = (id) =>
     {
         setSelectedRecipeId(id);
         if (editingId && editingId !== id) cancelEditing();
     };
 
-    /* ── Add form toggle ── */
+    /* Add form toggle */
     const handleToggleAddForm = () =>
     {
         setShowAddForm(!showAddForm);
@@ -139,7 +134,7 @@ const Recipes = (props) =>
             name:         newRecipeName,
             ingredients,
             instructions: parseInstructionsText(newRecipeInstructions),
-            tags:         newRecipeTags, // NEW CODE UPDATED — pass tags
+            tags:         newRecipeTags, // pass tags
         });
 
         setNewRecipeName('');
@@ -166,7 +161,7 @@ const Recipes = (props) =>
         setEditRecipeInstructions(
             Array.isArray(recipe.instructions) ? recipe.instructions.join('\n') : recipe.instructions || ''
         );
-        setEditRecipeTags(Array.isArray(recipe.tags) ? [...recipe.tags] : []); // NEW CODE UPDATED — load existing tags
+        setEditRecipeTags(Array.isArray(recipe.tags) ? [...recipe.tags] : []); // load existing tags
         setEditRecipeTagInput('');
     };
 
@@ -194,7 +189,7 @@ const Recipes = (props) =>
             name:         editRecipeName,
             ingredients,
             instructions: parseInstructionsText(editRecipeInstructions),
-            tags:         editRecipeTags, // NEW CODE UPDATED — pass tags
+            tags:         editRecipeTags, // pass tags
         });
         cancelEditing();
     };
@@ -207,8 +202,7 @@ const Recipes = (props) =>
         if (editingId === id) cancelEditing();
     };
 
-    /* ── Tag editor section — shared render helper ── */
-    // NEW CODE BLOCK BEGIN
+    /* Tag editor section — shared render helper */
     const renderTagEditor = (activeTags, onToggle, onRemove, tagInput, setTagInput, onKeyDown) => (
         <div className="gg-item-tag-editor">
             <div className="gg-item-tag-pills">
@@ -243,9 +237,8 @@ const Recipes = (props) =>
             />
         </div>
     );
-    // NEW CODE BLOCK END
 
-    /* ── Add-form modal ── */
+    /* Add-form modal */
     const renderAddFormModal = () => !showAddForm ? null : (
         <div style={{
             position: 'fixed', inset: 0,
@@ -282,12 +275,11 @@ const Recipes = (props) =>
                             value={newRecipeName} onChange={(e) => setNewRecipeName(e.target.value)} />
                     </div>
 
-                    {/* NEW CODE BLOCK BEGIN — tags in add modal */}
+                    {/* tags in add modal */}
                     <div style={{ marginBottom: '16px' }}>
                         <label className="gg-label">Tags</label>
                         {renderTagEditor(newRecipeTags, toggleNewRecipeTag, removeNewRecipeTag, newRecipeTagInput, setNewRecipeTagInput, handleNewRecipeTagKeyDown)}
                     </div>
-                    {/* NEW CODE BLOCK END */}
 
                     <div className="gg-divider"></div>
                     <div className="gg-detail-section-label" style={{ marginBottom: '12px' }}>Ingredients</div>
@@ -332,7 +324,7 @@ const Recipes = (props) =>
         </div>
     );
 
-    /* ── Ingredient rows in read-only detail ── */
+    /* Ingredient rows in read-only detail */
     const renderDetailIngredients = (ingredients) =>
     {
         if (!ingredients || ingredients.length === 0)
@@ -368,7 +360,7 @@ const Recipes = (props) =>
         ));
     };
 
-    /* ── Pantry coverage gauge ── */
+    /* Pantry coverage gauge */
     const renderCoverageGauge = (recipe) =>
     {
         const { matched, total, pct } = getCoverage(recipe, pantryItems);
@@ -415,7 +407,7 @@ const Recipes = (props) =>
             <div className="gg-panel active" id="panel-recipes">
                 <div className="gg-recipe-layout">
 
-                    {/* ── Left: recipe list ── */}
+                    {/* Left: recipe list */}
                     <div className="gg-recipe-list-col">
                         <div className="gg-recipe-list-header">
                             <div className="gg-recipe-list-title">All Recipes</div>
@@ -454,7 +446,7 @@ const Recipes = (props) =>
                             </div>
                         </div>
 
-                        {/* NEW CODE BLOCK BEGIN — tag filter row */}
+                        {/* tag filter row */}
                         <div className="gg-recipe-tag-filter-row">
                             {allRecipeTags.map((tag) => (
                                 <button
@@ -471,7 +463,6 @@ const Recipes = (props) =>
                                 </button>
                             )}
                         </div>
-                        {/* NEW CODE BLOCK END */}
 
                         <div className="gg-recipe-items-scroll">
                             {isLoading && (
@@ -491,12 +482,12 @@ const Recipes = (props) =>
                                     <div style={{ fontFamily: 'var(--f-body)', fontStyle: 'italic', fontSize: '13px', color: 'var(--text-faint)', marginBottom: '8px' }}>
                                         No recipes match
                                         {recipeSearch && <> "{recipeSearch}"</>}
-                                        {activeRecipeTag && <> · tag <em style={{ color: 'var(--teal)' }}>{activeRecipeTag}</em></>} {/* NEW CODE UPDATED, mention active tag */}
+                                        {activeRecipeTag && <> · tag <em style={{ color: 'var(--teal)' }}>{activeRecipeTag}</em></>} 
                                     </div>
                                     <button
                                         className="gg-btn-ghost"
                                         style={{ fontSize: '9px', padding: '4px 10px' }}
-                                        onClick={() => { setRecipeSearch(''); setActiveRecipeTag(null); }} // NEW CODE UPDATED, clear both filters
+                                        onClick={() => { setRecipeSearch(''); setActiveRecipeTag(null); }} 
                                     >
                                         Clear
                                     </button>
@@ -536,7 +527,7 @@ const Recipes = (props) =>
                         </div>
                     </div>
 
-                    {/* ── Right: detail / edit ── */}
+                    {/* Right: detail / edit */}
                     <div className="gg-recipe-detail-col">
 
                         {!selectedRecipe && editingId === null && (
@@ -562,12 +553,11 @@ const Recipes = (props) =>
                                         onChange={(e) => setEditRecipeName(e.target.value)} />
                                 </div>
 
-                                {/* NEW CODE BLOCK BEGIN — tags in edit form */}
+                                {/* tags in edit form */}
                                 <div>
                                     <label className="gg-label">Tags</label>
                                     {renderTagEditor(editRecipeTags, toggleEditRecipeTag, removeEditRecipeTag, editRecipeTagInput, setEditRecipeTagInput, handleEditRecipeTagKeyDown)}
                                 </div>
-                                {/* NEW CODE BLOCK END */}
 
                                 <div>
                                     <div className="gg-detail-section-label" style={{ marginBottom: '10px' }}>Ingredients</div>
@@ -631,7 +621,7 @@ const Recipes = (props) =>
                                                 <i className="bi bi-list-ul"></i> {selectedRecipe.ingredients.length} ingredients
                                             </span>
                                         )}
-                                        {/* NEW CODE BLOCK BEGIN — show tags in detail header */}
+                                        {/* show tags in detail header */}
                                         {Array.isArray(selectedRecipe.tags) && selectedRecipe.tags.length > 0 && (
                                             selectedRecipe.tags.map((tag) => (
                                                 <span key={tag} className="gg-item-tag">
@@ -639,7 +629,6 @@ const Recipes = (props) =>
                                                 </span>
                                             ))
                                         )}
-                                        {/* NEW CODE BLOCK END */}
                                     </div>
                                 </div>
 

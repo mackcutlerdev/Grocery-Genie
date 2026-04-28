@@ -8,35 +8,35 @@ const Pantry = (props) =>
     const [newName,     setNewName]     = useState('');
     const [newQuantity, setNewQuantity] = useState('');
     const [newUnit,     setNewUnit]     = useState('Unit');
-    const [newTags,     setNewTags]     = useState([]);       // NEW CODE BLOCK BEGIN — add form tags
-    const [newTagInput, setNewTagInput] = useState('');       // NEW CODE BLOCK END
+    const [newTags,     setNewTags]     = useState([]);      
+    const [newTagInput, setNewTagInput] = useState('');     
 
     // Inline-edit state
     const [editingId,    setEditingId]    = useState(null);
     const [editName,     setEditName]     = useState('');
     const [editQuantity, setEditQuantity] = useState('');
     const [editUnit,     setEditUnit]     = useState('Unit');
-    const [editTags,     setEditTags]     = useState([]);     // NEW CODE BLOCK BEGIN — edit row tags
-    const [editTagInput, setEditTagInput] = useState('');     // NEW CODE BLOCK END
+    const [editTags,     setEditTags]     = useState([]);     
+    const [editTagInput, setEditTagInput] = useState('');     
 
     // Search & filter state
     const [searchQuery, setSearchQuery] = useState('');
     const [activeTag,   setActiveTag]   = useState(null);
 
-    // NEW CODE BLOCK BEGIN — default tags + collect all tags in use across items
+    // default tags + collect all tags in use across items
     const DEFAULT_TAGS = ['Produce', 'Dairy', 'Meat', 'Seafood', 'Frozen', 'Pantry Staple', 'Spice', 'Beverage', 'Snack', 'Bakery', 'Favorite'];
 
     // build the full tag pool: defaults + any custom tags the user has already used
     const usedTags = [...new Set((items || []).flatMap((item) => item.tags || []))];
     const allTags  = [...new Set([...DEFAULT_TAGS, ...usedTags])];
-    // NEW CODE BLOCK END
+
 
     const handleTagFilter = (tagValue) =>
     {
         setActiveTag((prev) => (prev === tagValue ? null : tagValue));
     };
 
-    // ── Filtering logic ───────────────────────────────────────────────────
+    // Filtering logic 
     const q = searchQuery.trim().toLowerCase();
 
     const filteredItems = (items || []).filter((item) =>
@@ -49,7 +49,7 @@ const Pantry = (props) =>
     const hasItems   = items && items.length > 0;
     const hasResults = filteredItems.length > 0;
 
-    // ── Add form ──────────────────────────────────────────────────────────
+    // Add form
     const resetAddForm = () =>
     {
         setNewName(''); setNewQuantity(''); setNewUnit('Unit');
@@ -64,7 +64,6 @@ const Pantry = (props) =>
         resetAddForm();
     };
 
-    // NEW CODE BLOCK BEGIN — tag helpers for add form
     const handleNewTagKeyDown = (e) =>
     {
         if (e.key !== 'Enter' && e.key !== ',') return;
@@ -76,9 +75,8 @@ const Pantry = (props) =>
 
     const removeNewTag = (tag) => setNewTags((prev) => prev.filter((t) => t !== tag));
     const toggleNewTag = (tag) => setNewTags((prev) => prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]);
-    // NEW CODE BLOCK END
 
-    // ── Edit ──────────────────────────────────────────────────────────────
+    // Edit 
     const handleDelete = (id) =>
     {
         if (!window.confirm('Delete this item?')) return;
@@ -93,7 +91,7 @@ const Pantry = (props) =>
         setEditUnit(item.unit || 'Unit');
         setEditTags(Array.isArray(item.tags) ? [...item.tags] : []); // load existing tags
         setEditTagInput('');
-        setEditTagPickerOpen(false); // NEW CODE UPDATED, collapse picker on each new edit
+        setEditTagPickerOpen(false); 
     };
 
     const cancelEditing = () =>
@@ -101,7 +99,7 @@ const Pantry = (props) =>
         setEditingId(null);
         setEditName(''); setEditQuantity(''); setEditUnit('Unit');
         setEditTags([]); setEditTagInput(''); // reset tags
-        setEditTagPickerOpen(false); // NEW CODE UPDATED, reset picker on cancel
+        setEditTagPickerOpen(false); 
     };
 
     const handleEditSubmit = (e, id) =>
@@ -111,7 +109,6 @@ const Pantry = (props) =>
         cancelEditing();
     };
 
-    // NEW CODE BLOCK BEGIN — tag helpers for edit row
     const handleEditTagKeyDown = (e) =>
     {
         if (e.key !== 'Enter' && e.key !== ',') return;
@@ -126,7 +123,6 @@ const Pantry = (props) =>
 
     // controls whether the tag pill grid is expanded in the edit row
     const [editTagPickerOpen, setEditTagPickerOpen] = useState(false);
-    // NEW CODE BLOCK END
 
     const UNITS = ['Unit','g','kg','ml','L','cup','tbsp','tsp','Box','oz','Package'];
 
@@ -135,7 +131,7 @@ const Pantry = (props) =>
             <div className="gg-panel active" id="panel-pantry">
                 <div className="gg-pantry-layout">
 
-                    {/* ── Left: search + filter + table ── */}
+                    {/* Left: search + filter + table */}
                     <div>
 
                         {/* Search bar */}
@@ -168,7 +164,7 @@ const Pantry = (props) =>
                             )}
                         </div>
 
-                        {/* Tag filter row — now uses real allTags */}
+                        {/* Tag filter row, now uses real allTags */}
                         <div className="gg-tag-filter-row">
                             <span className="gg-tag-filter-label">Tags</span>
                             {allTags.map((tag) => (
@@ -256,7 +252,6 @@ const Pantry = (props) =>
                                                             value={editName}
                                                             onChange={(e) => setEditName(e.target.value)}
                                                         />
-                                                        {/* NEW CODE BLOCK BEGIN — compact tag editor in edit row */}
                                                         <div className="gg-item-tag-editor">
                                                             <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: '4px' }}>
                                                                 {editTags.map((tag) => (
@@ -301,7 +296,6 @@ const Pantry = (props) =>
                                                                 </div>
                                                             )}
                                                         </div>
-                                                        {/* NEW CODE BLOCK END */}
                                                     </>
                                                 ) : (
                                                     <>
@@ -309,7 +303,6 @@ const Pantry = (props) =>
                                                         {isDepleted && (
                                                             <span className="gg-depleted-pill">Empty</span>
                                                         )}
-                                                        {/* NEW CODE BLOCK BEGIN — show tags on item row */}
                                                         {Array.isArray(item.tags) && item.tags.length > 0 && (
                                                             <span style={{ marginLeft: '8px' }}>
                                                                 {item.tags.map((tag) => (
@@ -319,7 +312,6 @@ const Pantry = (props) =>
                                                                 ))}
                                                             </span>
                                                         )}
-                                                        {/* NEW CODE BLOCK END */}
                                                     </>
                                                 )}
                                             </td>
@@ -397,7 +389,7 @@ const Pantry = (props) =>
                         </div>
                     </div>
 
-                    {/* ── Right: add-item form card ── */}
+                    {/* Right: add-item form card */}
                     <div className="gg-add-form-card">
                         <div className="gg-add-form-title">
                             Add <em style={{ fontStyle: 'italic', color: 'var(--accent)' }}>New Item</em>
@@ -442,7 +434,6 @@ const Pantry = (props) =>
                                 </div>
                             </div>
 
-                            {/* NEW CODE BLOCK BEGIN — tags in add form */}
                             <div className="gg-add-form-row">
                                 <label className="gg-label">Tags</label>
                                 {newTags.length > 0 && (
@@ -478,7 +469,6 @@ const Pantry = (props) =>
                                     style={{ fontSize: '13px' }}
                                 />
                             </div>
-                            {/* NEW CODE BLOCK END */}
 
                             <button
                                 type="submit"
